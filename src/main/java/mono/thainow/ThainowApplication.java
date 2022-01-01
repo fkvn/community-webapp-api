@@ -9,8 +9,9 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 
 @SpringBootApplication
 // for starter dependency when haven't configured database yet
-@EnableAutoConfiguration(
-exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class, MongoAutoConfiguration.class})
+//@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
+////		HibernateJpaAutoConfiguration.class, 
+//		MongoAutoConfiguration.class })
 public class ThainowApplication {
 
 	public static void main(String[] args) {
