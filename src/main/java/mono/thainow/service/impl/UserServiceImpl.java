@@ -27,13 +27,11 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository userRepository;
-	
-	
+
 	@Override
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
 	}
-
 
 	@Override
 	public Page<User> findUserPaginated(int pageNo, int pageSize) {
@@ -50,15 +48,17 @@ public class UserServiceImpl implements UserService {
 		Assert.isTrue(!email.isEmpty() || !phone.isEmpty(),
 				"User needs at least either email or phone number to register!");
 
-		boolean isPhoneValid = false;
-		String[] arrPhones = { phone.get() };
-		try {
-			isPhoneValid = new PhoneValidationWithGoogleAPI().validatePhoneNumber(arrPhones, "US");
-		} catch (NumberParseException e) {
-			// TODO Auto-generated catch block
-		}
+		if (!phone.isEmpty()) {
+			boolean isPhoneValid = false;
+			String[] arrPhones = { phone.get() };
+			try {
+				isPhoneValid = new PhoneValidationWithGoogleAPI().validatePhoneNumber(arrPhones, "US");
+			} catch (NumberParseException e) {
+				// TODO Auto-generated catch block
+			}
 
-		Assert.isTrue(isPhoneValid, "Allow US phone number is allowed!");
+			Assert.isTrue(isPhoneValid, "Allow US phone number is allowed!");
+		}
 
 		Optional<String> password = Optional.ofNullable(user.getPassword());
 		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\\\S+$).{8, 20}$";
@@ -73,6 +73,5 @@ public class UserServiceImpl implements UserService {
 
 		return user.getId();
 	}
-
 
 }
