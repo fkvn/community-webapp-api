@@ -4,9 +4,12 @@ import java.util.Date;
 
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 public class ApiError {
-
+	
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date timestamp;
 
 	private HttpStatus status;

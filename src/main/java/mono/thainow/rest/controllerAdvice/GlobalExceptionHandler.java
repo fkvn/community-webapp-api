@@ -1,7 +1,12 @@
 package mono.thainow.rest.controllerAdvice;
 
+import javax.persistence.EntityNotFoundException;
+
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +20,7 @@ import mono.thainow.util.ApiError;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-	
+
 	@ExceptionHandler
 	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
 //		System.out.println("aaa " + ex.getClass().getSimpleName());
@@ -23,10 +28,72 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		ApiError apiError = new ApiError();
 		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		apiError.setError(ex.getCause().getLocalizedMessage());
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
 
 		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("ErrorMsg: " + ex.getLocalizedMessage());
+		apiError.setMessage("Unexpected error! Please contact your administrator.");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+	
+	
+	@ExceptionHandler({ DataIntegrityViolationException.class })
+	protected ResponseEntity<Object> handleDataIntegrityViolationException(Exception ex, WebRequest request) {
+		
+		ex.printStackTrace();
+		
+		String message = "Unexpected error! Please contact your administrator.";
+		
+		if (ex.getCause() instanceof ConstraintViolationException) {
+			ConstraintViolationException cve = (ConstraintViolationException) ex.getCause();
+			String constraint = cve.getConstraintName(); 
+			
+			switch (constraint) {
+			case "user.user_email_UNIQUE":
+				message = "The email has already existed or registered by another user.";
+				break;
+			case "user.user_phone_UNIQUE":
+				message = "The phone number has already existed or registered by another user.";
+				break;
+				default:
+			}
+			
+		}
+		
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage(message);
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+	
+	
+	
+	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class })
+	protected ResponseEntity<Object> handleEmptyResultDataAccessException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("No records available! The record is either deleted or not exist.");
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
@@ -134,7 +201,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //
 //		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 //	}
-
-
 
 }

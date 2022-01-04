@@ -1,6 +1,10 @@
 package mono.thainow.service.impl;
 
+import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.mindrot.jbcrypt.BCrypt;
@@ -13,17 +17,16 @@ import org.springframework.util.Assert;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 
-import mono.thainow.dao.UserDao;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserStatus;
 import mono.thainow.repository.UserRepository;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneValidationWithGoogleAPI;
+import mono.thainow.util.util;
+import survey.exception.UpdatingSurveyError;
 
 @Service
 public class UserServiceImpl implements UserService {
-
-	@Autowired
-	private UserDao userDao;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -49,29 +52,61 @@ public class UserServiceImpl implements UserService {
 				"User needs at least either email or phone number to register!");
 
 		if (!phone.isEmpty()) {
-			boolean isPhoneValid = false;
-			String[] arrPhones = { phone.get() };
-			try {
-				isPhoneValid = new PhoneValidationWithGoogleAPI().validatePhoneNumber(arrPhones, "US");
-			} catch (NumberParseException e) {
-				// TODO Auto-generated catch block
-			}
-
-			Assert.isTrue(isPhoneValid, "Allow US phone number is allowed!");
+			util.valPhoneNo(phone.get());
 		}
 
 		Optional<String> password = Optional.ofNullable(user.getPassword());
-		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\\\S+$).{8, 20}$";
+		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
 
 		Assert.isTrue(!password.isEmpty() && password.get().matches(passwordRegex),
 				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
 
-		String hashedPwd = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(12));
+		String hashedPwd = util.hashPassword(password.toString());
 		user.setPassword(hashedPwd);
 
-		user = userDao.saveUser(user);
+		// set user status
+		user.setStatus(UserStatus.ACTIVE);
+
+		user = userRepository.save(user);
 
 		return user.getId();
+	}
+
+	@Override
+	public void removeUser(Long id) {
+		User user = userRepository.getById(id);
+		user.setStatus(UserStatus.DELETED);
+		userRepository.save(user);
+	}
+
+	@Override
+	public Long updatePartialUser(Long id, Map<String, Object> userInfo) {
+
+		User updatedUser = userRepository.getById(id);
+
+		for (String key : userInfo.keySet()) {
+			switch (key) {
+			case "password":
+				updatedUser.setPassword(util.hashPassword(key));
+//				surveyInfo.get(key));
+				break;
+			case "email":
+				updatedUser.setEmail(key);
+				break;
+			case "phone":
+			{
+				util.valPhoneNo(key);
+				updatedUser.setPhone(key);
+			}
+				break;
+			case "status":
+				updatedUser.setStatus(key);
+				break;
+			default:
+			}
+		}
+
+		return null;
 	}
 
 }

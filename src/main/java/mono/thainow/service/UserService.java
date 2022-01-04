@@ -1,6 +1,7 @@
 package mono.thainow.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 
@@ -13,4 +14,8 @@ public interface UserService {
 	Page<User> findUserPaginated(int pageNo, int pageSize);
 	
 	Long createUser(User user);
+	
+	Long updatePartialUser(Long id, Map<String, Object> userInfo);
+	
+	void removeUser(Long id);
 }
