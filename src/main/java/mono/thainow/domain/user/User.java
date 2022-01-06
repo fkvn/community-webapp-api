@@ -76,7 +76,6 @@ public class User implements Serializable {
 	@Column(name = "USER_UPDATED_ON")
 	private Date updatedOn;
 
-	// post
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "AUTHOR_ID")
 	@NotNull

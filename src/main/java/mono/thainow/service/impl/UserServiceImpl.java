@@ -1,13 +1,9 @@
 package mono.thainow.service.impl;
 
-import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,15 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.google.i18n.phonenumbers.NumberParseException;
-
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.repository.UserRepository;
 import mono.thainow.service.UserService;
-import mono.thainow.util.PhoneValidationWithGoogleAPI;
 import mono.thainow.util.util;
-import survey.exception.UpdatingSurveyError;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -40,6 +32,11 @@ public class UserServiceImpl implements UserService {
 	public Page<User> findUserPaginated(int pageNo, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		return userRepository.findAll(pageable);
+	}
+	
+	@Override
+	public User getUserById(Long id) {
+		return userRepository.getById(id);
 	}
 
 	@Override
@@ -87,26 +84,28 @@ public class UserServiceImpl implements UserService {
 		for (String key : userInfo.keySet()) {
 			switch (key) {
 			case "password":
-				updatedUser.setPassword(util.hashPassword(key));
-//				surveyInfo.get(key));
+				updatedUser.setPassword(util.hashPassword((String) userInfo.get(key)));
 				break;
 			case "email":
-				updatedUser.setEmail(key);
+				updatedUser.setEmail((String) userInfo.get(key));
 				break;
-			case "phone":
-			{
-				util.valPhoneNo(key);
-				updatedUser.setPhone(key);
+			case "phone": {
+				util.valPhoneNo(String.valueOf(userInfo.get(key)));
+				updatedUser.setPhone(String.valueOf(userInfo.get(key)));
 			}
 				break;
 			case "status":
-				updatedUser.setStatus(key);
+				updatedUser.setStatus(UserStatus.valueOf((String) userInfo.get(key)));
 				break;
 			default:
 			}
 		}
 
-		return null;
+		updatedUser = userRepository.save(updatedUser);
+
+		return updatedUser.getId();
 	}
+
+
 
 }

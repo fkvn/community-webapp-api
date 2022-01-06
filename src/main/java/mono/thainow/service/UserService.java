@@ -11,6 +11,8 @@ public interface UserService {
 	
 	List<User> getAllUsers();
 	
+	User getUserById(Long id);
+	
 	Page<User> findUserPaginated(int pageNo, int pageSize);
 	
 	Long createUser(User user);
