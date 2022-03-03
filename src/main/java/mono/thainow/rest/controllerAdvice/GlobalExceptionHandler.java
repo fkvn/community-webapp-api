@@ -1,8 +1,14 @@
 package mono.thainow.rest.controllerAdvice;
 
-import javax.persistence.EntityNotFoundException;
+import java.text.ParseException;
 
+import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.codec.binary.Base64;
 import org.hibernate.exception.ConstraintViolationException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,8 +16,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -21,6 +29,48 @@ import mono.thainow.util.ApiError;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+	@ModelAttribute("sub")
+	protected String extractUserFromJWT(HttpServletRequest request) throws ParseException, AccessDeniedException {
+
+		System.out.println("checking");
+		String sub = "";
+
+		if (request.getHeader("Authorization") == null
+				|| request.getHeader("Authorization").length() == 0
+				|| request.getHeader("Authorization").equals("null")) {
+			return "";
+		}
+		
+		else {
+			System.out.println("authorization");
+			System.out.println(request.getHeader("Authorization"));
+			
+			String token = request.getHeader("Authorization").split(" ")[1]; // get jwt from header
+			String encodedPayload = token.split("\\.")[1]; // get second encoded part in jwt
+			Base64 base64Url = new Base64(true);
+			String payload = new String(base64Url.decode(encodedPayload));
+
+			JSONParser parser = new JSONParser();
+			JSONObject claimsObj = null;
+			
+			
+			try {
+				claimsObj = (JSONObject) parser.parse(payload);
+			} catch (org.json.simple.parser.ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			sub = claimsObj.get("sub").toString();
+
+			if (sub == null || sub.length() == 0)
+				throw new AccessDeniedException("405 returned");
+		}
+
+		return sub;
+	}	
+	
+	
 	@ExceptionHandler
 	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
 //		System.out.println("aaa " + ex.getClass().getSimpleName());
@@ -98,47 +148,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
-//	@ModelAttribute("sub")
-//	protected String extractUserFromJWT(HttpServletRequest request) throws ParseException {
-//
-////		System.out.println("checking");
-////		String sub = "";
-//		String sub = "testing user";
-//
-////		if (request.getHeader("Authorization") == null
-////				|| request.getHeader("Authorization").length() == 0
-////				|| request.getHeader("Authorization").equals("null")) {
-////			return "";
-////		}
-////		
-////		else {
-//////			System.out.println("authorization");
-//////			System.out.println(request.getHeader("Authorization"));
-////			
-////			String token = request.getHeader("Authorization").split(" ")[1]; // get jwt from header
-////			String encodedPayload = token.split("\\.")[1]; // get second encoded part in jwt
-////			Base64 base64Url = new Base64(true);
-////			String payload = new String(base64Url.decode(encodedPayload));
-////
-////			JSONParser parser = new JSONParser();
-////			JSONObject claimsObj = null;
-////			
-////			
-////			try {
-////				claimsObj = (JSONObject) parser.parse(payload);
-////			} catch (org.json.simple.parser.ParseException e) {
-////				// TODO Auto-generated catch block
-////				e.printStackTrace();
-////			}
-////
-////			sub = claimsObj.get("sub").toString();
-////
-////			if (sub == null || sub.length() == 0)
-////				throw new AccessDeniedException("405 returned");
-////		}
-//
-//		return sub;
-//	}
+
 
 //	@ExceptionHandler({ TransactionSystemException.class, DataIntegrityViolationException.class })
 //	protected ResponseEntity<Object> handleConstraintViolationExceptions(Exception ex,
