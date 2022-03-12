@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,9 @@ import mono.thainow.service.UserService;
 import mono.thainow.util.util;
 
 @Service
-public class UserServiceImpl implements UserService {
+//@Primary
+@Qualifier
+public class UserInternalServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository userRepository;
@@ -68,6 +71,14 @@ public class UserServiceImpl implements UserService {
 
 		return user.getId();
 	}
+	
+	
+	@Override
+	public Long createUser(String token, User user, User admin) {
+		// TODO Auto-generated method stub
+		System.out.println("call back internal");
+		return null;
+	}
 
 	@Override
 	public void removeUser(Long id) {
@@ -105,6 +116,8 @@ public class UserServiceImpl implements UserService {
 
 		return updatedUser.getId();
 	}
+
+
 
 
 

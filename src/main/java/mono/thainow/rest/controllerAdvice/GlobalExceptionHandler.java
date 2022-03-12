@@ -1,14 +1,15 @@
 package mono.thainow.rest.controllerAdvice;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.binary.Base64;
 import org.hibernate.exception.ConstraintViolationException;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,22 +24,30 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import mono.thainow.domain.user.User;
+import mono.thainow.jwt.Jwt;
 import mono.thainow.util.ApiError;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-	@ModelAttribute("sub")
-	protected String extractUserFromJWT(HttpServletRequest request) throws ParseException, AccessDeniedException {
+	private JSONObject claims;
+
+	@SuppressWarnings("unchecked")
+	@ModelAttribute("claims")
+	protected JSONObject extractUserFromJWT(HttpServletRequest request) throws ParseException, AccessDeniedException {
 
 		System.out.println("checking");
+		Jwt jwt = new Jwt();
 		String sub = "";
-
+		claims = new JSONObject();
+		
+	
 		if (request.getHeader("Authorization") == null
 				|| request.getHeader("Authorization").length() == 0
 				|| request.getHeader("Authorization").equals("null")) {
-			return "";
+			return null;
 		}
 		
 		else {
@@ -46,31 +55,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			System.out.println(request.getHeader("Authorization"));
 			
 			String token = request.getHeader("Authorization").split(" ")[1]; // get jwt from header
-			String encodedPayload = token.split("\\.")[1]; // get second encoded part in jwt
-			Base64 base64Url = new Base64(true);
-			String payload = new String(base64Url.decode(encodedPayload));
-
-			JSONParser parser = new JSONParser();
-			JSONObject claimsObj = null;
-			
-			
-			try {
-				claimsObj = (JSONObject) parser.parse(payload);
-			} catch (org.json.simple.parser.ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			JSONObject claimsObj = jwt.getClaimsObj(token);
 
 			sub = claimsObj.get("sub").toString();
-
+			
 			if (sub == null || sub.length() == 0)
-				throw new AccessDeniedException("405 returned");
+				throw new AccessDeniedException("Invalid Token");
+			
+			List<String> roles = (List<String>) Optional.ofNullable((claimsObj.get("role"))).orElse(new ArrayList<>());
+			User user = (User) Optional.ofNullable(jwt.getUserJwt(claimsObj)).orElse(new User());
+			
+			claims.put("sub", sub);
+			claims.put("roles", roles);
+			claims.put("admin", user);
+			claims.put("token", token);
 		}
+		
+		return claims;
+	}
 
-		return sub;
-	}	
-	
-	
 	@ExceptionHandler
 	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
 //		System.out.println("aaa " + ex.getClass().getSimpleName());
@@ -89,19 +92,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
-	
+
 	@ExceptionHandler({ DataIntegrityViolationException.class })
 	protected ResponseEntity<Object> handleDataIntegrityViolationException(Exception ex, WebRequest request) {
-		
+
 		ex.printStackTrace();
-		
+
 		String message = "Unexpected error! Please contact your administrator.";
-		
+
 		if (ex.getCause() instanceof ConstraintViolationException) {
 			ConstraintViolationException cve = (ConstraintViolationException) ex.getCause();
-			String constraint = cve.getConstraintName(); 
-			
+			String constraint = cve.getConstraintName();
+
 			switch (constraint) {
 			case "user.user_email_UNIQUE":
 				message = "The email has already existed or registered by another user.";
@@ -109,11 +111,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			case "user.user_phone_UNIQUE":
 				message = "The phone number has already existed or registered by another user.";
 				break;
-				default:
+			default:
 			}
-			
+
 		}
-		
+
 		ApiError apiError = new ApiError();
 		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		try {
@@ -127,9 +129,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
-	
-	
+
 	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class })
 	protected ResponseEntity<Object> handleEmptyResultDataAccessException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
@@ -147,8 +147,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-
-
 
 //	@ExceptionHandler({ TransactionSystemException.class, DataIntegrityViolationException.class })
 //	protected ResponseEntity<Object> handleConstraintViolationExceptions(Exception ex,

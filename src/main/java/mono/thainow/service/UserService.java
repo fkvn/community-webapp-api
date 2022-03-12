@@ -17,6 +17,8 @@ public interface UserService {
 	
 	Long createUser(User user);
 	
+	Long createUser(String token, User user, User admin);
+	
 	Long updatePartialUser(Long id, Map<String, Object> userInfo);
 	
 	void removeUser(Long id);

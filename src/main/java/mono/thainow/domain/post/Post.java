@@ -82,8 +82,8 @@ public class Post implements Serializable {
 	@Column(name = "NUMBER_OF_SHARES")
 	private Long numOfShares = (long) 0;
 	
-	// post owner - author
-	@ManyToOne(cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "AUTHOR_ID")
-	private User author;
+//	// post owner - author
+//	@ManyToOne(cascade = CascadeType.PERSIST)
+//	@JoinColumn(name = "AUTHOR_ID")
+//	private User author;
 }
