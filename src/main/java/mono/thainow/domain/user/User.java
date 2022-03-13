@@ -96,11 +96,6 @@ public class User implements Serializable {
 	@Column(name = "USER_CREATED_ON")
 	private Date createdOn = new Date(); 
 
-	@UpdateTimestamp
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	@Column(name = "USER_UPDATED_ON")
-	private Date updatedOn = new Date();
-
 //	@OneToMany(fetch = FetchType.LAZY)
 //	@JoinColumn(name = "AUTHOR_ID")
 //	@NotNull

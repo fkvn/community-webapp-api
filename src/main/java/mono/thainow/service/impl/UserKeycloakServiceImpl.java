@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import mono.thainow.domain.user.User;
-import mono.thainow.repository.UserRepository;
 import mono.thainow.service.UserService;
 
 @Service
@@ -19,17 +19,30 @@ import mono.thainow.service.UserService;
 //@Qualifier
 public class UserKeycloakServiceImpl implements UserService {
 
-	@Autowired
-	private UserRepository userRepository;
+	final String server = "http://localhost:8080";
+	final String realm = "thainow-mono";
+	final String restUri = server + "/auth/admin/realms" + realm + "/";
 	
 	@Autowired
-	private UserInternalServiceImpl userInternalService;
+	private UserServiceDashboardImpl userInternalService;
 	
 	
 	@Override
 	public List<User> getAllUsers() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+
+	@Override
+	public String getAllUsers(String token) {
+		
+		String api = "users";
+		
+		 RestTemplate restTemplate = new RestTemplate();
+		 String result = restTemplate.getForObject(restUri + api, String.class);
+		
+		return result;
 	}
 
 	@Override
@@ -71,6 +84,7 @@ public class UserKeycloakServiceImpl implements UserService {
 		// TODO Auto-generated method stub
 
 	}
+
 
 
 

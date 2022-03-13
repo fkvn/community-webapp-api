@@ -3,6 +3,7 @@ package mono.thainow.rest.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,16 @@ public class UserController {
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public List<User> getAllUsers() {
-		return userService.getAllUsers();
+	public String getAllUsers(@ModelAttribute("claims") JSONObject claims) {
+		@SuppressWarnings({ "unchecked" })
+		boolean isSuperAdmin = (boolean) (((ArrayList<String>) claims.get("roles")).contains(UserRole.SUPERADMIN.toString()));
+		Assert.isTrue(isSuperAdmin, "Access Forbidden");
+		
+		System.out.println();
+		
+		String token = Optional.ofNullable(claims.get("token").toString()).orElse("");
+	
+		return userService.getAllUsers(token);
 	}
 
 	@GetMapping("/page/{pageNo}")

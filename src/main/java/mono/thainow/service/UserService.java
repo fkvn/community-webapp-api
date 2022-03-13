@@ -11,6 +11,8 @@ public interface UserService {
 	
 	List<User> getAllUsers();
 	
+	String getAllUsers(String token);
+	
 	User getUserById(Long id);
 	
 	Page<User> findUserPaginated(int pageNo, int pageSize);
