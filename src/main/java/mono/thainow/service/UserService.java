@@ -15,9 +15,13 @@ public interface UserService {
 	
 	User getUserById(Long id);
 	
+	User findByUsername(String username);
+	User findByUserEmail(String email);
+	User findByUserPhone(String phone);
+	
 	Page<User> findUserPaginated(int pageNo, int pageSize);
 	
-	Long createUser(User user);
+	User saveUser(User user);
 	
 	Long createUser(String token, User user, User admin);
 	

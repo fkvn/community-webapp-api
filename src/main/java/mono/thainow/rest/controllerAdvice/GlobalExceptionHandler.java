@@ -25,7 +25,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import mono.thainow.domain.user.User;
-import mono.thainow.jwt.Jwt;
+import mono.thainow.security.jwt.Jwt;
 import mono.thainow.util.ApiError;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -38,40 +38,41 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ModelAttribute("claims")
 	protected JSONObject extractUserFromJWT(HttpServletRequest request) throws ParseException, AccessDeniedException {
 
-		System.out.println("checking");
-		Jwt jwt = new Jwt();
-		String sub = "";
-		claims = new JSONObject();
-		
-	
-		if (request.getHeader("Authorization") == null
-				|| request.getHeader("Authorization").length() == 0
-				|| request.getHeader("Authorization").equals("null")) {
-			return null;
-		}
-		
-		else {
-			System.out.println("authorization");
-			System.out.println(request.getHeader("Authorization"));
-			
-			String token = request.getHeader("Authorization").split(" ")[1]; // get jwt from header
-			JSONObject claimsObj = jwt.getClaimsObj(token);
-
-			sub = claimsObj.get("sub").toString();
-			
-			if (sub == null || sub.length() == 0)
-				throw new AccessDeniedException("Invalid Token");
-			
-			List<String> roles = (List<String>) Optional.ofNullable((claimsObj.get("role"))).orElse(new ArrayList<>());
-			User user = (User) Optional.ofNullable(jwt.getUserJwt(claimsObj)).orElse(new User());
-			
-			claims.put("sub", sub);
-			claims.put("roles", roles);
-			claims.put("admin", user);
-			claims.put("token", token);
-		}
-		
-		return claims;
+//		System.out.println("checking");
+//		Jwt jwt = new Jwt();
+//		String sub = "";
+//		claims = new JSONObject();
+//		
+//	
+//		if (request.getHeader("Authorization") == null
+//				|| request.getHeader("Authorization").length() == 0
+//				|| request.getHeader("Authorization").equals("null")) {
+//			return null;
+//		}
+//		
+//		else {
+//			System.out.println("authorization");
+//			System.out.println(request.getHeader("Authorization"));
+//			
+//			String token = request.getHeader("Authorization").split(" ")[1]; // get jwt from header
+//			JSONObject claimsObj = jwt.getClaimsObj(token);
+//
+//			sub = claimsObj.get("sub").toString();
+//			
+//			if (sub == null || sub.length() == 0)
+//				throw new AccessDeniedException("Invalid Token");
+//			
+//			List<String> roles = (List<String>) Optional.ofNullable((claimsObj.get("role"))).orElse(new ArrayList<>());
+//			User user = (User) Optional.ofNullable(jwt.getUserJwt(claimsObj)).orElse(new User());
+//			
+//			claims.put("sub", sub);
+//			claims.put("roles", roles);
+//			claims.put("admin", user);
+//			claims.put("token", token);
+//		}
+//		
+//		return claims;
+		return null;
 	}
 
 	@ExceptionHandler
@@ -103,17 +104,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		if (ex.getCause() instanceof ConstraintViolationException) {
 			ConstraintViolationException cve = (ConstraintViolationException) ex.getCause();
 			String constraint = cve.getConstraintName();
+			String constraintMessage = "The ";
 
 			switch (constraint) {
 			case "user.user_email_UNIQUE":
-				message = "The email has already existed or registered by another user.";
+				constraintMessage += "email";
 				break;
 			case "user.user_phone_UNIQUE":
-				message = "The phone number has already existed or registered by another user.";
+				constraintMessage += "phone number";
+				break;
+			case "user.user_username_UNIQUE":
+				constraintMessage += "username";
 				break;
 			default:
 			}
-
+		   
+			message = constraintMessage + " has already existed or registered by another user.";
 		}
 
 		ApiError apiError = new ApiError();

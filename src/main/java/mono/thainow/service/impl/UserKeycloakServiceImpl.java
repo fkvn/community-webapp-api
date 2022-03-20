@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,8 +15,8 @@ import mono.thainow.domain.user.User;
 import mono.thainow.service.UserService;
 
 @Service
-@Primary
-//@Qualifier
+//@Primary
+@Qualifier
 public class UserKeycloakServiceImpl implements UserService {
 
 	final String server = "http://localhost:8080";
@@ -58,7 +58,13 @@ public class UserKeycloakServiceImpl implements UserService {
 	}
 
 	@Override
-	public Long createUser(User user) {
+	public User findByUsername(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public User saveUser(User user) {
 
 		return null;
 	}
@@ -84,6 +90,23 @@ public class UserKeycloakServiceImpl implements UserService {
 		// TODO Auto-generated method stub
 
 	}
+
+
+	@Override
+	public User findByUserEmail(String email) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public User findByUserPhone(String phone) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
 
 
 

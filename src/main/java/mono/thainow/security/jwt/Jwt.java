@@ -1,14 +1,16 @@
-package mono.thainow.jwt;
+package mono.thainow.security.jwt;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
 
 public class Jwt {
@@ -40,13 +42,18 @@ public class Jwt {
 
 //		define fields
 		String sub = Optional.ofNullable(claimsObj.get("sub").toString()).orElse("");
-		List<String> roles = (List<String>) Optional.ofNullable((claimsObj.get("role"))).orElse(new ArrayList<>());
+		
+		Set<UserRole> roles = (Set<UserRole>) Optional.ofNullable((claimsObj.get("role"))).orElse(new ArrayList<>());
+		
 		String email = Optional.ofNullable(claimsObj.get("email").toString()).orElse("");
+		
 		boolean isEmailVerified = (boolean) Optional.ofNullable(claimsObj.get("email_verified")).orElse(false);
+		
 		String firstName = Optional.ofNullable(claimsObj.get("given_name").toString()).orElse("");
 		String lastName = Optional.ofNullable(claimsObj.get("family_name").toString()).orElse("");
 		String fullName = Optional.ofNullable(claimsObj.get("name").toString()).orElse("");
 		String username = Optional.ofNullable(claimsObj.get("preferred_username").toString()).orElse("");
+		
 		UserStatus status = (UserStatus) Optional.ofNullable(claimsObj.get("status")).orElse(UserStatus.DEACTIVED);
 
 //		create user

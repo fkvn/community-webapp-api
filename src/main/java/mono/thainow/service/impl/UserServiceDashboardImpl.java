@@ -2,15 +2,17 @@ package mono.thainow.service.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
@@ -19,27 +21,26 @@ import mono.thainow.service.UserService;
 import mono.thainow.util.util;
 
 @Service
-//@Primary
-@Qualifier
+@Primary
+//@Qualifier
 public class UserServiceDashboardImpl implements UserService {
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Autowired
 	private UserRepository userRepository;
-	
-	
-	@Autowired
-	private UserServiceDashboardImpl userSDimpl;
 
 	@Override
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
 	}
-	
+
 	@Override
 	public String getAllUsers(String token) {
-		
-		String users = userSDimpl.getAllUsers(token);
-		
+
+		String users = this.getAllUsers(token);
+
 		return users;
 	}
 
@@ -48,43 +49,45 @@ public class UserServiceDashboardImpl implements UserService {
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		return userRepository.findAll(pageable);
 	}
-	
+
 	@Override
 	public User getUserById(Long id) {
 		return userRepository.getById(id);
 	}
 
 	@Override
-	public Long createUser(User user) {
-
-		Optional<String> email = Optional.ofNullable(user.getEmail());
-		Optional<String> phone = Optional.ofNullable(user.getPhone());
-
-		Assert.isTrue(!email.isEmpty() || !phone.isEmpty(),
-				"User needs at least either email or phone number to register!");
-
-		if (!phone.isEmpty()) {
-			util.valPhoneNo(phone.get());
-		}
-
-		Optional<String> password = Optional.ofNullable(user.getPassword());
-		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-
-		Assert.isTrue(!password.isEmpty() && password.get().matches(passwordRegex),
-				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
-
-		String hashedPwd = util.hashPassword(password.toString());
-		user.setPassword(hashedPwd);
-
-		// set user status
-		user.setStatus(UserStatus.ACTIVE);
-
-		user = userRepository.save(user);
-
-		return user.getId();
+	public User findByUsername(String username) {
+		
+		User user = entityManager.createQuery("from User where username =:username", User.class)
+				.setParameter("username", username).getSingleResult();
+		
+		return user;
 	}
 	
-	
+	@Override
+	public User findByUserEmail(String email) {
+
+		User user = entityManager.createQuery("from User where email =:email", User.class)
+				.setParameter("email", email).getSingleResult();
+		
+		return user;
+	}
+
+	@Override
+	public User findByUserPhone(String phone) {
+
+		User user = entityManager.createQuery("from User where phone =:phone", User.class)
+				.setParameter("phone", phone).getSingleResult();
+		
+		return user;
+	}
+
+	@Override
+	@Transactional
+	public User saveUser(User user) {
+		return userRepository.save(user);
+	}
+
 	@Override
 	public Long createUser(String token, User user, User admin) {
 		// TODO Auto-generated method stub
@@ -107,7 +110,7 @@ public class UserServiceDashboardImpl implements UserService {
 		for (String key : userInfo.keySet()) {
 			switch (key) {
 			case "password":
-				updatedUser.setPassword(util.hashPassword((String) userInfo.get(key)));
+//				updatedUser.setPassword(util.encodeString((String) userInfo.get(key)));
 				break;
 			case "email":
 				updatedUser.setEmail((String) userInfo.get(key));
@@ -128,10 +131,6 @@ public class UserServiceDashboardImpl implements UserService {
 
 		return updatedUser.getId();
 	}
-
-
-
-
 
 
 
