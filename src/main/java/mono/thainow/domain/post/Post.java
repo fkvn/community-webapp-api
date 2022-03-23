@@ -23,7 +23,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import mono.thainow.domain.location.AddressDisplayType;
+import mono.thainow.domain.location.LocationDisplayType;
 import mono.thainow.domain.user.User;
 
 @RequiredArgsConstructor
@@ -68,7 +68,7 @@ public class Post implements Serializable {
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "POST_ADDR_DISPLAY_TYPE")
-	private AddressDisplayType addrDisplayType = AddressDisplayType.FULL_ADDRESS;
+	private LocationDisplayType addrDisplayType = LocationDisplayType.FULL_ADDRESS;
 
 	@PositiveOrZero
 	@Column(name = "POST_AVG_RATING")
