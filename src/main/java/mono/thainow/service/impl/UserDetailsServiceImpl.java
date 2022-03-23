@@ -17,27 +17,42 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Autowired
 	private UserServiceDashboardImpl userSDI;
 
+//	this function is called when Sign-in and Validate token
+//	this is called automatically because UserDetailsService interface that has only one method
 	@Override
 	public UserDetails loadUserByUsername(String query) throws UsernameNotFoundException {
 
-		String loginValue = query.split(",")[1];
-		String loginType = query.split(",")[0];
+		String[] splitQuery = query.split(",");
+		Optional<User> user = null;	
+		
+//		sign-in case
+		if (splitQuery.length == 2) {
+			String loginValue = query.split(",")[1];
+			String loginType = query.split(",")[0];
 
-		Optional<User> user = null;
+			switch (loginType) {
+			case "email-login":
+				user = Optional.ofNullable(userSDI.findByUserEmail(loginValue));
+				break;
+			case "phone-login":
+				user = Optional.ofNullable(userSDI.findByUserPhone(loginValue));
+				break;
 
-		switch (loginType) {
-		case "email-login":
-			user = Optional.ofNullable(userSDI.findByUserEmail(loginValue));
-			break;
-		case "phone-login":
-			user = Optional.ofNullable(userSDI.findByUserPhone(loginValue));
-			break;
-
-		default:
+			default:
+			}
+			
+			Assert.isTrue(!user.isEmpty(), "User Not Found with username: " + loginValue);
 		}
-
-		Assert.isTrue(!user.isEmpty(), "User Not Found with username: " + loginValue);
-
+//		validate token - this case the query is the sub value
+		else if (splitQuery.length == 1) {
+			
+			String sub = splitQuery[0];
+			
+			user = Optional.ofNullable(userSDI.findByUserSub(sub));
+			
+			Assert.isTrue(!user.isEmpty(), "Error: Unauthorized!");
+		}
+		
 		return UserDetailsImpl.build(user.get());
 	}
 

@@ -31,28 +31,17 @@ public class UserServiceDashboardImpl implements UserService {
 	@Autowired
 	private UserRepository userRepository;
 
+//	=============================== Find User - Start ===============================
+	
 	@Override
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
 	}
 
 	@Override
-	public String getAllUsers(String token) {
-
-		String users = this.getAllUsers(token);
-
-		return users;
-	}
-
-	@Override
 	public Page<User> findUserPaginated(int pageNo, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		return userRepository.findAll(pageable);
-	}
-
-	@Override
-	public User getUserById(Long id) {
-		return userRepository.getById(id);
 	}
 
 	@Override
@@ -81,18 +70,24 @@ public class UserServiceDashboardImpl implements UserService {
 		
 		return user;
 	}
+	
+	@Override
+	public User findByUserSub(String sub) {
+		User user = entityManager.createQuery("from User where sub =:sub", User.class)
+				.setParameter("sub", sub).getSingleResult();
+		
+		return user;
+	}
+
+//	=============================== Find User - End =============================== 
+	
+	
+//	=============================== Modify User - Start =========================== 
 
 	@Override
 	@Transactional
 	public User saveUser(User user) {
 		return userRepository.save(user);
-	}
-
-	@Override
-	public Long createUser(String token, User user, User admin) {
-		// TODO Auto-generated method stub
-		System.out.println("call back internal");
-		return null;
 	}
 
 	@Override
@@ -132,6 +127,19 @@ public class UserServiceDashboardImpl implements UserService {
 		return updatedUser.getId();
 	}
 
+	@Override
+	public User findByUserId(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
+	@Override
+	public Long createUser(String token, User user, User admin) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+//	=============================== Modify User - End =============================== 
 
 }

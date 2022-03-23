@@ -11,13 +11,11 @@ public interface UserService {
 	
 	List<User> getAllUsers();
 	
-	String getAllUsers(String token);
-	
-	User getUserById(Long id);
-	
+	User findByUserId(Long id);
 	User findByUsername(String username);
 	User findByUserEmail(String email);
 	User findByUserPhone(String phone);
+	User findByUserSub(String sub);
 	
 	Page<User> findUserPaginated(int pageNo, int pageSize);
 	

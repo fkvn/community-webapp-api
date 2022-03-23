@@ -50,8 +50,6 @@ public class AuthServiceImpl implements AuthService {
 		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
 		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(null);
 
-		System.out.println(isPhoneVerified);
-
 		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse(null);
 		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
 		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
@@ -65,8 +63,8 @@ public class AuthServiceImpl implements AuthService {
 
 		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
 		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-
-		Assert.isTrue(!password.isEmpty() && password.get().matches(passwordRegex),
+		
+		Assert.isTrue(password.get().matches(passwordRegex),
 				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
 
 		// encoding
@@ -87,7 +85,6 @@ public class AuthServiceImpl implements AuthService {
 			roles.add(userRole.get());
 		}
 
-		Assert.isTrue(!(roles.contains(UserRole.GUEST) && roles.size() > 1), "Guest users can't acquire another role");
 		Assert.isTrue(!(roles.contains(UserRole.CLASSIC) && roles.contains(UserRole.BUSINESS)),
 				"A user cannot be both classic and business");
 

@@ -1,15 +1,8 @@
 package mono.thainow.rest.controllerAdvice;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.json.simple.JSONObject;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,26 +10,21 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import mono.thainow.domain.user.User;
-import mono.thainow.security.jwt.Jwt;
 import mono.thainow.util.ApiError;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-	private JSONObject claims;
-
-	@SuppressWarnings("unchecked")
-	@ModelAttribute("claims")
-	protected JSONObject extractUserFromJWT(HttpServletRequest request) throws ParseException, AccessDeniedException {
+//	private JSONObject claims;
+//
+//	@ModelAttribute("claims")
+//	protected JSONObject extractUserFromJWT(HttpServletRequest request) throws ParseException, AccessDeniedException {
 
 //		System.out.println("checking");
 //		Jwt jwt = new Jwt();
@@ -72,8 +60,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		}
 //		
 //		return claims;
-		return null;
-	}
+//		return null;
+//	}
 
 	@ExceptionHandler
 	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {

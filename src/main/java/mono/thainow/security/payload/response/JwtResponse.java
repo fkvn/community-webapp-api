@@ -1,7 +1,5 @@
 package mono.thainow.security.payload.response;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class JwtResponse {
 
-	private String token;
+	private String access_token;
 	private String type = "Bearer";
 //	private Long id;
 //	private String username;
@@ -17,7 +15,7 @@ public class JwtResponse {
 //	private List<String> roles;
 	
 	public JwtResponse(String accessToken) {
-		this.token = accessToken;
+		this.access_token = accessToken;
 	}
 
 //	public JwtResponse(String accessToken, Long id, String username, String email, List<String> roles) {

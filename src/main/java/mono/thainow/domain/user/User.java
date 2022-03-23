@@ -92,7 +92,7 @@ public class User implements Serializable {
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "USER_ROLES",
 			joinColumns = @JoinColumn(name = "USER_ID"))
-	@Column(name = "USER_ROLE")
+	@Column(name = "USER_ROLE", nullable = false)
 	private Set<UserRole> roles = new HashSet<>();
 
 	@NotNull
