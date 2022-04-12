@@ -1,8 +1,6 @@
 package mono.thainow.service.impl;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,17 +11,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import mono.thainow.domain.user.User;
-import mono.thainow.domain.user.UserRole;
-import mono.thainow.domain.user.UserStatus;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.security.payload.request.LoginRequest;
 import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.security.payload.response.JwtResponse;
+import mono.thainow.security.verify.TwilioVerification;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.UserRoleService;
 import mono.thainow.service.UserService;
-import mono.thainow.util.util;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -42,67 +37,87 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	JwtUtils jwtUtils;
+	
+	@Autowired
+	TwilioVerification twilio;
 
 	@Override
 	public boolean signUp(SignupRequest signUpRequest) {
 
-		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
-		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
-		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(null);
-
-		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse(null);
-		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
-		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
-		String fullName = firstName + lastName;
-
-		Assert.isTrue(!phone.isEmpty() && isPhoneVerified, "Users must verify phone number to register!");
-
-		if (!phone.isEmpty()) {
-			util.valPhoneNo(phone);
-		}
-
-		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
-		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
+//		Check Type of verification
+		Optional<Boolean> isPhoneVerified = Optional.ofNullable(signUpRequest.getIsPhoneVerified());
 		
-		Assert.isTrue(password.get().matches(passwordRegex),
-				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
-
-		// encoding
-		String encodedPwd = encoder.encode(password.get());
-		String sub = encoder.encode(phone);
-
-		Set<String> strRoles = signUpRequest.getRoles();
-		Assert.isTrue(!strRoles.isEmpty(), "Error: Role is not found.");
-
-		Set<UserRole> roles = new HashSet<>();
-
-		for (String role : strRoles) {
-
-			Optional<UserRole> userRole = Optional.ofNullable(userRoleService.findByName(role.trim()));
-
-			Assert.isTrue(!userRole.isEmpty(), "Error: Role is not found.");
-
-			roles.add(userRole.get());
+//		Verification is required
+		Assert.isTrue(!isPhoneVerified.isEmpty(), "Users must be verified to register!");
+		
+//		Verify by Phone
+		if (isPhoneVerified.get()) {	
+			twilio.sendAverficationToken("6268773058", true, "", "sms");
+			
 		}
-
-		Assert.isTrue(!(roles.contains(UserRole.CLASSIC) && roles.contains(UserRole.BUSINESS)),
-				"A user cannot be both classic and business");
-
-		// create a new user
-		User user = new User();
-		user.setSub(sub);
-		user.setEmail(email);
-		user.setPassword(encodedPwd);
-		user.setUsername(username);
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-		user.setFullName(fullName);
-		user.setPhone(phone);
-		user.setPhoneVerified(isPhoneVerified);
-		user.setRoles(roles);
-		user.setStatus(UserStatus.ACTIVE);
-
-		user = userService.saveUser(user);
+//		Verify by Email
+		else {
+			twilio.sendAverficationToken("", true, "phucaone@gmail.com", "email");
+		}
+		
+//		
+//		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
+//		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
+//		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(null);
+//
+//		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse(null);
+//		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
+//		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
+//		String fullName = firstName + lastName;
+//
+//		Assert.isTrue(!phone.isEmpty() && isPhoneVerified, "Users must verify phone number to register!");
+//
+//		if (!phone.isEmpty()) {
+//			util.valPhoneNo(phone);
+//		}
+//
+//		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
+//		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
+//		
+//		Assert.isTrue(password.get().matches(passwordRegex),
+//				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
+//
+//		// encoding
+//		String encodedPwd = encoder.encode(password.get());
+//		String sub = encoder.encode(phone);
+//
+//		Set<String> strRoles = signUpRequest.getRoles();
+//		Assert.isTrue(!strRoles.isEmpty(), "Error: Role is not found.");
+//
+//		Set<UserRole> roles = new HashSet<>();
+//
+//		for (String role : strRoles) {
+//
+//			Optional<UserRole> userRole = Optional.ofNullable(userRoleService.findByName(role.trim()));
+//
+//			Assert.isTrue(!userRole.isEmpty(), "Error: Role is not found.");
+//
+//			roles.add(userRole.get());
+//		}
+//
+//		Assert.isTrue(!(roles.contains(UserRole.CLASSIC) && roles.contains(UserRole.BUSINESS)),
+//				"A user cannot be both classic and business");
+//
+//		// create a new user
+//		User user = new User();
+//		user.setSub(sub);
+//		user.setEmail(email);
+//		user.setPassword(encodedPwd);
+//		user.setUsername(username);
+//		user.setFirstName(firstName);
+//		user.setLastName(lastName);
+//		user.setFullName(fullName);
+//		user.setPhone(phone);
+//		user.setPhoneVerified(isPhoneVerified);
+//		user.setRoles(roles);
+//		user.setStatus(UserStatus.ACTIVE);
+//
+//		user = userService.saveUser(user);
 
 		return true;
 	}

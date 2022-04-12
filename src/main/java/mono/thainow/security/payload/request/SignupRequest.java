@@ -12,6 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SignupRequest {
+	
+//	if false, verify by Email
+	private Boolean isPhoneVerified = null;
 
 	@Size(max = 50)
 	@Email
@@ -21,7 +24,7 @@ public class SignupRequest {
 	@Size(min=10, max = 10)
 	private String phone;
 	
-	private boolean isPhoneVerified = true;
+	
 
 	private Set<String> roles;
 

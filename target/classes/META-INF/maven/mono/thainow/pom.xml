@@ -115,11 +115,16 @@
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
 		<!-- Multiple oauth2 -->
-<!-- 		<dependency>
-			<groupId>io.mzlnk.springframework</groupId>
-			<artifactId>multi-tenant-oauth2-resource-server-spring-boot-starter</artifactId>
-			<version>1.0.4-beta</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>io.mzlnk.springframework</groupId> <artifactId>multi-tenant-oauth2-resource-server-spring-boot-starter</artifactId> 
+			<version>1.0.4-beta</version> </dependency> -->
+
+		<!-- Twilio -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>8.29.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
