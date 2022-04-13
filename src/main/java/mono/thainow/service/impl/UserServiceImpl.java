@@ -2,6 +2,7 @@ package mono.thainow.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -13,19 +14,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.repository.UserRepository;
+import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
 
 @Service
 @Primary
 //@Qualifier
-public class UserServiceDashboardImpl implements UserService {
+public class UserServiceImpl implements UserService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -140,6 +143,39 @@ public class UserServiceDashboardImpl implements UserService {
 		return null;
 	}
 
-//	=============================== Modify User - End =============================== 
+//	=============================== Modify User - End ===============================
+	
+	
+//	=============================== Business Service - start ===============================
+	
+	@Override
+	public User getClassicUser(User user, SignupRequest signUpRequest) {
+		
+////		user email
+//		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
+//		boolean isEmailVerified = Optional.ofNullable(signUpRequest.isEmailVerified()).orElse(false);
+//		
+////		update user email fields
+//		user.setEmail(email);
+//		user.setEmailVerified(isEmailVerified);
+//		
+////		user phone
+//		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
+//		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(false);
+//		
+////		update user email fields
+//		user.setPhone(phone);
+//		user.setPhoneVerified(isPhoneVerified);
+//				
+////		assert user has at least email or phone number
+//		Assert.isTrue(!phone.isEmpty() && isPhoneVerified, "Users must verify phone number to register!");
+
+		
+		
+		return user;
+	}
+	
+	
+//	=============================== Business Service - End ===============================
 
 }

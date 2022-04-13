@@ -15,7 +15,7 @@ import mono.thainow.domain.user.User;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
 	@Autowired
-	private UserServiceDashboardImpl userSDI;
+	private UserServiceImpl userSDI;
 
 //	this function is called when Sign-in and Validate token
 //	this is called automatically because UserDetailsService interface that has only one method

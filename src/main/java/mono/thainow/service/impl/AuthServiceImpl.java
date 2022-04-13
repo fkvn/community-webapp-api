@@ -11,6 +11,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+
+import mono.thainow.domain.location.Location;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.security.payload.request.LoginRequest;
 import mono.thainow.security.payload.request.SignupRequest;
@@ -74,24 +80,56 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public boolean signUp(SignupRequest signUpRequest) {
-
-//		check Type of verification
-		Optional<Boolean> isVerified = Optional.ofNullable(signUpRequest.getIsVerified());
 		
-//		verification is required
-		Assert.isTrue(!isVerified.isEmpty(), "Users must be verified to register!");
-		
-
-//		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
-//		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
-//		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(null);
+////		validate users' roles
+//		Set<String> strRoles = signUpRequest.getRoles();
 //
+//		Set<UserRole> roles = userRoleService.verifyRoles(strRoles);
+//
+//		Assert.isTrue(!(roles.contains(UserRole.CLASSIC) && roles.contains(UserRole.BUSINESS)),
+//				"A user cannot be both classic and business");
+//
+////		check Type of verification
+//		Boolean isVerified = Optional.ofNullable(signUpRequest.getIsVerified()).orElse(false);
+//		
+////		verification is required for classic users
+//		Assert.isTrue(roles.contains(UserRole.CLASSIC) && !isVerified, "Users must be verified to register!");
+//		
+////		create a new user
+//		User user = new User();
+//		
+////		user's profile information 
+//		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
+//		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
+//		
+////		add user profile information
+//		user.setFirstName(firstName);
+//		user.setLastName(lastName);
+//		
+////		password validation
+//		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
+//		PasswordUtil.verifyPassword(password.get());
+//		
+//		// password encoded
+//		String encodedPwd = encoder.encode(password.get());
+//		
+////		add user password
+//		user.setPassword(encodedPwd);
+		
+		
+		Location location = Optional.ofNullable(signUpRequest.getLocation()).orElse(new Location());
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String prettyJsonString = gson.toJson(location);
+		
+		System.out.println(prettyJsonString);
+
 //		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse(null);
 //		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
 //		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
 //		String fullName = firstName + lastName;
 //
-//		Assert.isTrue(!phone.isEmpty() && isPhoneVerified, "Users must verify phone number to register!");
+
 //
 //		if (!phone.isEmpty()) {
 //			util.valPhoneNo(phone);
@@ -107,22 +145,7 @@ public class AuthServiceImpl implements AuthService {
 //		String encodedPwd = encoder.encode(password.get());
 //		String sub = encoder.encode(phone);
 //
-//		Set<String> strRoles = signUpRequest.getRoles();
-//		Assert.isTrue(!strRoles.isEmpty(), "Error: Role is not found.");
-//
-//		Set<UserRole> roles = new HashSet<>();
-//
-//		for (String role : strRoles) {
-//
-//			Optional<UserRole> userRole = Optional.ofNullable(userRoleService.findByName(role.trim()));
-//
-//			Assert.isTrue(!userRole.isEmpty(), "Error: Role is not found.");
-//
-//			roles.add(userRole.get());
-//		}
-//
-//		Assert.isTrue(!(roles.contains(UserRole.CLASSIC) && roles.contains(UserRole.BUSINESS)),
-//				"A user cannot be both classic and business");
+
 //
 //		// create a new user
 //		User user = new User();
