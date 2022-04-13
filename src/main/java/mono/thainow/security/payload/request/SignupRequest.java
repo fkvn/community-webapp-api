@@ -9,12 +9,13 @@ import javax.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 public class SignupRequest {
 	
 //	if false, verify by Email
-	private Boolean isPhoneVerified = null;
+	private Boolean isVerified = null;
 
 	@Size(max = 50)
 	@Email

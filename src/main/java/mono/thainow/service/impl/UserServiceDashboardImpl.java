@@ -14,11 +14,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.repository.UserRepository;
 import mono.thainow.service.UserService;
-import mono.thainow.util.util;
+import mono.thainow.util.PhoneUtil;
 
 @Service
 @Primary
@@ -32,7 +34,7 @@ public class UserServiceDashboardImpl implements UserService {
 	private UserRepository userRepository;
 
 //	=============================== Find User - Start ===============================
-	
+
 	@Override
 	public List<User> getAllUsers() {
 		return userRepository.findAll();
@@ -46,42 +48,41 @@ public class UserServiceDashboardImpl implements UserService {
 
 	@Override
 	public User findByUsername(String username) {
-		
+
 		User user = entityManager.createQuery("from User where username =:username", User.class)
 				.setParameter("username", username).getSingleResult();
-		
+
 		return user;
 	}
-	
+
 	@Override
 	public User findByUserEmail(String email) {
 
-		User user = entityManager.createQuery("from User where email =:email", User.class)
-				.setParameter("email", email).getSingleResult();
-		
+		User user = entityManager.createQuery("from User where email =:email", User.class).setParameter("email", email)
+				.getSingleResult();
+
 		return user;
 	}
 
 	@Override
 	public User findByUserPhone(String phone) {
 
-		User user = entityManager.createQuery("from User where phone =:phone", User.class)
-				.setParameter("phone", phone).getSingleResult();
-		
+		User user = entityManager.createQuery("from User where phone =:phone", User.class).setParameter("phone", phone)
+				.getSingleResult();
+
 		return user;
 	}
-	
+
 	@Override
 	public User findByUserSub(String sub) {
-		User user = entityManager.createQuery("from User where sub =:sub", User.class)
-				.setParameter("sub", sub).getSingleResult();
-		
+		User user = entityManager.createQuery("from User where sub =:sub", User.class).setParameter("sub", sub)
+				.getSingleResult();
+
 		return user;
 	}
 
 //	=============================== Find User - End =============================== 
-	
-	
+
 //	=============================== Modify User - Start =========================== 
 
 	@Override
@@ -111,7 +112,7 @@ public class UserServiceDashboardImpl implements UserService {
 				updatedUser.setEmail((String) userInfo.get(key));
 				break;
 			case "phone": {
-				util.valPhoneNo(String.valueOf(userInfo.get(key)));
+				PhoneUtil.validatePhoneNumberWithGoogleAPI(String.valueOf(userInfo.get(key)), "US");
 				updatedUser.setPhone(String.valueOf(userInfo.get(key)));
 			}
 				break;
@@ -138,7 +139,6 @@ public class UserServiceDashboardImpl implements UserService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 //	=============================== Modify User - End =============================== 
 

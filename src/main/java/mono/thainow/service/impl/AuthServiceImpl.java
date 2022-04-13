@@ -14,7 +14,9 @@ import org.springframework.util.Assert;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.security.payload.request.LoginRequest;
 import mono.thainow.security.payload.request.SignupRequest;
+import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
+import mono.thainow.security.payload.response.TokenResponse;
 import mono.thainow.security.verify.TwilioVerification;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.UserRoleService;
@@ -40,27 +42,46 @@ public class AuthServiceImpl implements AuthService {
 	
 	@Autowired
 	TwilioVerification twilio;
+	
+	
+	@Override
+	public void sendVerificationToken(TokenRequest tokenRequest) {
+		
+//		inputs
+		String phone = Optional.ofNullable(tokenRequest.getPhone().trim()).orElse("");
+		String region = Optional.ofNullable(tokenRequest.getRegion().trim()).orElse("");
+		String email = Optional.ofNullable(tokenRequest.getEmail().trim()).orElse("");
+		String channel = Optional.ofNullable(tokenRequest.getChannel().trim()).orElse("");
+		
+//		send verification token
+		twilio.sendVerficationToken(phone, region, email, channel);
+	}
+	
+	@Override
+	public void checkVerificationToken(TokenResponse tokenResponse) {
+		
+//		inputs
+		String phone = Optional.ofNullable(tokenResponse.getPhone().trim()).orElse("");
+		String region = Optional.ofNullable(tokenResponse.getRegion().trim()).orElse("");
+		String email = Optional.ofNullable(tokenResponse.getEmail().trim()).orElse("");
+		String channel = Optional.ofNullable(tokenResponse.getChannel().trim()).orElse("");
+		String token = Optional.ofNullable(tokenResponse.getToken().trim()).orElse("");
+
+//		check verification token
+		twilio.checkVerficationToken(phone, region, email, channel, token);
+	}
+
 
 	@Override
 	public boolean signUp(SignupRequest signUpRequest) {
 
-//		Check Type of verification
-		Optional<Boolean> isPhoneVerified = Optional.ofNullable(signUpRequest.getIsPhoneVerified());
+//		check Type of verification
+		Optional<Boolean> isVerified = Optional.ofNullable(signUpRequest.getIsVerified());
 		
-//		Verification is required
-		Assert.isTrue(!isPhoneVerified.isEmpty(), "Users must be verified to register!");
+//		verification is required
+		Assert.isTrue(!isVerified.isEmpty(), "Users must be verified to register!");
 		
-//		Verify by Phone
-		if (isPhoneVerified.get()) {	
-			twilio.sendAverficationToken("6268773058", true, "", "sms");
-			
-		}
-//		Verify by Email
-		else {
-			twilio.sendAverficationToken("", true, "phucaone@gmail.com", "email");
-		}
-		
-//		
+
 //		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
 //		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
 //		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(null);
@@ -164,5 +185,8 @@ public class AuthServiceImpl implements AuthService {
 		return jwtClaims;
 
 	}
+
+
+
 
 }

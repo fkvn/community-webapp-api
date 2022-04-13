@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mono.thainow.security.payload.request.LoginRequest;
 import mono.thainow.security.payload.request.SignupRequest;
+import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.MessageResponse;
+import mono.thainow.security.payload.response.TokenResponse;
 import mono.thainow.service.AuthService;
 
 // 30 secs
@@ -34,6 +36,23 @@ public class AuthController {
 
 		return authService.signin(loginRequest);
 	}
+
+	@PostMapping("/getToken")
+	public MessageResponse getToken(@Valid @RequestBody TokenRequest tokenRequest) {
+
+		authService.sendVerificationToken(tokenRequest);
+
+		return new MessageResponse("Token was sent successfully!");
+	}
+	
+	@PostMapping("/verifyToken")
+	public MessageResponse verifyToken(@Valid @RequestBody TokenResponse tokenResponse) {
+
+		authService.checkVerificationToken(tokenResponse);
+
+		return new MessageResponse("Token was verified successfully!");
+	}
+	
 
 	@PostMapping("/signup")
 	public MessageResponse registerUser(@Valid @RequestBody SignupRequest signUpRequest) {

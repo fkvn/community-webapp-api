@@ -1,8 +1,11 @@
 package mono.thainow.rest.controllerAdvice;
 
+import java.util.Optional;
+
 import javax.persistence.EntityNotFoundException;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,6 +13,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -82,6 +87,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
+
 	@ExceptionHandler({ DataIntegrityViolationException.class })
 	protected ResponseEntity<Object> handleDataIntegrityViolationException(Exception ex, WebRequest request) {
 
@@ -106,7 +112,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				break;
 			default:
 			}
-		   
+
 			message = constraintMessage + " has already existed or registered by another user.";
 		}
 

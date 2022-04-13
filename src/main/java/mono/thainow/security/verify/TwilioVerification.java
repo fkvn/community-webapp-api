@@ -1,15 +1,17 @@
 package mono.thainow.security.verify;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import com.twilio.Twilio;
 import com.twilio.rest.verify.v2.service.Verification;
-import org.springframework.util.Assert;
+import com.twilio.rest.verify.v2.service.VerificationCheck;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import mono.thainow.util.PhoneUtil;
 
 @Component
 @Getter
@@ -24,94 +26,103 @@ public class TwilioVerification {
 
 	public TwilioVerification() {
 		Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-
 	}
 
-	public boolean sendAverficationToken(String phone, boolean isUSNumber, String email, String channel) {
+//	if no error, it went through
+	public void sendVerficationToken(String phone, String region, String email, String channel) {
 
+//		only verify by email and sms
+		Assert.isTrue(channel.equals("email") || channel.equals("sms"), "Only Email and SMS are supported at the moment!");
+		
+
+		
+//		verification object
 		Verification verification = null;
-		boolean isSent = false;
 
+//		validate receiver process
+		String receiver = "";
+	
 		switch (channel) {
 		case "email": {
 //			email is required
 			Assert.isTrue(email != null && !email.equals(""), "Email is required for the verification process!");
 
-//			send verification code
-			verification = Verification.creator(serviceID, email, channel).create();
+//			update receiver
+			receiver = email;
 
-//			flag sent is successful
-			isSent = true;
 		}
 			break;
 
 		case "sms": {
 //			phone number is required
 			Assert.isTrue(phone != null && !phone.equals(""), "Phone number is required for the verification process!");
-
-//			phone format 10-digits: xxxxxxxxxx
-			if (isUSNumber) {
-//				receiver format 10-digits: +1xxxxxxxxxx
-				String receiver = "+1" + phone;
-
-//				send verification code
-				verification = Verification.creator(serviceID, receiver, channel).create();
-
-//				flag sent is successful
-				isSent = true;
-			}
+			
+//			update receiver
+			receiver = PhoneUtil.getPhoneNumberWithRegionCode(phone, region);
+			
 		}
 			break;
 
 		default:
 			break;
 		}
+		
+//		assert the receiver is not empty
+		Assert.isTrue(!receiver.isEmpty(), "Missing receiver!");
+		
+//		send verification token
+		verification = Verification.creator(serviceID, receiver, channel).create();
 
-		Assert.isTrue(verification != null, "Verification Failed");
+//		assert the verification token was sent
+		Assert.isTrue(verification != null && verification.getStatus().equals("pending"), "Sending Verification Failed");
 
-		return isSent;
 	}
 	
-	public boolean checkAverficationToken(String phone, boolean isUSNumber, String email, String channel) {
+	
+//	if no error, it went through
+	public void checkVerficationToken(String phone, String region, String email, String channel, String token) {
+		
+//		token is required
+		Assert.isTrue(!token.isEmpty(), "Token can't be empty!");
 
-		Verification verification = null;
-		boolean isSent = false;
+//		validate receiver process
+		String receiver = "";
 
 		switch (channel) {
+		
 		case "email": {
 //			email is required
 			Assert.isTrue(email != null && !email.equals(""), "Email is required for the verification process!");
-
-			verification = Verification.creator(serviceID, email, channel).create();
-
-			isSent = true;
+			
+//			update receiver
+			receiver = email;
 		}
 			break;
 
 		case "sms": {
 //			phone number is required
 			Assert.isTrue(phone != null && !phone.equals(""), "Phone number is required for the verification process!");
-
-//			phone format 10-digits: xxxxxxxxxx
-			if (isUSNumber) {
-//				receiver format 10-digits: +1xxxxxxxxxx
-				String receiver = "+1" + phone;
-
-				verification = Verification.creator(serviceID, receiver, channel).create();
-
-				isSent = true;
-			}
+			
+//			update receiver
+			receiver = PhoneUtil.getPhoneNumberWithRegionCode(phone, region);
 		}
 			break;
 
 		default:
 			break;
 		}
+		
+//		assert the receiver is not empty
+		Assert.isTrue(!receiver.isEmpty(), "Missing receiver!");
+		
+//		validate token
+        VerificationCheck verificationCheck = VerificationCheck.creator(
+                serviceID,
+                token)
+            .setTo(receiver).create();
 
-		Assert.isTrue(verification != null, "Verification Failed");
-
-		return isSent;
+//		assert the verification token was approved
+		Assert.isTrue(verificationCheck.getStatus().equals("approved"), "Token Verification Failed");
 	}
 	
-
 }
