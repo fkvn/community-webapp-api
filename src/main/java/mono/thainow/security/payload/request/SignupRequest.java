@@ -17,39 +17,39 @@ import mono.thainow.domain.location.Location;
 @Setter
 public class SignupRequest {
 	
-////	if false, otp was not verified
-//	private Boolean isVerified;
-//
-//	@Size(max = 50, message = "Email can't be more than 50 characters")
-//	@Email
-//	private String email;
-//	
-////	 email validation - if user uses email for otp verification
-//	private boolean isEmailVerified;
-//
-//	@Size(max = 15, message = "Phone number can't be more than 15 digit numbers")
-//	private String phone;
-//	
-////	phone validation - if user uses phone for otp verification
-//	private boolean isPhoneVerified;
-//	
-//	@NotEmpty
-//	private Set<String> roles;
-//
-//	@NotBlank
-//	@Size(min = 8, max = 20)
-//	private String password;
-//	
-//	@NotBlank
-//	private String firstname = "";
-//
-//	@NotBlank
-//	private String lastname = "";
-//	
-//	@NotEmpty
-//	private Long playid;
+//	if false, otp was not verified
+	private Boolean isVerified;
+
+	@Size(max = 50, message = "Email can't be more than 50 characters")
+	@Email
+	private String email;
+	
+//	 email validation - if user uses email for otp verification
+	private boolean isEmailVerified;
+
+	@Size(max = 15, message = "Phone number can't be more than 15 digit numbers")
+	private String phone;
+	
+//	phone validation - if user uses phone for otp verification
+	private boolean isPhoneVerified;
+	
+	@NotEmpty
+	private Set<String> roles;
+
+	@NotBlank
+	@Size(min = 8, max = 20)
+	private String password;
+	
+	@NotBlank
+	private String firstname = "";
+
+	@NotBlank
+	private String lastname = "";
 	
 	@NotNull
 	private Location location; 
 
+//	Business account Information
+	
+	
 }

@@ -60,7 +60,7 @@ public class Jwt {
 
 //		update user
 		user.setSub(sub);
-		user.setRoles(roles);
+//		user.setRoles(roles);
 		user.setEmail(email);
 		user.setEmailVerified(isEmailVerified);
 		user.setFirstName(firstName);

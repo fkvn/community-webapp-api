@@ -16,8 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.google.i18n.phonenumbers.NumberParseException;
-
+import mono.thainow.dao.jpa.LocationDaoImpl;
+import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.repository.UserRepository;
@@ -35,6 +35,10 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	
+	@Autowired
+	private LocationDaoImpl locationDaoImpl;
 
 //	=============================== Find User - Start ===============================
 
@@ -144,38 +148,51 @@ public class UserServiceImpl implements UserService {
 	}
 
 //	=============================== Modify User - End ===============================
-	
-	
+
 //	=============================== Business Service - start ===============================
-	
+
 	@Override
 	public User getClassicUser(User user, SignupRequest signUpRequest) {
-		
-////		user email
-//		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
-//		boolean isEmailVerified = Optional.ofNullable(signUpRequest.isEmailVerified()).orElse(false);
-//		
-////		update user email fields
-//		user.setEmail(email);
-//		user.setEmailVerified(isEmailVerified);
-//		
-////		user phone
-//		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
-//		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(false);
-//		
-////		update user email fields
-//		user.setPhone(phone);
-//		user.setPhoneVerified(isPhoneVerified);
-//				
-////		assert user has at least email or phone number
-//		Assert.isTrue(!phone.isEmpty() && isPhoneVerified, "Users must verify phone number to register!");
 
+//		user email
+		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
+		boolean isEmailVerified = Optional.ofNullable(signUpRequest.isEmailVerified()).orElse(false);
+		user.setEmail(email);
+		user.setEmailVerified(isEmailVerified);
+
+//		user phone
+		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
+		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(false);
+		user.setPhone(phone);
+		user.setPhoneVerified(isPhoneVerified);
+
+//		assert user has at least email or phone number
+		Assert.isTrue(!phone.isEmpty() && !email.isEmpty(), "Users must have at least email or phone number to register!");
+ 
+//		user location
+		Location location = Optional.ofNullable(signUpRequest.getLocation()).orElse(new Location());
 		
+//		assert location has city, state, and zipcode
+		Assert.isTrue(!location.getLocality().equals("") && !location.getState().equals("")
+				&& !location.getZipcode().equals(""), "City, State, and Zipcode can't be empty");
 		
+//		check if location is in the database
+		Location dbLocation = locationDaoImpl.findLocationByLatLng(location.getLat(), location.getLng());
+		
+//		new location
+		if (dbLocation == null) {
+			location = locationDaoImpl.saveLocation(location);
+			user.setLocation(location);
+		}
+//		existed location
+		else {
+			user.setLocation(dbLocation);
+		}
+		
+
 		return user;
 	}
-	
-	
+
 //	=============================== Business Service - End ===============================
 
 }
