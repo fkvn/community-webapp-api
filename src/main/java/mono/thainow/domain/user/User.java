@@ -23,6 +23,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DiscriminatorFormula;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -45,6 +46,8 @@ import mono.thainow.domain.location.Location;
 		@Index(name = "user_email_UNIQUE", columnList = "USER_EMAIL", unique = true),
 		@Index(name = "user_phone_UNIQUE", columnList = "USER_PHONE", unique = true),
 		@Index(name = "user_username_UNIQUE", columnList = "USER_USERNAME", unique = true), })
+@DiscriminatorFormula("case when '' is null then 0 else forest_type end")
+
 public class User implements Serializable {
 	/**
 	* 

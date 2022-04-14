@@ -115,6 +115,9 @@ public class AuthServiceImpl implements AuthService {
 //		add user password
 		user.setPassword(encodedPwd);
 
+//		add user roles
+		user.setRoles(roles);
+		
 //		classic user
 		if (roles.contains(UserRole.CLASSIC)) {
 			user = userService.getClassicUser(user, signUpRequest);
