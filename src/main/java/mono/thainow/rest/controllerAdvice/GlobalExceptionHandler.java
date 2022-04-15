@@ -1,11 +1,8 @@
 package mono.thainow.rest.controllerAdvice;
 
-import java.util.Optional;
-
 import javax.persistence.EntityNotFoundException;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,8 +10,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -98,22 +96,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		if (ex.getCause() instanceof ConstraintViolationException) {
 			ConstraintViolationException cve = (ConstraintViolationException) ex.getCause();
 			String constraint = cve.getConstraintName();
-			String constraintMessage = "The ";
 
 			switch (constraint) {
 			case "user.user_email_UNIQUE":
-				constraintMessage += "email";
+				message = "The email has already existed or registered by another user.";
 				break;
 			case "user.user_phone_UNIQUE":
-				constraintMessage += "phone number";
+				message = "The phone number has already existed or registered by another user.";
 				break;
 			case "user.user_username_UNIQUE":
-				constraintMessage += "username";
+				message = "The username has already existed or registered by another user.";
+				break;
+			case "location.location_placeid_UNIQUE":
+				message = "Unexpected error! Please contact your administrator.";
 				break;
 			default:
 			}
-
-			message = constraintMessage + " has already existed or registered by another user.";
 		}
 
 		ApiError apiError = new ApiError();
@@ -144,6 +142,63 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
 		apiError.setMessage("No records available! The record is either deleted or not exist.");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+	
+	
+	@ExceptionHandler({ BadCredentialsException.class })
+	protected ResponseEntity<Object> handleBadCredentialsException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("Invalid Password!");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+	
+	
+	@ExceptionHandler({ InternalAuthenticationServiceException.class })
+	protected ResponseEntity<Object> handleInternalAuthenticationServiceException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("User Not Found!");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+	
+	
+	@ExceptionHandler({ AccessDeniedException.class })
+	protected ResponseEntity<Object> handleAccessDeniedException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("Access is denied!");
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}

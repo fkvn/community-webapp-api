@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import mono.thainow.domain.user.User;
 
+/*
+ * contains necessary information (such as: username, password, authorities) to
+ * build an Authentication object.
+ */
 @RequiredArgsConstructor
 @Getter
 @Setter
@@ -24,40 +29,33 @@ public class UserDetailsImpl implements UserDetails {
 	private static final long serialVersionUID = 1L;
 	private Long id;
 	private String username;
-	private String email;
+//	private String email;
 	private String sub;
-	
+
 	@JsonIgnore
 	private String password;
-	
+
 	private Collection<? extends GrantedAuthority> authorities;
-	
-	public UserDetailsImpl(Long id, String username, String email, String password, String sub,
+
+	public UserDetailsImpl(Long id, String username, String password, String sub,
 			Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.username = username;
-		this.email = email;
+//		this.email = email;
 		this.password = password;
 		this.sub = sub;
 		this.authorities = authorities;
 	}
-	
-	public static UserDetailsImpl build(User user) {
-		
-		List<GrantedAuthority> authorities = user.getRoles().stream()
-				.map(role -> new SimpleGrantedAuthority(role.toString()))
-				.collect(Collectors.toList());
-		
-		return new UserDetailsImpl(
-				user.getId(), 
-				user.getUsername(), 
-				user.getEmail(),
-				user.getPassword(),
-				user.getSub(),
-				authorities);
-	}
-	
 
+	public static UserDetailsImpl build(User user) {
+
+// 		this list of GrantedAuthority would be used for PreAuthorize annotation
+//		in this case, we add both Privileges and Roles into stream and concat together to authority
+		List<GrantedAuthority> authorities = Stream.concat(user.getPrivileges().stream(), Stream.of("ROLE_" + user.getRole()))
+				.map(role -> new SimpleGrantedAuthority(role.toString())).collect(Collectors.toList());
+
+		return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), user.getSub(), authorities);
+	}
 
 	@Override
 	public boolean isAccountNonExpired() {
@@ -78,7 +76,7 @@ public class UserDetailsImpl implements UserDetails {
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)

@@ -34,7 +34,10 @@ public class SignupRequest {
 	private boolean isPhoneVerified;
 	
 	@NotEmpty
-	private Set<String> roles;
+	private Set<String> privileges;
+	
+	@NotEmpty
+	private String role;
 
 	@NotBlank
 	@Size(min = 8, max = 20)

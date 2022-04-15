@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService {
 				&& !location.getZipcode().equals(""), "City, State, and Zipcode can't be empty");
 		
 //		check if location is in the database
-		Location dbLocation = locationDaoImpl.findLocationByLatLng(location.getLat(), location.getLng());
+		Location dbLocation = locationDaoImpl.findLocationByLatLng(location.getPlaceid(), location.getLat(), location.getLng());
 		
 //		new location
 		if (dbLocation == null) {

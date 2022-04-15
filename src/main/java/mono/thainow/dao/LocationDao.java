@@ -6,7 +6,7 @@ public interface LocationDao {
 	
 	Location findLocationById(Long id);
 	
-	Location findLocationByLatLng(String lat, String lng);
+	Location findLocationByLatLng(String placeid, String lat, String lng);
 	
 	Location saveLocation(Location location);
 	

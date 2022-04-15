@@ -34,7 +34,6 @@ public class TwilioVerification {
 //		only verify by email and sms
 		Assert.isTrue(channel.equals("email") || channel.equals("sms"), "Only Email and SMS are supported at the moment!");
 		
-
 		
 //		verification object
 		Verification verification = null;

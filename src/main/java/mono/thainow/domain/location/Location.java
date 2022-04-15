@@ -31,7 +31,12 @@ import mono.thainow.util.LocationUtil;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(indexes = { @Index(name = "location_placeid_UNIQUE", columnList = "LOCATION_PLACEID", unique = true), })
+@Table(indexes = { @Index(name = "location_placeid_UNIQUE", columnList = "LOCATION_PLACEID", unique = true),
+		@Index(name = "location_formattedAddress_UNIQUE", columnList = "LOCATION_FORMATTED_ADDRESS", unique = true),
+		@Index(name = "location_fullAddress_UNIQUE", columnList = "LOCATION_FULL_ADDRESS", unique = true),
+		@Index(name = "location_lat_UNIQUE", columnList = "LOCATION_LAT", unique = true),
+		@Index(name = "location_lng_UNIQUE", columnList = "LOCATION_LNG", unique = true)
+})
 public class Location implements Serializable {
 	/**
 	* 
@@ -75,32 +80,32 @@ public class Location implements Serializable {
 	private String zipcode = "";
 
 	@Column(name = "LOCATION_FORMATTED_ADDRESS")
-	private String formattedAddress = "";
-	
+	private String formattedAddress;
+
 	@Column(name = "LOCATION_FULL_ADDRESS")
-	private String fullAddress = "";
+	private String fullAddress;
 
 	@Column(name = "LOCATION_LAT")
 	private String lat;
 
 	@Column(name = "LOCATION_LNG")
 	private String lng;
-	
-	@OneToMany(mappedBy="location")
+
+	@OneToMany(mappedBy = "location")
 	@JsonIgnore
 	private List<User> users = new ArrayList<>();
-  
+
 	@PrePersist
 	public void prePersist() {
 		this.formattedAddress = LocationUtil.getFormattedAddress(this);
 		this.fullAddress = LocationUtil.getFullAddress(this);
 	}
-	
+
 	public String getFormattedAddress() {
 		this.formattedAddress = LocationUtil.getFormattedAddress(this);
 		return this.formattedAddress;
 	}
-	
+
 	public String getFullAddress() {
 		this.fullAddress = LocationUtil.getFullAddress(this);
 		return this.fullAddress;

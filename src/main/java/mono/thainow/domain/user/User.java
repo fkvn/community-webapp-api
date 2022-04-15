@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,6 +18,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
@@ -47,7 +51,9 @@ import mono.thainow.domain.location.Location;
 		@Index(name = "user_phone_UNIQUE", columnList = "USER_PHONE", unique = true),
 		@Index(name = "user_username_UNIQUE", columnList = "USER_USERNAME", unique = true), })
 @DiscriminatorFormula("case when '' is null then 0 else forest_type end")
-
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="USER_ROLE", 
+discriminatorType = DiscriminatorType.STRING)
 public class User implements Serializable {
 	/**
 	* 
@@ -73,8 +79,8 @@ public class User implements Serializable {
 	@Column(name = "USER_EMAIL")
 	private String email;
 
-	@Column(name = "USER_ISEMAILVERIFIED")
-	private boolean isEmailVerified;
+	@Column(name = "IS_USER_EMAIL_VERIFIED")
+	private boolean isEmailVerified = false;
 
 	@Column(name = "USER_FIRSTNAME")
 	private String firstName = "";
@@ -91,17 +97,17 @@ public class User implements Serializable {
 	@Column(name = "USER_PHONE")
 	private String phone;
 
-	@Column(name = "USER_ISPHONEVERIFIED")
-	private boolean isPhoneVerified;
+	@Column(name = "IS_USER_PHONE_VERIFIED")
+	private boolean isPhoneVerified = false;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "USER_ROLES", joinColumns = @JoinColumn(name = "USER_ID"))
-	@Column(name = "USER_ROLE", nullable = false)
-	private Set<UserRole> roles = new HashSet<>();
+	@CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
+	@Column(name = "USER_PRIVILEGES", nullable = false)
+	private Set<UserPrivilege> privileges = new HashSet<>();
 	
-//	@Enumerated(EnumType.ORDINAL)
-//	@Column(name = "USER_ROLE", nullable = false)
-//	private UserRole role;
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name = "USER_ROLE", nullable = false)
+	private UserRole role;
 	
 	@NotNull
 	@Enumerated(EnumType.ORDINAL)
@@ -125,6 +131,7 @@ public class User implements Serializable {
 	@PrePersist
 	private void generateSecret(){
 	    this.setSub(UUID.randomUUID().toString());
+	    this.setFullName(firstName + " " + lastName);
 	}
 
 }

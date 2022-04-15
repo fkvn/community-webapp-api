@@ -21,10 +21,12 @@ public class LocationDaoImpl implements LocationDao {
 	}
 
 	@Override
-	public Location findLocationByLatLng(String lat, String lng) {
+	public Location findLocationByLatLng(String placeid, String lat, String lng) {
 		try {
-			return entityManager.createQuery("from Location where lat =:lat and lng =:lng", Location.class)
-					.setParameter("lat", lat).setParameter("lng", lng).getSingleResult();
+			return entityManager
+					.createQuery("from Location where placeid =:placeid and lat =:lat and lng =:lng", Location.class)
+					.setParameter("placeid", placeid).setParameter("lat", lat).setParameter("lng", lng)
+					.getSingleResult();
 		} catch (Exception ex) {
 //			if location is new 
 			return null;
