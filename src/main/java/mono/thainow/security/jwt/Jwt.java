@@ -53,7 +53,7 @@ public class Jwt {
 		String fullName = Optional.ofNullable(claimsObj.get("name").toString()).orElse("");
 		String username = Optional.ofNullable(claimsObj.get("preferred_username").toString()).orElse("");
 		
-		UserStatus status = (UserStatus) Optional.ofNullable(claimsObj.get("status")).orElse(UserStatus.DEACTIVED);
+		UserStatus status = (UserStatus) Optional.ofNullable(claimsObj.get("status")).orElse(UserStatus.DEACTIVATED);
 
 //		create user
 		User user = new User();

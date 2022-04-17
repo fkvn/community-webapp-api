@@ -1,19 +1,16 @@
 package mono.thainow.service.impl;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import mono.thainow.domain.user.User;
-import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.security.payload.request.LoginRequest;
@@ -23,22 +20,15 @@ import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.TokenResponse;
 import mono.thainow.security.verify.TwilioVerification;
 import mono.thainow.service.AuthService;
-import mono.thainow.service.UserPrivilegeService;
 import mono.thainow.service.UserService;
-import mono.thainow.util.PasswordUtil;
-import mono.thainow.util.PhoneUtil;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-	@Autowired
-	private UserPrivilegeService userRoleService;
+
 
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private PasswordEncoder encoder;
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -78,99 +68,30 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public boolean signUp(SignupRequest signUpRequest) {
-
-//		validate users' privileges
-		Set<String> strPrivileges = signUpRequest.getPrivileges();
-
-		Set<UserPrivilege> privileges = userRoleService.verifyPrivileges(strPrivileges);
-
-//		Assert.isTrue(!(privileges.contains(UserRole.CLASSIC) && roles.contains(UserRole.BUSINESS)),
-//				"A user cannot be both classic and business");
+		
+//		initialize user based on its role
+		String role = Optional.ofNullable(signUpRequest.getRole()).orElse(null);
+		User user = userService.initializeUserByRole(UserRole.valueOf(role));
 
 //		check Type of verification
-		boolean isVerified = Optional.ofNullable(signUpRequest.getIsVerified()).orElse(true);
-
+		boolean isVerified = Optional.ofNullable(signUpRequest.getIsVerified()).orElse(false);
+		
 //		verification is required for classic users
-//		if (roles.contains(UserRole.CLASSIC)) {
-//			Assert.isTrue(isVerified, "Users must be verified to register!");
-//		}
-
-//		create a new user
-		User user = new User();
-
-//		user's profile information 
-		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
-		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
-
-//		add user profile information
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-
-//		password validation
-		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
-		PasswordUtil.verifyPassword(password.get());
-
-		// password encoded
-		String encodedPwd = encoder.encode(password.get());
-
-//		add user password
-		user.setPassword(encodedPwd);
-
-//		add user roles
-		user.setPrivileges(privileges); 
+		if (user.getRole() == UserRole.CLASSIC) {
+			Assert.isTrue(isVerified, "Users must be verified to register!");
+		}
 		
-		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
-		user.setPhone(phone);
-		 
+//		persist user info into database 
+		user = userService.saveUserFromSignUpInfo(user, signUpRequest);
 		
-		String role = Optional.ofNullable(signUpRequest.getRole()).orElse(null);
-		user.setRole(UserRole.valueOf(role.toUpperCase()));
-		
-//		classic user
-//		if (roles.contains(UserRole.CLASSIC)) {
-			user = userService.getClassicUser(user, signUpRequest);
-//		}
+//		update business user
+		if (user.getRole() == UserRole.BUSINESS) {
+			
+			user = userService.updateBusinessUserFromSignUpInfo(user, signUpRequest);
+			
+			Assert.isTrue(user != null, "Company Registered Failed" );
 
-//		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse(null);
-//		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
-//		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
-//		String fullName = firstName + lastName;
-//
-
-//
-//		if (!phone.isEmpty()) {
-//			util.valPhoneNo(phone);
-//		}
-//
-//		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
-//		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-//		
-//		Assert.isTrue(password.get().matches(passwordRegex),
-//				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
-//
-//		// encoding
-//		String encodedPwd = encoder.encode(password.get());
-//		String sub = encoder.encode(phone);
-//
-
-// 
-//		// create a new user
-//		User user = new User();
-//		user.setSub(sub);
-//		user.setEmail(email);
-//		user.setPassword(encodedPwd);
-//		user.setUsername(username);
-//		user.setFirstName(firstName);
-//		user.setLastName(lastName);
-//		user.setFullName(fullName);
-//		user.setPhone(phone);
-//		user.setPhoneVerified(isPhoneVerified);
-//		user.setRoles(roles);
-//		user.setStatus(UserStatus.ACTIVE);
-//
-		user = userService.saveUser(user);
-
-//		JsonUtil.printObject(user);
+		}
 
 		return true;
 	}
@@ -197,7 +118,7 @@ public class AuthServiceImpl implements AuthService {
 			Optional<String> email = Optional.ofNullable(loginRequest.getEmail());
 			
 //			email is required
-			Assert.isTrue(email != null && !email.equals(""), "Email is required for the login process!");
+			Assert.isTrue(email != null && !email.isEmpty(), "Email is required for the login process!");
 
 //			update username
 			username = "email-login," + email.get();
@@ -210,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
 			Optional<String> phone = Optional.ofNullable(loginRequest.getPhone());
 			
 //			phone number is required
-			Assert.isTrue(phone != null && !phone.equals(""), "Phone number is required for the login process!");
+			Assert.isTrue(phone != null && !phone.isEmpty(), "Phone number is required for the login process!");
 			
 //			update username
 			username = "phone-login," + phone.get();

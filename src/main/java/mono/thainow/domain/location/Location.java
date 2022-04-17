@@ -2,6 +2,7 @@ package mono.thainow.domain.location;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -15,6 +16,10 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.EqualsAndHashCode;
@@ -45,7 +50,6 @@ public class Location implements Serializable {
 
 	@Id
 	@GeneratedValue
-	@Column(name = "LOCATION_ID")
 	private Long id;
 
 	@Column(name = "LOCATION_PLACEID")
@@ -90,9 +94,19 @@ public class Location implements Serializable {
 
 	@Column(name = "LOCATION_LNG")
 	private String lng;
+	
+	@CreationTimestamp
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Column(name = "LOCATION_CREATED_ON")
+	private Date createdOn = new Date();
+	
+	@UpdateTimestamp
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Column(name = "LOCATION_UPDATED_ON")
+	private Date updatedOn = new Date();
 
-	@OneToMany(mappedBy = "location")
 	@JsonIgnore
+	@OneToMany(mappedBy = "location")
 	private List<User> users = new ArrayList<>();
 
 	@PrePersist

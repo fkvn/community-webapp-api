@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 
 import lombok.Getter;
 import lombok.Setter;
+import mono.thainow.domain.company.Company;
 import mono.thainow.domain.location.Location;
 
 
@@ -53,6 +54,7 @@ public class SignupRequest {
 	private Location location; 
 
 //	Business account Information
+	private Company company; 
 	
 	
 }

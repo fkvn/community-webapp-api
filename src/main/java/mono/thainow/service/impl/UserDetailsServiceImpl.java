@@ -32,10 +32,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 			switch (loginType) {
 			case "email-login":
-				user = Optional.ofNullable(userSDI.findByUserEmail(loginValue));
+				user = Optional.ofNullable(userSDI.getByUserEmail(loginValue));
 				break;
 			case "phone-login":
-				user = Optional.ofNullable(userSDI.findByUserPhone(loginValue));
+				user = Optional.ofNullable(userSDI.getByUserPhone(loginValue));
 				break;
 
 			default:
@@ -48,7 +48,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			
 			String sub = splitQuery[0];
 			
-			user = Optional.ofNullable(userSDI.findByUserSub(sub));
+			user = Optional.ofNullable(userSDI.getByUserSub(sub));
 			
 			Assert.isTrue(!user.isEmpty(), "Error: Unauthorized!");
 		}

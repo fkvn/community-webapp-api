@@ -1,8 +1,10 @@
 package mono.thainow.domain.user;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -10,6 +12,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -22,15 +25,18 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.DiscriminatorFormula;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.EqualsAndHashCode;
@@ -38,6 +44,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import mono.thainow.domain.company.Company;
 import mono.thainow.domain.location.Location;
 
 @RequiredArgsConstructor
@@ -46,14 +53,9 @@ import mono.thainow.domain.location.Location;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(indexes = { @Index(name = "user_sub_UNIQUE", columnList = "USER_SUB", unique = true),
-		@Index(name = "user_email_UNIQUE", columnList = "USER_EMAIL", unique = true),
-		@Index(name = "user_phone_UNIQUE", columnList = "USER_PHONE", unique = true),
-		@Index(name = "user_username_UNIQUE", columnList = "USER_USERNAME", unique = true), })
-@DiscriminatorFormula("case when '' is null then 0 else forest_type end")
+@Table(indexes = { @Index(name = "user_sub_UNIQUE", columnList = "USER_SUB", unique = true)})
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="USER_ROLE", 
-discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "USER_ROLE", discriminatorType = DiscriminatorType.STRING)
 public class User implements Serializable {
 	/**
 	* 
@@ -62,7 +64,6 @@ public class User implements Serializable {
 
 	@Id
 	@GeneratedValue
-	@Column(name = "USER_ID")
 	private Long id;
 
 	@NotNull
@@ -100,15 +101,11 @@ public class User implements Serializable {
 	@Column(name = "IS_USER_PHONE_VERIFIED")
 	private boolean isPhoneVerified = false;
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
 	@Column(name = "USER_PRIVILEGES", nullable = false)
 	private Set<UserPrivilege> privileges = new HashSet<>();
-	
-	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "USER_ROLE", nullable = false)
-	private UserRole role;
-	
+
 	@NotNull
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "USER_STATUS")
@@ -118,20 +115,30 @@ public class User implements Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "USER_CREATED_ON")
 	private Date createdOn = new Date();
+ 
+	@UpdateTimestamp
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Column(name = "USER_UPDATED_ON")
+	private Date updatedOn = new Date();
 
 	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")
 	private Location location;
+	
+	@Transient
+	public UserRole getRole() {
+		return UserRole.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
+	}
 
 //	@OneToMany(fetch = FetchType.LAZY)
 //	@JoinColumn(name = "AUTHOR_ID")
 //	@NotNull
 //	private List<Post> posts = new ArrayList<>();
-	
+
 	@PrePersist
-	private void generateSecret(){
-	    this.setSub(UUID.randomUUID().toString());
-	    this.setFullName(firstName + " " + lastName);
+	private void generateSecret() {
+		this.setSub(UUID.randomUUID().toString());
+		this.setFullName(firstName + " " + lastName);
 	}
 
 }

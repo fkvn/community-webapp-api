@@ -4,9 +4,13 @@ import mono.thainow.domain.user.User;
 
 public interface UserDao {
 	
-	public User getUser(long id);
+	User getUser(long id);
+	
+	boolean isEmailUnique(String email);
+	
+	boolean isPhoneUnique(String phone);
 
-	public User saveUser(User user);
+	User saveUser(User user);
 
-	public void removeUser(long id);
+	void removeUser(long id);
 }

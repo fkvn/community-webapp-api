@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,12 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import mono.thainow.annotation.InternalAuthorization;
 import mono.thainow.domain.user.User;
 import mono.thainow.service.UserService;
 
 @RestController
-@PreAuthorize("hasAnyAuthority('USER_MANAGE')")
+//@PreAuthorize("hasAnyAuthority('USER_MANAGE')")
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -31,6 +29,12 @@ public class UserController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public List<User> getAllUsers() {
 		return userService.getAllUsers();
+	} 
+	
+	@GetMapping("/{id}")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public User getUser(@PathVariable Long id) {
+		return userService.getByUserId(id);
 	} 
 
 	@GetMapping("/page/{pageNo}")
@@ -47,8 +51,13 @@ public class UserController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	public void deleteSurvey(@ModelAttribute("sub") String sub, @PathVariable Long id) 
-	public void deleteSurvey(@PathVariable Long id) {
+	public void deleteUser(@PathVariable Long id) {
+		userService.deleteUser(id);
+	}
+	
+	@DeleteMapping("/remove/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void removeUser(@PathVariable Long id) {
 		userService.removeUser(id);
 	}
 
