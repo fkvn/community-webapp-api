@@ -2,7 +2,6 @@ package mono.thainow.domain.company;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -112,7 +111,14 @@ public class Company implements Serializable {
 
 	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
 	@JoinColumn(name = "LOCATION_ID")
+	@NotNull
 	private Location location;
+	
+	@Column(name = "COMPANY_FIXED_POSTION")
+	private Integer fixedPostion;
+	
+	@Column(name = "COMPANY_WEIGHT")
+	private int weight  = 0;
 
 	@ManyToOne
 	@JoinColumn(name = "ADMINISTRATOR_ID")
@@ -128,9 +134,21 @@ public class Company implements Serializable {
 	}
 
 	@PrePersist
-	private void validateIndustry() {
+	private void validateCompany() {
+		
+//		assert that the industry is valid
 		Assert.isTrue(!this.industry.isEmpty() && DEFAULT_COMP_INDUSTRY.contains(this.industry),
 				"Invalid Company Industry");
+		
+//		assert that once we have the administrator, then the administratorRole cannot be null
+		if (this.administrator != null) {
+			Assert.isTrue(!this.administratorRole.isEmpty(), "Invalid Administrator Role!");
+		}
+		
+//		assert that once we have the administrator Role, then the administrator cannot be null
+		if (this.administratorRole != null && !this.administratorRole.isEmpty()) {
+			Assert.isTrue(this.administrator != null, "Invalid Administrator!");
+		}
 	}
 
 }

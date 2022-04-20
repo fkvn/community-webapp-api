@@ -4,9 +4,9 @@ import mono.thainow.domain.location.Location;
 
 public interface LocationDao {
 	
-	Location findLocationById(Long id);
+	Location getLocationById(Long id);
 	
-	Location findLocationByLatLng(String placeid, String lat, String lng);
+	Location getLocationByLatLng(String placeid, String lat, String lng);
 	
 	Location saveLocation(Location location);
 	

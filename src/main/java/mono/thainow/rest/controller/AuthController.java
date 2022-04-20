@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import mono.thainow.security.payload.request.LoginRequest;
-import mono.thainow.security.payload.request.SignupRequest;
+import mono.thainow.security.payload.request.SignInRequest;
+import mono.thainow.security.payload.request.SignUpRequest;
 import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.MessageResponse;
@@ -31,12 +31,6 @@ public class AuthController {
 	@Autowired
 	PasswordEncoder encoder;
 
-	@PostMapping("/signin")
-	public JwtResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
-		return authService.signin(loginRequest);
-	}
-
 	@PostMapping("/getToken")
 	public MessageResponse getToken(@Valid @RequestBody TokenRequest tokenRequest) {
 
@@ -53,9 +47,15 @@ public class AuthController {
 		return new MessageResponse("Token was verified successfully!");
 	}
 	
+	@PostMapping("/signin")
+	public JwtResponse authenticateUser(@Valid @RequestBody SignInRequest loginRequest) {
+
+		return authService.signin(loginRequest);
+	}
+
 
 	@PostMapping("/signup")
-	public MessageResponse registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+	public MessageResponse registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
 
 		Assert.isTrue(authService.signUp(signUpRequest), "Registration Failed!");
 

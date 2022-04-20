@@ -44,4 +44,6 @@ public class CompanyRequest {
 	
 	@NotNull
 	private Location location; 
+	
+	private String administratorRole;
 }

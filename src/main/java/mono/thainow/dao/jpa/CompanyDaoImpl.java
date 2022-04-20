@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import mono.thainow.dao.CompanyDao;
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.location.Location;
 
 @Repository
 public class CompanyDaoImpl implements CompanyDao {
@@ -16,15 +17,15 @@ public class CompanyDaoImpl implements CompanyDao {
 	private EntityManager entityManager;
 
 	@Override
-	public Company findCompanyById(Long id) {
+	public Company getCompanyById(Long id) {
 		return entityManager.find(Company.class, id);
 	}
 
 	@Override
-	public Company findCompanyByName(String name) {
+	public Company getCompanyByName(String name) {
 		try {
-			return entityManager.createQuery("from Company where name =:name", Company.class).setParameter("name", name)
-					.getSingleResult();
+			return entityManager.createQuery("from Company where UPPER(name) =:name", Company.class)
+					.setParameter("name", name.toUpperCase()).getSingleResult();
 		} catch (Exception ex) {
 //			if location is new 
 			return null;
@@ -42,6 +43,19 @@ public class CompanyDaoImpl implements CompanyDao {
 	public void removeCompany(Long id) {
 		Company company = entityManager.find(Company.class, id);
 		entityManager.remove(company);
+	}
+
+	@Override
+	public Company getCompany(String name, Location location) {
+		try {
+			return entityManager.createQuery("from Company where UPPER(name) =:name and location =:location", Company.class)
+					.setParameter("name", name.toUpperCase())
+					.setParameter("location", location)
+					.getSingleResult();
+		} catch (Exception ex) {
+//			if location is new 
+			return null;
+		}
 	}
 
 }

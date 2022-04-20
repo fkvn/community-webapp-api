@@ -12,9 +12,10 @@ import org.springframework.util.Assert;
 
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
+import mono.thainow.domain.user.UserStatus;
 import mono.thainow.security.jwt.JwtUtils;
-import mono.thainow.security.payload.request.LoginRequest;
-import mono.thainow.security.payload.request.SignupRequest;
+import mono.thainow.security.payload.request.SignInRequest;
+import mono.thainow.security.payload.request.SignUpRequest;
 import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.TokenResponse;
@@ -24,8 +25,6 @@ import mono.thainow.service.UserService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
-
-
 
 	@Autowired
 	private UserService userService;
@@ -67,27 +66,29 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public boolean signUp(SignupRequest signUpRequest) {
-		
-//		initialize user based on its role
-		String role = Optional.ofNullable(signUpRequest.getRole()).orElse(null);
-		User user = userService.initializeUserByRole(UserRole.valueOf(role));
+	public boolean signUp(SignUpRequest signUpRequest) {
+
+		User user = userService.getUserFromSignUpRequest(signUpRequest);
 
 //		check Type of verification
 		boolean isVerified = Optional.ofNullable(signUpRequest.getIsVerified()).orElse(false);
-		
+
 //		verification is required for classic users
 		if (user.getRole() == UserRole.CLASSIC) {
 			Assert.isTrue(isVerified, "Users must be verified to register!");
+			user.setStatus(UserStatus.ACTIVATED);
 		}
-		
+
 //		persist user info into database 
-		user = userService.saveUserFromSignUpInfo(user, signUpRequest);
-		
-//		update business user
-		if (user.getRole() == UserRole.BUSINESS) {
-			
-			user = userService.updateBusinessUserFromSignUpInfo(user, signUpRequest);
+		user = userService.saveUser(user);
+
+		/*
+		 * 1. Validate company information if user registered as BUSINESS 
+		 * 2. Add company into business
+		 * 3. Revert user if company registered failed
+		 */ if (user.getRole() == UserRole.BUSINESS) {
+
+			user = userService.addBusinessCompanyFromSignUpRequest(user, signUpRequest);
 			
 			Assert.isTrue(user != null, "Company Registered Failed" );
 
@@ -97,52 +98,51 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public JwtResponse signin(LoginRequest loginRequest) {
+	public JwtResponse signin(SignInRequest loginRequest) {
 
 		String channel = Optional.ofNullable(loginRequest.getChannel()).orElse("");
-		
+
 //		only verify by email and phone
-		Assert.isTrue(channel.equals("email") || channel.equals("phone"), "Only Email and Phone are supported at the moment!");
-		
+		Assert.isTrue(channel.equals("email") || channel.equals("phone"),
+				"Only Email and Phone are supported at the moment!");
+
 //		password verification
 		Optional<String> password = Optional.ofNullable(loginRequest.getPassword());
 		Assert.isTrue(!password.isEmpty(), "Password can't be blank!");
-		
-		
+
 		String username = "";
-		
+
 		switch (channel) {
-		
+
 		case "email": {
-			
+
 			Optional<String> email = Optional.ofNullable(loginRequest.getEmail());
-			
+
 //			email is required
 			Assert.isTrue(email != null && !email.isEmpty(), "Email is required for the login process!");
 
 //			update username
 			username = "email-login," + email.get();
-			
+
 		}
 			break;
 
 		case "phone": {
-			
+
 			Optional<String> phone = Optional.ofNullable(loginRequest.getPhone());
-			
+
 //			phone number is required
 			Assert.isTrue(phone != null && !phone.isEmpty(), "Phone number is required for the login process!");
-			
+
 //			update username
 			username = "phone-login," + phone.get();
-			
+
 		}
 			break;
 
 		default:
 			break;
 		}
-		
 
 		Authentication authentication = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(username, password.get()));

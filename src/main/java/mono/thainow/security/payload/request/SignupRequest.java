@@ -16,7 +16,7 @@ import mono.thainow.domain.location.Location;
 
 @Getter
 @Setter
-public class SignupRequest {
+public class SignUpRequest {
 	
 //	if false, otp was not verified
 	private Boolean isVerified;

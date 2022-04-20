@@ -1,12 +1,15 @@
 package mono.thainow.dao;
 
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.location.Location;
 
 public interface CompanyDao {
 
-	Company findCompanyById(Long id);
+	Company getCompanyById(Long id);
 	
-	Company findCompanyByName(String name);
+	Company getCompanyByName(String name);
+	
+	Company getCompany(String name, Location location);
 	
 	Company saveCompany(Company company);
 	

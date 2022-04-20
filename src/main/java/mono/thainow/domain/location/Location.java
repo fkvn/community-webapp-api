@@ -18,6 +18,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -110,9 +111,18 @@ public class Location implements Serializable {
 	private List<User> users = new ArrayList<>();
 
 	@PrePersist
-	public void prePersist() {
+	public void validateLocation() {
 		this.formattedAddress = LocationUtil.getFormattedAddress(this);
 		this.fullAddress = LocationUtil.getFullAddress(this);
+		
+//		assert zipcode has exact 5 digits
+		String zipcodePattern = "^\\d{5}(-\\d{4})?$";
+		boolean isValidZipcode = this.zipcode.matches(zipcodePattern);
+		Assert.isTrue(isValidZipcode, "Invalid Zipcode!");
+		
+//		assert location has city, state, and zipcode
+		Assert.isTrue(!this.locality.equals("") && !this.state.equals("")
+				&& !this.zipcode.equals(""), "City, State, and Zipcode can't be empty");
 	}
 
 	public String getFormattedAddress() {

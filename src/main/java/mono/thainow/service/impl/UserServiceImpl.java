@@ -5,35 +5,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import mono.thainow.dao.CompanyDao;
-import mono.thainow.dao.LocationDao;
 import mono.thainow.dao.UserDao;
 import mono.thainow.domain.company.Company;
-import mono.thainow.domain.company.CompanyStatus;
-import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
-import mono.thainow.repository.UserRepository;
-import mono.thainow.security.payload.request.SignupRequest;
+import mono.thainow.security.payload.request.SignUpRequest;
+import mono.thainow.service.CompanyService;
+import mono.thainow.service.LocationService;
 import mono.thainow.service.UserPrivilegeService;
 import mono.thainow.service.UserService;
-import mono.thainow.util.PasswordUtil;
 import mono.thainow.util.PhoneUtil;
 
 @Service
@@ -41,75 +30,48 @@ import mono.thainow.util.PhoneUtil;
 //@Qualifier
 public class UserServiceImpl implements UserService {
 
-	@PersistenceContext
-	private EntityManager entityManager;
-
 	@Autowired
-	private UserRepository userRepository;
-
+	private LocationService locationService;
+	
 	@Autowired
 	private UserDao userDao;
-
-	@Autowired
-	private LocationDao locationDao;
 
 	@Autowired
 	private PasswordEncoder encoder;
 
 	@Autowired
-	private UserPrivilegeService userRoleService;
+	private UserPrivilegeService userPrivilegeService;
 
 	@Autowired
-	private CompanyDao companyDao;
+	private CompanyService compService;
 
 //	=============================== Find User - Start ===============================
 
 	@Override
 	public List<User> getAllUsers() {
-		return userRepository.findAll();
-	}
-
-	@Override
-	public Page<User> getUserPaginated(int pageNo, int pageSize) {
-		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
-		return userRepository.findAll(pageable);
+		return userDao.getAllUsers();
 	}
 
 	@Override
 	public User getByUsername(String username) {
-
-		User user = entityManager.createQuery("from User where username =:username", User.class)
-				.setParameter("username", username).getSingleResult();
-
-		return user;
+		return userDao.getByUsername(username);
 	}
 
 	@Override
 	public User getByUserEmail(String email) {
-
-		User user = entityManager.createQuery("from User where email =:email", User.class).setParameter("email", email)
-				.getSingleResult();
-
-		return user;
+		return userDao.getByUserEmail(email);
 	}
 
 	@Override
 	public User getByUserPhone(String phone) {
-
-		User user = entityManager.createQuery("from User where phone =:phone", User.class).setParameter("phone", phone)
-				.getSingleResult();
-
-		return user;
+		return userDao.getByUserPhone(phone);
 	}
 
 	@Override
 	public User getByUserSub(String sub) {
-		User user = entityManager.createQuery("from User where sub =:sub", User.class).setParameter("sub", sub)
-				.getSingleResult();
-
-		return user;
+		return userDao.getByUserSub(sub);
 	}
-	
+
 	@Override
 	public User getByUserId(Long id) {
 		return userDao.getUser(id);
@@ -120,16 +82,15 @@ public class UserServiceImpl implements UserService {
 //	=============================== Modify User - Start =========================== 
 
 	@Override
-	@Transactional
 	public User saveUser(User user) {
-		return userRepository.save(user);
+		return userDao.saveUser(user);
 	}
 
 	@Override
 	public void deleteUser(Long id) {
-		User user = userRepository.getById(id);
+		User user = userDao.getUser(id);
 		user.setStatus(UserStatus.DELETED);
-		userRepository.save(user);
+		userDao.saveUser(user);
 	}
 
 	@Override
@@ -140,7 +101,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Long updatePartialUser(Long id, Map<String, Object> userInfo) {
 
-		User updatedUser = userRepository.getById(id);
+		User updatedUser = userDao.getUser(id);
 
 		for (String key : userInfo.keySet()) {
 			switch (key) {
@@ -162,11 +123,10 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-		updatedUser = userRepository.save(updatedUser);
+		updatedUser = userDao.saveUser(updatedUser);
 
 		return updatedUser.getId();
 	}
-
 
 //	=============================== Modify User - End ===============================
 
@@ -195,12 +155,70 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User saveUserFromSignUpInfo(User user, SignupRequest signUpRequest) {
+	public User addBusinessCompanyFromSignUpRequest(User user, SignUpRequest signUpRequest) {
+
+		try {
+
+//			this method is for BUSINESS user only
+			Assert.isTrue(user.getRole() == UserRole.BUSINESS, "Invalid User Type");
+
+//			assert that user is persisted in the database
+			Assert.isTrue(user.getId() != null, "Invalid User");
+
+//			cast user
+			BusinessUser businessUser = (BusinessUser) user;
+
+//			initialize company
+			Company company = Optional.ofNullable(signUpRequest.getCompany()).orElse(new Company());
+			company = compService.createCompanyWithAdministrator(company, businessUser,
+					signUpRequest.getCompany().getAdministratorRole());
+
+//			add company to the business user list and assert that company is successfully added
+			boolean isAddCompany = businessUser.getCompanies().add(company);
+			Assert.isTrue(isAddCompany, "Failed Adding Company");
+
+//			update business company list
+			businessUser.setCompanies(businessUser.getCompanies());
+
+			/*
+			 * At this sign-up step, company is still pending, so business status would be
+			 * DEACTIVED
+			 */
+			businessUser.setStatus(UserStatus.DEACTIVATED);
+
+//			merge user into database
+			user = saveUser(businessUser);
+
+			return user;
+
+		} catch (Exception ex) {
+
+			/*
+			 * At the moment - 4/16/22, if errors happened -> company is failed to add then
+			 * register process would be failed and revert user, but the location is not
+			 * affected
+			 */
+
+			ex.printStackTrace();
+
+//			revert user
+			userDao.removeUser(user.getId());
+
+			return null;
+
+		}
+	}
+
+	@Override
+	public User getUserFromSignUpRequest(SignUpRequest signUpRequest) {
+
+//		initialize user based on its role
+		String role = Optional.ofNullable(signUpRequest.getRole()).orElse(null);
+		User user = initializeUserByRole(UserRole.valueOf(role));
 
 //		validate users' privileges
 		Set<String> strPrivileges = signUpRequest.getPrivileges();
-
-		Set<UserPrivilege> privileges = userRoleService.verifyPrivileges(strPrivileges);
+		Set<UserPrivilege> privileges = userPrivilegeService.verifyPrivileges(strPrivileges);
 
 //		add user privileges
 		user.setPrivileges(privileges);
@@ -215,157 +233,69 @@ public class UserServiceImpl implements UserService {
 
 //		password validation
 		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
-		PasswordUtil.verifyPassword(password.get());
-
-		// password encoded
-		String encodedPwd = encoder.encode(password.get());
-
-//		add user password
-		user.setPassword(encodedPwd);
+		user.setPassword(validateAndEncodeUserPassword(password.get()));
 
 //		user email
-		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse(null);
-		
-//		validate email unique
-		boolean isEmailUnique = userDao.isEmailUnique(email);
-		Assert.isTrue(isEmailUnique, "Email already existed!");
-		user.setEmail(email);
-		
+		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse("");
+		user.setEmail(validateUserEmail(email));
+
 //		email Verified
 		boolean isEmailVerified = Optional.ofNullable(signUpRequest.isEmailVerified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
 
 //		user phone
-		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse(null);
-		
-//		validate phone unique
-		boolean isPhoneUnique = userDao.isPhoneUnique(phone);
-		Assert.isTrue(isPhoneUnique, "Phone already existed!");
-		user.setPhone(phone);
+		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse("");
+		user.setPhone(validateUserPhone(phone));
 
 //		phone Verified
 		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(false);
 		user.setPhoneVerified(isPhoneVerified);
 
 //		assert user has at least email or phone number
-		Assert.isTrue(!phone.isEmpty() && !email.isEmpty(),
+		Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
 				"Users must have at least email or phone number to register!");
 
 //		user location
-		Location location = Optional.ofNullable(signUpRequest.getLocation()).orElse(new Location());
+		user.setLocation(locationService.getLocationFromSignUpRequest(signUpRequest));
 
-//		assert location has city, state, and zipcode
-		Assert.isTrue(!location.getLocality().equals("") && !location.getState().equals("")
-				&& !location.getZipcode().equals(""), "City, State, and Zipcode can't be empty");
-
-//		check if location is in the database
-		Location dbLocation = locationDao.findLocationByLatLng(location.getPlaceid(), location.getLat(),
-				location.getLng());
-
-//		new location
-		if (dbLocation == null) {
-//			save location to database to persist
-			location = locationDao.saveLocation(location);
-
-//			set location to user
-			user.setLocation(location);
-		}
-//		existed location
-		else {
-			user.setLocation(dbLocation);
-		}
-
-//		update user status
-		user.setStatus(UserStatus.ACTIVE);
-
-//		persist user to database
-		user = saveUser(user);
-
-
-//		update user sub
-		String sub = encoder.encode(user.getId().toString());
-		user.setSub(sub);
-
-//		merge user to database
-		user = saveUser(user);
+//		initialize user status as DEACTIVATED
+		user.setStatus(UserStatus.DEACTIVATED);
 
 		return user;
 	}
 
 	@Override
-	public User updateBusinessUserFromSignUpInfo(User user, SignupRequest signUpRequest) {
+	public String validateUserPhone(String phone) {
+//		validate phone unique
+		boolean isPhoneUnique = userDao.isPhoneUnique(phone);
 
-		try {
+		Assert.isTrue(isPhoneUnique, "Phone already existed!");
 
-//		this method is for BUSINESS user only
-			Assert.isTrue(user.getRole() == UserRole.BUSINESS, "Invalid User Type");
+		return phone;
+	}
 
-//		assert that user is persisted in the database
-			Assert.isTrue(user.getId() != null, "Invalid User");
+	@Override
+	public String validateUserEmail(String email) {
+//		validate email unique
+		boolean isEmailUnique = userDao.isEmailUnique(email);
 
-//		cast user
-			BusinessUser businessUser = (BusinessUser) user;
+		Assert.isTrue(isEmailUnique, "Email already existed!");
 
-//		Company info
-			Company company = Optional.ofNullable(signUpRequest.getCompany()).orElse(new Company());
+		return email;
+	}
 
-//		Company Location at the moment is the same with the user - 4/16/22
-			company.setLocation(user.getLocation());
+	@Override
+	public String validateAndEncodeUserPassword(String password) {
 
-//		Company email at the moment is the same with the user - 4/16/22
-			company.setEmail(user.getEmail());
-			company.setEmailVerified(user.isEmailVerified());
+		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
 
-//		Company phone at the moment is the same with the user - 4/16/22
-			company.setPhone(user.getPhone());
-			company.setPhoneVerified(user.isPhoneVerified());
+		Assert.isTrue(password.matches(passwordRegex),
+				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
 
-//		update administrator
-			company.setAdministrator(businessUser);
+		// password encoded
+		String encodedPwd = encoder.encode(password);
 
-//		company status as Pending WHEN sign-up 
-			company.setStatus(CompanyStatus.PENDING);
-
-			/*
-			 * At this sign-up step, the company is still pending, so we persist it into
-			 * database no matter
-			 */
-
-			company = companyDao.saveCompany(company);
-
-//		add company to the business user list and assert that company is successfully added
-			boolean isAddCompany = businessUser.getCompanies().add(company);
-			Assert.isTrue(isAddCompany, "Failed Adding Company");
-
-//		update business company list
-			businessUser.setCompanies(businessUser.getCompanies());
-
-			/*
-			 * At this sign-up step, company is still pending, so business status would be
-			 * DEACTIVED
-			 */
-			businessUser.setStatus(UserStatus.DEACTIVATED);
-
-//		merge user into database
-			user = saveUser(businessUser);
-
-			return user;
-			
-		} catch (Exception ex) {
-			
-			/*
-			 * At the moment - 4/16/22, if errors happened -> company is failed to add
-			 * then register process would be failed and revert user, but the location is not affected
-			 */
-			
-			ex.printStackTrace();
-			
-//			revert user
-			userDao.removeUser(user.getId());
-
-			return null;
-
-		}
+		return encodedPwd;
 	}
 
 //	=============================== Business Service - End ===============================

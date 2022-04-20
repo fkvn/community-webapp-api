@@ -16,12 +16,12 @@ public class LocationDaoImpl implements LocationDao {
 	private EntityManager entityManager;
 
 	@Override
-	public Location findLocationById(Long id) {
+	public Location getLocationById(Long id) {
 		return entityManager.find(Location.class, id);
 	}
 
 	@Override
-	public Location findLocationByLatLng(String placeid, String lat, String lng) {
+	public Location getLocationByLatLng(String placeid, String lat, String lng) {
 		try {
 			return entityManager
 					.createQuery("from Location where placeid =:placeid and lat =:lat and lng =:lng", Location.class)
