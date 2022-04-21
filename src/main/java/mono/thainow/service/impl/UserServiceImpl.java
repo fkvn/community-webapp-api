@@ -14,6 +14,7 @@ import org.springframework.util.Assert;
 import mono.thainow.dao.UserDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.user.BusinessUser;
+import mono.thainow.domain.user.ClassicUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
 	private UserPrivilegeService userPrivilegeService;
 
 	@Autowired
-	private CompanyService compService;
+	private CompanyService companyService;
 
 //	=============================== Find User - Start ===============================
 
@@ -142,9 +143,10 @@ public class UserServiceImpl implements UserService {
 			user = new BusinessUser();
 			break;
 		case CLASSIC:
-			user = new User();
+			user = new ClassicUser();
 			break;
 		default:
+			user = new User();
 			break;
 		}
 
@@ -170,7 +172,7 @@ public class UserServiceImpl implements UserService {
 
 //			initialize company
 			Company company = Optional.ofNullable(signUpRequest.getCompany()).orElse(new Company());
-			company = compService.createCompanyWithAdministrator(company, businessUser,
+			company = companyService.createCompanyWithAdministrator(company, businessUser,
 					signUpRequest.getCompany().getAdministratorRole());
 
 //			add company to the business user list and assert that company is successfully added
@@ -270,6 +272,9 @@ public class UserServiceImpl implements UserService {
 		boolean isPhoneUnique = userDao.isPhoneUnique(phone);
 
 		Assert.isTrue(isPhoneUnique, "Phone already existed!");
+		
+//		validate phone number
+		PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
 
 		return phone;
 	}

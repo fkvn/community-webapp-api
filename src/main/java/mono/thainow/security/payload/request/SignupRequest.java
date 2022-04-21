@@ -34,7 +34,6 @@ public class SignUpRequest {
 //	phone validation - if user uses phone for otp verification
 	private boolean isPhoneVerified;
 	
-	@NotEmpty
 	private Set<String> privileges;
 	
 	@NotEmpty

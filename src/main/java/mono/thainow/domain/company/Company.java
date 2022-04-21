@@ -109,7 +109,7 @@ public class Company implements Serializable {
 	@Column(name = "COMPANY_STATUS")
 	private CompanyStatus status = CompanyStatus.UNREGISTERED;
 
-	@ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")
 	@NotNull
 	private Location location;

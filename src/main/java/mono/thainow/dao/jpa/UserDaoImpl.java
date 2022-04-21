@@ -87,6 +87,8 @@ public class UserDaoImpl implements UserDao {
 		User user = entityManager.find(User.class, id);
 		entityManager.remove(user);
 	}
+	
+//	=====================================================
 
 	@Override
 	public boolean isEmailUnique(String email) {

@@ -5,10 +5,12 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import mono.thainow.dao.LocationDao;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.User;
+import mono.thainow.rest.request.PostRequest;
 import mono.thainow.security.payload.request.SignUpRequest;
 import mono.thainow.service.LocationService;
 
@@ -50,6 +52,22 @@ public class LocationServiceImpl implements LocationService {
 //		get location
 		Location location = Optional.ofNullable(signUpRequest.getLocation()).orElse(new Location());
 
+		Assert.isTrue(location != null, "Location cannot be null");
+		
+//		validate location
+		location = validateIfLocationExist(location);
+		
+		return location;
+	}
+	
+	@Override
+	public Location getLocationFromPostRequest(PostRequest postRequest) {
+		
+//		get location
+		Location location = Optional.ofNullable(postRequest.getLocation()).orElse(new Location());
+
+		Assert.isTrue(location != null, "Location cannot be null");
+		
 //		validate location
 		location = validateIfLocationExist(location);
 		

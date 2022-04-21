@@ -30,15 +30,13 @@ public class UserPrivilegeServiceImpl implements UserPrivilegeService {
 	@Override
 	public Set<UserPrivilege> verifyPrivileges(Set<String> strPrivileges) {
 		
-		Assert.isTrue(!strPrivileges.isEmpty(), "Role can't be empty");
-		
 		Set<UserPrivilege> privileges = new HashSet<>();
 
 		for (String privilege : strPrivileges) {
 
 			Optional<UserPrivilege> userPrivilege = Optional.ofNullable(findByName(privilege.trim()));
 
-			Assert.isTrue(!userPrivilege.isEmpty(), "Role " + privilege + " is not found.");
+			Assert.isTrue(!userPrivilege.isEmpty(), "Privilege " + privilege + " is not found.");
 
 			privileges.add(userPrivilege.get());
 		}
