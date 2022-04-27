@@ -43,8 +43,8 @@ import mono.thainow.domain.user.User;
 @ToString
 @EqualsAndHashCode
 @Entity
-//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-//@DiscriminatorColumn(name = "POST_TYPE", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "POST_TYPE", discriminatorType = DiscriminatorType.STRING)
 public class Post implements Serializable {
 	/**
 	* 
@@ -104,8 +104,8 @@ public class Post implements Serializable {
 	@JoinColumn(name=" POST_CONTACT_INFO")
 	private ContactInfo contactInfo;
 
-//	@Transient
-//	public PostType getPostType() {
-//		return PostType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
-//	}
+	@Transient
+	public PostType getPostType() {
+		return PostType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
+	}
 }

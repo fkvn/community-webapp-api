@@ -171,4 +171,19 @@ public class CompanyServiceImpl implements CompanyService {
 		return company;
 	}
 
+	@Override
+	public Company validateCompanyWithUserById(Long companyId, BusinessUser user) {
+		
+//		assert that company is not missing
+		Assert.isTrue(companyId != null, "Invalid Company ID!");
+
+//		get company
+		Company company = getCompanyById(companyId);
+		
+//		assert that the company belongs to the author
+		Assert.isTrue(user.getCompanies().contains(company), "Invalid Company!");
+		
+		return company;
+	}
+
 }

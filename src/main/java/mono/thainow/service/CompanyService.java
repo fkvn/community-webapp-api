@@ -21,4 +21,5 @@ public interface CompanyService {
 	
 	Company createCompanyWithAdministrator(Company company, BusinessUser user,  String administratorRole);
 	
+	Company validateCompanyWithUserById(Long companyId, BusinessUser user);
 }

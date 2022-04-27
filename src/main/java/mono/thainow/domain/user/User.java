@@ -37,6 +37,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.EqualsAndHashCode;
@@ -46,6 +47,7 @@ import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.Post;
+import mono.thainow.domain.post.PostType;
 import mono.thainow.util.PhoneUtil;
 
 @RequiredArgsConstructor
@@ -94,7 +96,7 @@ public class User implements Serializable {
 	private String fullName = firstName + lastName;
 
 	@Column(name = "USER_USERNAME")
-	private String username;
+	private String username = "";
 
 	@Column(name = "USER_PHONE")
 	private String phone;
@@ -134,8 +136,9 @@ public class User implements Serializable {
 
 	@NotNull
 	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<Post> posts = new ArrayList<>();
-
+	
 	@PrePersist
 	private void validateUser() {
 		this.setSub(UUID.randomUUID().toString());
@@ -143,6 +146,11 @@ public class User implements Serializable {
 
 //		validate phone number
 		PhoneUtil.validatePhoneNumberWithGoogleAPI(this.phone, "US");
+	}
+	
+	@Transient
+	public String getDisplayName() {
+		return !this.username.isEmpty() ? this.username : this.fullName;
 	}
 
 }
