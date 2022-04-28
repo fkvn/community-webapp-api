@@ -27,6 +27,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -86,6 +87,7 @@ public class Post implements Serializable {
 	// post owner - author
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "AUTHOR_ID")
+	@JsonIgnore
 	private User author;
 	
 	@Column(name = "IS_COMPANY_POST")

@@ -128,6 +128,9 @@ public class User implements Serializable {
 	@JoinColumn(name = "LOCATION_ID")
 	@NotNull
 	private Location location;
+	
+//	@Column(name = "USER_PROFILE_URL")
+//	private String profileUrl = "";
 
 	@Transient
 	public UserRole getRole() {
