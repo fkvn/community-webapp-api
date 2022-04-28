@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -35,7 +36,7 @@ public class Storage implements Serializable {/**
 	
 	@Id
 	@GeneratedValue
-    private String id;
+    private Long id;
 	
 	@NotEmpty
 	@JsonIgnore
@@ -53,7 +54,7 @@ public class Storage implements Serializable {/**
 	private String url;
 
 	@JsonIgnore
-	@NotEmpty
+	@NotNull
 	@Column(name = "STORAGE_SIZE")
 	private Long size;
 	

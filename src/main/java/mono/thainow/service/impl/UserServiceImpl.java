@@ -13,15 +13,18 @@ import org.springframework.util.Assert;
 
 import mono.thainow.dao.UserDao;
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.ClassicUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
+import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.security.payload.request.SignUpRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
+import mono.thainow.service.StorageService;
 import mono.thainow.service.UserPrivilegeService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
@@ -45,6 +48,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private CompanyService companyService;
+	
+	@Autowired
+	private StorageService storageService;
 
 //	=============================== Find User - Start ===============================
 
@@ -82,6 +88,85 @@ public class UserServiceImpl implements UserService {
 
 //	=============================== Modify User - Start =========================== 
 
+	
+	@Override
+	public User addBusinessCompanyFromSignUpRequest(User user, SignUpRequest signUpRequest) {
+
+		try {
+
+//			this method is for BUSINESS user only
+			Assert.isTrue(user.getRole() == UserRole.BUSINESS, "Invalid User Type");
+
+//			assert that user is persisted in the database
+			Assert.isTrue(user.getId() != null, "Invalid User");
+
+//			cast user
+			BusinessUser businessUser = (BusinessUser) user;
+
+//			initialize company
+			Company company = Optional.ofNullable(signUpRequest.getCompany()).orElse(new Company());
+			company = companyService.createCompanyWithAdministrator(company, businessUser,
+					signUpRequest.getCompany().getAdministratorRole());
+
+//			add company to the business user list and assert that company is successfully added
+			boolean isAddCompany = businessUser.getCompanies().add(company);
+			Assert.isTrue(isAddCompany, "Failed Adding Company");
+
+//			update business company list
+			businessUser.setCompanies(businessUser.getCompanies());
+
+			/*
+			 * At this sign-up step, company is still pending, so business status would be
+			 * DEACTIVED
+			 */
+			businessUser.setStatus(UserStatus.DEACTIVATED);
+
+//			merge user into database
+			user = saveUser(businessUser);
+
+			return user;
+
+		} catch (Exception ex) {
+
+			/*
+			 * At the moment - 4/16/22, if errors happened -> company is failed to add then
+			 * register process would be failed and revert user, but the location is not
+			 * affected
+			 */
+
+			ex.printStackTrace();
+
+//			revert user
+			userDao.removeUser(user.getId());
+
+			return null;
+
+		}
+	}
+	
+	@Override
+	public User uploadProfilePicture(User user, StorageRequest storageRequest) {
+		
+//		persist storage into database
+		Storage profile = new Storage(); 
+		
+		profile.setName(storageRequest.getName());
+		profile.setType(storageRequest.getType());
+		profile.setUrl(storageRequest.getUrl());
+		profile.setSize(storageRequest.getSize());
+				
+		profile =	storageService.saveStorage(profile);
+	
+//		attach into user
+		user.setProfileUrl(profile);
+		
+//		persist into database
+		user = saveUser(user);
+		
+		return user;
+
+	}
+	
 	@Override
 	public User saveUser(User user) {
 		return userDao.saveUser(user);
@@ -154,61 +239,6 @@ public class UserServiceImpl implements UserService {
 		Assert.isTrue(user != null, "Failed Initialized User");
 
 		return user;
-	}
-
-	@Override
-	public User addBusinessCompanyFromSignUpRequest(User user, SignUpRequest signUpRequest) {
-
-		try {
-
-//			this method is for BUSINESS user only
-			Assert.isTrue(user.getRole() == UserRole.BUSINESS, "Invalid User Type");
-
-//			assert that user is persisted in the database
-			Assert.isTrue(user.getId() != null, "Invalid User");
-
-//			cast user
-			BusinessUser businessUser = (BusinessUser) user;
-
-//			initialize company
-			Company company = Optional.ofNullable(signUpRequest.getCompany()).orElse(new Company());
-			company = companyService.createCompanyWithAdministrator(company, businessUser,
-					signUpRequest.getCompany().getAdministratorRole());
-
-//			add company to the business user list and assert that company is successfully added
-			boolean isAddCompany = businessUser.getCompanies().add(company);
-			Assert.isTrue(isAddCompany, "Failed Adding Company");
-
-//			update business company list
-			businessUser.setCompanies(businessUser.getCompanies());
-
-			/*
-			 * At this sign-up step, company is still pending, so business status would be
-			 * DEACTIVED
-			 */
-			businessUser.setStatus(UserStatus.DEACTIVATED);
-
-//			merge user into database
-			user = saveUser(businessUser);
-
-			return user;
-
-		} catch (Exception ex) {
-
-			/*
-			 * At the moment - 4/16/22, if errors happened -> company is failed to add then
-			 * register process would be failed and revert user, but the location is not
-			 * affected
-			 */
-
-			ex.printStackTrace();
-
-//			revert user
-			userDao.removeUser(user.getId());
-
-			return null;
-
-		}
 	}
 
 	@Override
@@ -302,6 +332,8 @@ public class UserServiceImpl implements UserService {
 
 		return encodedPwd;
 	}
+
+
 
 //	=============================== Business Service - End ===============================
 

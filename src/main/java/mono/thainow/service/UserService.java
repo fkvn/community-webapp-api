@@ -5,6 +5,7 @@ import java.util.Map;
 
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
+import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.security.payload.request.SignUpRequest;
 
 public interface UserService {
@@ -18,6 +19,8 @@ public interface UserService {
 	User getByUserSub(String sub);
 	
 	Long updatePartialUser(Long id, Map<String, Object> userInfo);
+	
+	User uploadProfilePicture(User user, StorageRequest storageRequest);
 	
 	User saveUser(User user);
 	

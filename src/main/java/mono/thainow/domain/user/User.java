@@ -26,6 +26,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
@@ -47,7 +48,7 @@ import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.Post;
-import mono.thainow.domain.post.PostType;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.util.PhoneUtil;
 
 @RequiredArgsConstructor
@@ -129,8 +130,8 @@ public class User implements Serializable {
 	@NotNull
 	private Location location;
 	
-//	@Column(name = "USER_PROFILE_URL")
-//	private String profileUrl = "";
+	@OneToOne
+	private Storage profileUrl;
 
 	@Transient
 	public UserRole getRole() {

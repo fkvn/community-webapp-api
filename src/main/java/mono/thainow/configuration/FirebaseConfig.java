@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -15,6 +16,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
 import lombok.Getter;
+import mono.thainow.domain.storage.FirebaseStorageClient;
 
 @Configuration
 public class FirebaseConfig {
@@ -55,6 +57,8 @@ public class FirebaseConfig {
 		if (FirebaseApp.getApps().isEmpty()) { // <--- check with this line
 			FirebaseApp.initializeApp(options);
 		}
+		
+
 	}
 
 }

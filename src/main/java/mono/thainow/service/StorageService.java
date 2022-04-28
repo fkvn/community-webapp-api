@@ -1,13 +1,15 @@
 package mono.thainow.service;
 
 import java.io.File;
-import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import mono.thainow.domain.storage.Storage;
+import mono.thainow.rest.response.StorageResponse;
+
 public interface StorageService {
 
-	Map<String, Object> upload(MultipartFile file);
+	StorageResponse upload(MultipartFile file);
 
 	String getFileName(MultipartFile file);
 	
@@ -16,4 +18,6 @@ public interface StorageService {
 	File convertToFile(MultipartFile multipartFile, String fileName);
 	
 	String uploadFile(File file, String fileName, String fileType);
+	
+	Storage saveStorage(Storage storage);
 }

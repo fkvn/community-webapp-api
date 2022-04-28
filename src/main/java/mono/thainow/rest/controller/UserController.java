@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import mono.thainow.domain.user.User;
+import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.UserService;
 
 @RestController
@@ -43,6 +45,18 @@ public class UserController {
 		return null;
 	}
 
+	
+	@PostMapping("/{id}/profile")
+	@ResponseStatus(HttpStatus.CREATED) 
+	public User uploadProfile(@PathVariable Long id, @RequestBody StorageRequest storage) 
+	{
+		User user = userService.getByUserId(id);
+		
+		user = userService.uploadProfilePicture(user, storage);
+		
+		return user;
+	}
+	
 	@PatchMapping("/{id}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public Long updatePartialUser(@PathVariable Long id, @RequestBody Map<String, Object> userInfo) {
