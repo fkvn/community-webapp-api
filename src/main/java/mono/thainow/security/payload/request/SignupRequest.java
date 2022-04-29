@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.Setter;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.location.Location;
-import mono.thainow.domain.storage.Storage;
 
 
 @Getter
