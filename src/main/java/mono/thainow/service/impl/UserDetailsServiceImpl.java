@@ -41,7 +41,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			default:
 			}
 			
-			Assert.isTrue(!user.isEmpty(), "User Not Found with username: " + loginValue);
+			Assert.isTrue(user != null, "User Not Found with credential: " + loginValue);
 		}
 //		validate token - this case the query is the sub value
 		else if (splitQuery.length == 1) {

@@ -31,8 +31,7 @@ public class LocationServiceImpl implements LocationService {
 	public Location validateIfLocationExist(Location location) {
 		
 //		check if location is in the database
-		Location dbLocation = locationDao.getLocationByLatLng(location.getPlaceid(), location.getLat(),
-				location.getLng());
+		Location dbLocation = locationDao.getLocationByPlaceid(location.getPlaceid());
 
 //		new location
 		if (dbLocation == null) {

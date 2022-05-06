@@ -19,6 +19,19 @@ public class LocationDaoImpl implements LocationDao {
 	public Location getLocationById(Long id) {
 		return entityManager.find(Location.class, id);
 	}
+	
+	@Override
+	public Location getLocationByPlaceid(String placeid) {
+		try {
+			return entityManager
+					.createQuery("from Location where placeid =:placeid", Location.class)
+					.setParameter("placeid", placeid)
+					.getSingleResult();
+		} catch (Exception ex) {
+//			if location is new 
+			return null;
+		}
+	}
 
 	@Override
 	public Location getLocationByLatLng(String placeid, String lat, String lng) {
@@ -45,5 +58,7 @@ public class LocationDaoImpl implements LocationDao {
 		Location location = entityManager.find(Location.class, id);
 		entityManager.remove(location);
 	}
+
+
 
 }

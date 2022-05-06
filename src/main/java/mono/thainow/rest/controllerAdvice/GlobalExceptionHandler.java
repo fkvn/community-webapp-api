@@ -152,7 +152,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ex.printStackTrace();
 
 		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		apiError.setStatus(HttpStatus.UNAUTHORIZED);
 		try {
 			apiError.setError(ex.getCause().getLocalizedMessage());
 		} catch (Exception e) {
@@ -171,7 +171,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ex.printStackTrace();
 
 		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		apiError.setStatus(HttpStatus.UNAUTHORIZED);
 		try {
 			apiError.setError(ex.getCause().getLocalizedMessage());
 		} catch (Exception e) {
@@ -190,7 +190,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ex.printStackTrace();
 
 		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		apiError.setStatus(HttpStatus.FORBIDDEN);
 		try {
 			apiError.setError(ex.getCause().getLocalizedMessage());
 		} catch (Exception e) {

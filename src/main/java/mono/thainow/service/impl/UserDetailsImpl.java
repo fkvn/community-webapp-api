@@ -15,7 +15,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserRole;
 
 /*
  * contains necessary information (such as: username, password, authorities) to
@@ -29,7 +31,8 @@ public class UserDetailsImpl implements UserDetails {
 	private static final long serialVersionUID = 1L;
 	private Long id;
 	private String username;
-//	private String email;
+	private Storage profileUrl;
+	private UserRole role;
 	private String sub;
 
 	@JsonIgnore
@@ -37,13 +40,14 @@ public class UserDetailsImpl implements UserDetails {
 
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(Long id, String username, String password, String sub,
+	public UserDetailsImpl(Long id, String username, String password, String sub, Storage profileUrl, UserRole role,
 			Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.username = username;
-//		this.email = email;
 		this.password = password;
 		this.sub = sub;
+		this.profileUrl = profileUrl;
+		this.role = role;
 		this.authorities = authorities;
 	}
 
@@ -51,10 +55,12 @@ public class UserDetailsImpl implements UserDetails {
 
 // 		this list of GrantedAuthority would be used for PreAuthorize annotation
 //		in this case, we add both Privileges and Roles into stream and concat together to authority
-		List<GrantedAuthority> authorities = Stream.concat(user.getPrivileges().stream(), Stream.of("ROLE_" + user.getRole()))
+		List<GrantedAuthority> authorities = Stream
+				.concat(user.getPrivileges().stream(), Stream.of("ROLE_" + user.getRole()))
 				.map(role -> new SimpleGrantedAuthority(role.toString())).collect(Collectors.toList());
 
-		return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), user.getSub(), authorities);
+		return new UserDetailsImpl(user.getId(), user.getDisplayName(), user.getPassword(), user.getSub(),
+				user.getProfileUrl(), user.getRole(), authorities);
 	}
 
 	@Override

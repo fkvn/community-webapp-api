@@ -105,7 +105,7 @@ public class User implements Serializable {
 	@Column(name = "IS_USER_PHONE_VERIFIED")
 	private boolean isPhoneVerified = false;
 
-	@ElementCollection(fetch = FetchType.LAZY)
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
 	@Column(name = "USER_PRIVILEGES", nullable = false)
 	private Set<UserPrivilege> privileges = new HashSet<>();

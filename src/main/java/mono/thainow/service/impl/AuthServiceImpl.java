@@ -83,14 +83,13 @@ public class AuthServiceImpl implements AuthService {
 		user = userService.saveUser(user);
 
 		/*
-		 * 1. Validate company information if user registered as BUSINESS 
-		 * 2. Add company into business
-		 * 3. Revert user if company registered failed
+		 * 1. Validate company information if user registered as BUSINESS 2. Add company
+		 * into business 3. Revert user if company registered failed
 		 */ if (user.getRole() == UserRole.BUSINESS) {
 
 			user = userService.addBusinessCompanyFromSignUpRequest(user, signUpRequest);
-			
-			Assert.isTrue(user != null, "Company Registered Failed" );
+
+			Assert.isTrue(user != null, "Company Registered Failed");
 
 		}
 
@@ -151,13 +150,14 @@ public class AuthServiceImpl implements AuthService {
 
 		String jwt = jwtUtils.generateJwtToken(authentication);
 
-		JwtResponse jwtClaims = new JwtResponse(jwt);
+//		JwtResponse jwtClaims = new JwtResponse(jwt);
 
-//		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
+				userDetails.getProfileUrl(), userDetails.getRole());
+
 //		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 //				.collect(Collectors.toList());
-//		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
-//				userDetails.getEmail(), roles);
 
 		return jwtClaims;
 
