@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.twilio.exception.ApiException;
+
 import mono.thainow.util.ApiError;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -142,6 +144,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
 		apiError.setMessage("No records available! The record is either deleted or not exist.");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+	
+	@ExceptionHandler({ ApiException.class })
+	protected ResponseEntity<Object> handleTwilioApiException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("Invalid Code. Please try again or request a new code!!!");
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}

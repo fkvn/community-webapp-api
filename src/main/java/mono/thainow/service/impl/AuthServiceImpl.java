@@ -42,10 +42,10 @@ public class AuthServiceImpl implements AuthService {
 	public void sendVerificationToken(TokenRequest tokenRequest) {
 
 //		inputs
-		String phone = Optional.ofNullable(tokenRequest.getPhone().trim()).orElse("");
-		String region = Optional.ofNullable(tokenRequest.getRegion().trim()).orElse("");
-		String email = Optional.ofNullable(tokenRequest.getEmail().trim()).orElse("");
-		String channel = Optional.ofNullable(tokenRequest.getChannel().trim()).orElse("");
+		String phone = Optional.ofNullable(tokenRequest.getPhone()).orElse("").trim();
+		String region = Optional.ofNullable(tokenRequest.getRegion()).orElse("").trim();
+		String email = Optional.ofNullable(tokenRequest.getEmail()).orElse("").trim();
+		String channel = Optional.ofNullable(tokenRequest.getChannel()).orElse("").trim();
 
 //		send verification token
 		twilio.sendVerficationToken(phone, region, email, channel);
@@ -55,11 +55,11 @@ public class AuthServiceImpl implements AuthService {
 	public void checkVerificationToken(TokenResponse tokenResponse) {
 
 //		inputs
-		String phone = Optional.ofNullable(tokenResponse.getPhone().trim()).orElse("");
-		String region = Optional.ofNullable(tokenResponse.getRegion().trim()).orElse("");
-		String email = Optional.ofNullable(tokenResponse.getEmail().trim()).orElse("");
-		String channel = Optional.ofNullable(tokenResponse.getChannel().trim()).orElse("");
-		String token = Optional.ofNullable(tokenResponse.getToken().trim()).orElse("");
+		String phone = Optional.ofNullable(tokenResponse.getPhone()).orElse("").trim();
+		String region = Optional.ofNullable(tokenResponse.getRegion()).orElse("").trim();
+		String email = Optional.ofNullable(tokenResponse.getEmail()).orElse("").trim();
+		String channel = Optional.ofNullable(tokenResponse.getChannel()).orElse("").trim();
+		String token = Optional.ofNullable(tokenResponse.getToken()).orElse("").trim();
 
 //		check verification token
 		twilio.checkVerficationToken(phone, region, email, channel, token);

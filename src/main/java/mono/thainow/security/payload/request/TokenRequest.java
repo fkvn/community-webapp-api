@@ -15,7 +15,7 @@ public class TokenRequest {
 	private String phone;
 	
 	@Size(max = 2, message = "Region can't be more than 2 characters")
-	private String region;
+	private String region = "us";
 	
 	@Size(max = 50, message = "Email can't be more than 50 characters")
 	@Email
