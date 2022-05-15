@@ -1,5 +1,6 @@
 package mono.thainow.security.payload.request;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.constraints.Email;
@@ -11,7 +12,6 @@ import javax.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import mono.thainow.domain.company.Company;
-import mono.thainow.domain.location.Location;
 
 
 @Getter
@@ -34,7 +34,7 @@ public class SignUpRequest {
 //	phone validation - if user uses phone for otp verification
 	private boolean isPhoneVerified;
 	
-	private Set<String> privileges;
+	private Set<String> privileges = new HashSet<>();
 	
 	@NotEmpty
 	private String role;
@@ -50,7 +50,7 @@ public class SignUpRequest {
 	private String lastname = "";
 	
 	@NotNull
-	private Location location; 
+	private String address; 
 
 //	Business account Information
 	private Company company; 

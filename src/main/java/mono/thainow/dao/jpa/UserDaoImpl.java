@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import mono.thainow.dao.UserDao;
-import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.repository.UserRepository;
@@ -111,7 +110,7 @@ public class UserDaoImpl implements UserDao {
 			 * 
 			 * We don't check email unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from User where status =:status and email =:email", Location.class)
+			entityManager.createQuery("from User where status =:status and email =:email", User.class)
 					.setParameter("status", UserStatus.ACTIVATED).setParameter("email", email).getSingleResult();
 
 			return false;
@@ -131,7 +130,7 @@ public class UserDaoImpl implements UserDao {
 			 * 
 			 * We don't check phone unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from User where status =:status and phone =:phone", Location.class)
+			entityManager.createQuery("from User where status =:status and phone =:phone", User.class)
 					.setParameter("status", UserStatus.ACTIVATED).setParameter("phone", phone).getSingleResult();
 
 			return false;

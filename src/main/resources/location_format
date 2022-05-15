@@ -1,0 +1,105 @@
+{
+  "addressComponents": [
+    {
+      "longName": "11976",
+      "shortName": "11976",
+      "types": [
+        "STREET_NUMBER"
+      ]
+    },
+    {
+      "longName": "Ventura Boulevard",
+      "shortName": "Ventura Blvd",
+      "types": [
+        "ROUTE"
+      ]
+    },
+    {
+      "longName": "Studio City",
+      "shortName": "Studio City",
+      "types": [
+        "NEIGHBORHOOD",
+        "POLITICAL"
+      ]
+    },
+    {
+      "longName": "Los Angeles",
+      "shortName": "Los Angeles",
+      "types": [
+        "LOCALITY",
+        "POLITICAL"
+      ]
+    },
+    {
+      "longName": "Los Angeles County",
+      "shortName": "Los Angeles County",
+      "types": [
+        "ADMINISTRATIVE_AREA_LEVEL_2",
+        "POLITICAL"
+      ]
+    },
+    {
+      "longName": "California",
+      "shortName": "CA",
+      "types": [
+        "ADMINISTRATIVE_AREA_LEVEL_1",
+        "POLITICAL"
+      ]
+    },
+    {
+      "longName": "United States",
+      "shortName": "US",
+      "types": [
+        "COUNTRY",
+        "POLITICAL"
+      ]
+    },
+    {
+      "longName": "91604",
+      "shortName": "91604",
+      "types": [
+        "POSTAL_CODE"
+      ]
+    },
+    {
+      "longName": "2606",
+      "shortName": "2606",
+      "types": [
+        "POSTAL_CODE_SUFFIX"
+      ]
+    }
+  ],
+  "formattedAddress": "11976 Ventura Blvd, Studio City, CA 91604, USA",
+  "geometry": {
+    "bounds": {
+      "northeast": {
+        "lat": 34.1431153,
+        "lng": -118.3927182
+      },
+      "southwest": {
+        "lat": 34.1428087,
+        "lng": -118.3932508
+      }
+    },
+    "location": {
+      "lat": 34.1429443,
+      "lng": -118.393033
+    },
+    "locationType": "ROOFTOP",
+    "viewport": {
+      "northeast": {
+        "lat": 34.1443432802915,
+        "lng": -118.3916355197085
+      },
+      "southwest": {
+        "lat": 34.1416453197085,
+        "lng": -118.3943334802915
+      }
+    }
+  },
+  "types": [
+    "SUBPREMISE"
+  ],
+  "partialMatch": false,
+  "placeId": "ChIJKZhyquK9woARaBL8nJT7DrI"
+}

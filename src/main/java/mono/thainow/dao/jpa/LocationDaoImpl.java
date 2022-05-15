@@ -45,6 +45,22 @@ public class LocationDaoImpl implements LocationDao {
 			return null;
 		}
 	}
+	
+	@Override
+	public Location getLocationByFormattedAddress(String address) {
+		
+		System.out.println(address);
+		
+		try {
+			return entityManager
+					.createQuery("from Location where formattedAddress =:address", Location.class)
+					.setParameter("address", address)
+					.getSingleResult();
+		} catch (Exception ex) {
+//			if location is new 
+			return null;
+		}
+	}
 
 	@Override
 	@Transactional
@@ -58,6 +74,8 @@ public class LocationDaoImpl implements LocationDao {
 		Location location = entityManager.find(Location.class, id);
 		entityManager.remove(location);
 	}
+
+
 
 
 

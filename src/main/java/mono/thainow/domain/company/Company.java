@@ -104,7 +104,7 @@ public class Company implements Serializable {
 	private Date updatedOn = new Date();
 
 	@NotNull
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	@Column(name = "COMPANY_STATUS")
 	private CompanyStatus status = CompanyStatus.UNREGISTERED;
 

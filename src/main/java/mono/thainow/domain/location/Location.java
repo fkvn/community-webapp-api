@@ -96,6 +96,10 @@ public class Location implements Serializable {
 	@Column(name = "LOCATION_LNG")
 	private String lng;
 	
+	
+	@Column(name = "LOCATION_TYPE")
+	private String type;
+	
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "LOCATION_CREATED_ON")
@@ -112,7 +116,6 @@ public class Location implements Serializable {
 
 	@PrePersist
 	public void validateLocation() {
-		this.formattedAddress = LocationUtil.getFormattedAddress(this);
 		this.fullAddress = LocationUtil.getFullAddress(this);
 		
 //		assert zipcode has exact 5 digits
@@ -123,11 +126,6 @@ public class Location implements Serializable {
 //		assert location has city, state, and zipcode
 		Assert.isTrue(!this.locality.equals("") && !this.state.equals("")
 				&& !this.zipcode.equals(""), "City, State, and Zipcode can't be empty");
-	}
-
-	public String getFormattedAddress() {
-		this.formattedAddress = LocationUtil.getFormattedAddress(this);
-		return this.formattedAddress;
 	}
 
 	public String getFullAddress() {

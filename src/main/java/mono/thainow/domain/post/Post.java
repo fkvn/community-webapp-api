@@ -75,7 +75,7 @@ public class Post implements Serializable {
 	private Date updatedOn = new Date();
 
 	@NotNull(message = "Post status can't be null!")
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	@Column(name = "POST_STATUS")
 	private PostStatus status;
 	

@@ -268,7 +268,7 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(validateAndEncodeUserPassword(password.get()));
 
 //		user email
-		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse("");
+		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse("").trim();
 		user.setEmail(validateUserEmail(email));
 
 //		email Verified

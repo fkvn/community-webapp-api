@@ -8,6 +8,8 @@ public interface LocationDao {
 	
 	Location getLocationByPlaceid(String placeid);
 	
+	Location getLocationByFormattedAddress(String address);
+	
 	Location getLocationByLatLng(String placeid, String lat, String lng);
 	
 	Location saveLocation(Location location);

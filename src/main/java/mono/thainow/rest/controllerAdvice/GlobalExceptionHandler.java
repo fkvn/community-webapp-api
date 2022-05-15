@@ -86,6 +86,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
+	
+	
+	
+
+	@ExceptionHandler({ IllegalArgumentException.class })
+	protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage(ex.getLocalizedMessage());
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
 
 
 	@ExceptionHandler({ DataIntegrityViolationException.class })

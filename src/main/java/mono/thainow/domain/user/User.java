@@ -111,7 +111,7 @@ public class User implements Serializable {
 	private Set<UserPrivilege> privileges = new HashSet<>();
 
 	@NotNull(message = "User status can't be null!")
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	@Column(name = "USER_STATUS")
 	private UserStatus status;
 
