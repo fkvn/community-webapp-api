@@ -10,15 +10,17 @@ public interface UserDao {
 	
 	List<User> getAllActiveUser();
 	
-	User getUser(long id);
+	User getUserById(long id);
 	
-	User getByUsername(String username);
+	User getActiveUserById(long id);
 	
-	User getByUserEmail(String email);
+	User getActiveUserByUsername(String username);
 	
-	User getByUserPhone(String phone);
+	User getActiveUserByEmail(String email);
 	
-	User getByUserSub(String sub);
+	User getActiveUserByPhone(String phone);
+	
+	User getActiveUserBySub(String sub);
 	
 	boolean isEmailUnique(String email);
 	

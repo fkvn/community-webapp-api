@@ -16,6 +16,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import mono.thainow.security.jwt.AuthEntryPointJwt;
 import mono.thainow.security.jwt.AuthTokenFilter;
@@ -100,6 +102,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		
 		web.ignoring().mvcMatchers("/swagger-ui/**", "/swagger-ui.html/**", "/configuration/**",
 				"/swagger-resources/**", "/v2/api-docs");
+	}
+	
+//	cors
+	@Bean
+	public WebMvcConfigurer corsConfigurer() {
+
+		return new WebMvcConfigurer() {
+
+			@Override
+			public void addCorsMappings(CorsRegistry registry) {
+
+				registry.addMapping("/**").allowedOrigins("*").allowedMethods("*")
+						.exposedHeaders("Content-Disposition");
+			}
+		};
 	}
 
 }

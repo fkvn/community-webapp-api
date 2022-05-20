@@ -60,28 +60,28 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getByUsername(String username) {
-		return userDao.getByUsername(username);
+	public User getActiveUserByUsername(String username) {
+		return userDao.getActiveUserByUsername(username);
 	}
 
 	@Override
-	public User getByUserEmail(String email) {
-		return userDao.getByUserEmail(email);
+	public User getActiveUserByEmail(String email) {
+		return userDao.getActiveUserByEmail(email);
 	}
 
 	@Override
-	public User getByUserPhone(String phone) {
-		return userDao.getByUserPhone(phone);
+	public User getActiveUserByPhone(String phone) {
+		return userDao.getActiveUserByPhone(phone);
 	}
 
 	@Override
-	public User getByUserSub(String sub) {
-		return userDao.getByUserSub(sub);
+	public User getActiveUserBySub(String sub) {
+		return userDao.getActiveUserBySub(sub);
 	}
 
 	@Override
 	public User getByUserId(Long id) {
-		return userDao.getUser(id);
+		return userDao.getUserById(id);
 	}
 
 //	=============================== Find User - End =============================== 
@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void deleteUser(Long id) {
-		User user = userDao.getUser(id);
+		User user = userDao.getUserById(id);
 		user.setStatus(UserStatus.DELETED);
 		userDao.saveUser(user);
 	}
@@ -187,7 +187,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Long updatePartialUser(Long id, Map<String, Object> userInfo) {
 
-		User updatedUser = userDao.getUser(id);
+		User updatedUser = userDao.getUserById(id);
 
 		for (String key : userInfo.keySet()) {
 			switch (key) {

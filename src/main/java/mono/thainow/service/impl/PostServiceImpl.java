@@ -71,7 +71,7 @@ public class PostServiceImpl implements PostService {
 		Assert.isTrue(authorId != null, "Invalid Post Author!");
 
 //		get post author info
-		User user = userDao.getUser(authorId);
+		User user = userDao.getUserById(authorId);
 
 //		create new post
 		Post post = initializePostByType(PostType.valueOf(postRequest.getType()));

@@ -51,6 +51,9 @@ public class SignUpRequest {
 	
 	@NotNull
 	private String address; 
+	
+	@NotNull
+	private String placeid;
 
 //	Business account Information
 	private Company company; 

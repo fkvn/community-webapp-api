@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.maps.model.AddressComponent;
 import com.google.maps.model.GeocodingResult;
 
@@ -32,33 +34,30 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public Location validateIfLocationExist(Location location) {
-
-//		check if location is in the database
-		Location dbLocation = locationDao.getLocationByPlaceid(location.getPlaceid());
-
-//		new location
-		if (dbLocation == null) {
-//			save location to database to persist
-			location = locationDao.saveLocation(location);
-		} else {
-			location = dbLocation;
-		}
-
-		return location;
-	}
-
-	@Override
 	public Location getLocationFromSignUpRequest(SignUpRequest signUpRequest) {
 
+//		get placeid - MUST NOT NULL
+		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("").trim();
+		Assert.isTrue(!placeid.isEmpty(), "Invalid Placeid!");
+
+//		get address - MUST NOT NULL
 		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("").trim();
-//		
 		Assert.isTrue(!address.isEmpty(), "Invalid Address!");
 
-//		get location
-		Location location = getLocationByAddress(address);
-		
+//		search location
+		Location location = locationDao.getLocationByEitherPlaceidOrAddress(placeid, address);
+
+//		can't find location by placeid -> add new one
+		if (location == null) {
+
+//			create location
+			location = createLocationByAddress(address);
+		}
+
+		Assert.isTrue(location != null, "Invalid Address!");
+
 		return location;
+
 	}
 
 	@Override
@@ -69,44 +68,32 @@ public class LocationServiceImpl implements LocationService {
 
 		Assert.isTrue(location != null, "Location cannot be null");
 
-//		validate location
-		location = validateIfLocationExist(location);
+////		validate location
+//		location = validateIfLocationExist(location);
 
 		return location;
 	}
 
 	@Override
-	public Location getLocationByAddress(String address) {
+	public Location createLocationByAddress(String address) {
 
-//		check if location is in the database
-		Location location = locationDao.getLocationByFormattedAddress(address);
-		
-		System.out.println(location == null);
+//		initialize google geocoding Api
+		GoogleGeoAPI geoCode = new GoogleGeoAPI();
+
+//		calling the api to get the gecode result
+		GeocodingResult geoResult = geoCode.getLocationResultFromAddress(address);
+
+//		double-check if the placeId exists
+		Location location = locationDao.getLocationByPlaceid(geoResult.placeId);
 
 //		new location
 		if (location == null) {
-			
-//			initialize google geocoding Api
-			GoogleGeoAPI geoCode = new GoogleGeoAPI();
-			
-//			calling the api to get the gecode result
-			GeocodingResult geoResult = geoCode.getLocationResultFromAddress(address);
-			
-//			extract information
+
+//			extract location new information
 			location = getLocationFromGeocodingResult(geoResult);
-			
-//			double check one more time if the placeId is existed
-			Location ifExistedLocation = locationDao.getLocationByPlaceid(location.getPlaceid());
-			
-//			if exist, don't add / persist new 
-			if (ifExistedLocation != null) {
-				location = ifExistedLocation;
-			}
-//			persist into the database
-			else {
-				location = locationDao.saveLocation(location);
-			}
-			
+
+//			persist into database
+			location = locationDao.saveLocation(location);
 		}
 
 		return location;
@@ -131,7 +118,7 @@ public class LocationServiceImpl implements LocationService {
 
 //		location type
 		location.setType(geoResult.geometry.locationType.toString());
-		
+
 //		location address component
 		location = updateLocationFromAddressComponent(location, geoResult.addressComponents);
 
@@ -141,9 +128,12 @@ public class LocationServiceImpl implements LocationService {
 	@Override
 	public Location updateLocationFromAddressComponent(Location location, AddressComponent[] addressComponents) {
 
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		System.out.println(gson.toJson(addressComponents));
+
 //		address components
 		Arrays.asList(addressComponents).stream().forEach(field -> {
-			
+
 			switch (String.valueOf(field.types[0]).toUpperCase()) {
 
 			case "STREET_NUMBER":
@@ -177,6 +167,8 @@ public class LocationServiceImpl implements LocationService {
 				break;
 			}
 		});
+
+		System.out.println(gson.toJson(location));
 
 		return location;
 	}

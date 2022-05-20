@@ -41,8 +41,7 @@ import mono.thainow.util.LocationUtil;
 		@Index(name = "location_formattedAddress_UNIQUE", columnList = "LOCATION_FORMATTED_ADDRESS", unique = true),
 		@Index(name = "location_fullAddress_UNIQUE", columnList = "LOCATION_FULL_ADDRESS", unique = true),
 		@Index(name = "location_lat_UNIQUE", columnList = "LOCATION_LAT", unique = true),
-		@Index(name = "location_lng_UNIQUE", columnList = "LOCATION_LNG", unique = true)
-})
+		@Index(name = "location_lng_UNIQUE", columnList = "LOCATION_LNG", unique = true) })
 public class Location implements Serializable {
 	/**
 	* 
@@ -80,8 +79,7 @@ public class Location implements Serializable {
 	private String country = "USA";
 
 	@Column(name = "LOCATION_ZIPCODE")
-	@NotEmpty(message = "Location zipcode can't be empty")
-	@Size(min = 5, max = 5)
+	@Size(min = 0, max = 5)
 	private String zipcode = "";
 
 	@Column(name = "LOCATION_FORMATTED_ADDRESS")
@@ -95,16 +93,15 @@ public class Location implements Serializable {
 
 	@Column(name = "LOCATION_LNG")
 	private String lng;
-	
-	
+
 	@Column(name = "LOCATION_TYPE")
 	private String type;
-	
+
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "LOCATION_CREATED_ON")
 	private Date createdOn = new Date();
-	
+
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "LOCATION_UPDATED_ON")
@@ -117,15 +114,17 @@ public class Location implements Serializable {
 	@PrePersist
 	public void validateLocation() {
 		this.fullAddress = LocationUtil.getFullAddress(this);
-		
+
+		if (!this.zipcode.isEmpty()) {
 //		assert zipcode has exact 5 digits
-		String zipcodePattern = "^\\d{5}(-\\d{4})?$";
-		boolean isValidZipcode = this.zipcode.matches(zipcodePattern);
-		Assert.isTrue(isValidZipcode, "Invalid Zipcode!");
-		
+			String zipcodePattern = "^\\d{5}(-\\d{4})?$";
+			boolean isValidZipcode = this.zipcode.matches(zipcodePattern);
+			Assert.isTrue(isValidZipcode, "Invalid Zipcode!");
+		}
+
 //		assert location has city, state, and zipcode
-		Assert.isTrue(!this.locality.equals("") && !this.state.equals("")
-				&& !this.zipcode.equals(""), "City, State, and Zipcode can't be empty");
+		Assert.isTrue(!this.locality.equals("") && !this.state.equals(""),
+				"Invalid city and state");
 	}
 
 	public String getFullAddress() {

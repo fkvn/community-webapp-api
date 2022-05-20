@@ -13,10 +13,10 @@ public interface UserService {
 	List<User> getAllUsers();
 	
 	User getByUserId(Long id);
-	User getByUsername(String username);
-	User getByUserEmail(String email);
-	User getByUserPhone(String phone);
-	User getByUserSub(String sub);
+	User getActiveUserByUsername(String username);
+	User getActiveUserByEmail(String email);
+	User getActiveUserByPhone(String phone);
+	User getActiveUserBySub(String sub);
 	
 	Long updatePartialUser(Long id, Map<String, Object> userInfo);
 	

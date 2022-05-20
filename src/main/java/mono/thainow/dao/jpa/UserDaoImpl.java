@@ -37,23 +37,31 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public User getUser(long id) {
+	public User getUserById(long id) {
 		return entityManager.find(User.class, id);
 	}
-
+	
 	@Override
-	public User getByUsername(String username) {
-		User user = entityManager.createQuery("from User where username =:username", User.class)
-				.setParameter("username", username).getSingleResult();
+	public User getActiveUserById(long id) {
+		User user = entityManager.createQuery("from User where status =: status and id =:id", User.class)
+				.setParameter("status", UserStatus.ACTIVATED).setParameter("id", id).getSingleResult();
 
 		return user;
 	}
 
 	@Override
-	public User getByUserEmail(String email) {
+	public User getActiveUserByUsername(String username) {
+		User user = entityManager.createQuery("from User where status =: status and username =:username", User.class)
+				.setParameter("status", UserStatus.ACTIVATED).setParameter("username", username).getSingleResult();
+
+		return user;
+	}
+
+	@Override
+	public User getActiveUserByEmail(String email) {
 		try {
-			User user = entityManager.createQuery("from User where email =:email", User.class)
-					.setParameter("email", email).getSingleResult();
+			User user = entityManager.createQuery("from User where status =:status and email =:email", User.class)
+					.setParameter("status", UserStatus.ACTIVATED).setParameter("email", email).getSingleResult();
 			return user;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -63,10 +71,10 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public User getByUserPhone(String phone) {
+	public User getActiveUserByPhone(String phone) {
 		try {
-			User user = entityManager.createQuery("from User where phone =:phone", User.class)
-					.setParameter("phone", phone).getSingleResult();
+			User user = entityManager.createQuery("from User where status =:status and phone =:phone", User.class)
+					.setParameter("status", UserStatus.ACTIVATED).setParameter("phone", phone).getSingleResult();
 
 			return user;
 		} catch (Exception ex) {
@@ -77,9 +85,9 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public User getByUserSub(String sub) {
-		User user = entityManager.createQuery("from User where sub =:sub", User.class).setParameter("sub", sub)
-				.getSingleResult();
+	public User getActiveUserBySub(String sub) {
+		User user = entityManager.createQuery("from User where status =:status and sub =:sub", User.class).setParameter("sub", sub)
+				.setParameter("status", UserStatus.ACTIVATED).getSingleResult();
 
 		return user;
 	}
@@ -110,8 +118,8 @@ public class UserDaoImpl implements UserDao {
 			 * 
 			 * We don't check email unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from User where status =:status and email =:email", User.class)
-					.setParameter("status", UserStatus.ACTIVATED).setParameter("email", email).getSingleResult();
+			entityManager.createQuery("from User where status !=:status and email =:email and email <> ''", User.class)
+					.setParameter("status", UserStatus.DELETED).setParameter("email", email).getSingleResult();
 
 			return false;
 
@@ -130,8 +138,8 @@ public class UserDaoImpl implements UserDao {
 			 * 
 			 * We don't check phone unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from User where status =:status and phone =:phone", User.class)
-					.setParameter("status", UserStatus.ACTIVATED).setParameter("phone", phone).getSingleResult();
+			entityManager.createQuery("from User where status !=:status and phone =:phone and phone <> ''", User.class)
+					.setParameter("status", UserStatus.DELETED).setParameter("phone", phone).getSingleResult();
 
 			return false;
 
@@ -140,5 +148,7 @@ public class UserDaoImpl implements UserDao {
 			return true;
 		}
 	}
+
+
 
 }

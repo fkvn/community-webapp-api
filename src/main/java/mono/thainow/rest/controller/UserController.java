@@ -2,6 +2,7 @@ package mono.thainow.rest.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,18 +27,18 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public List<User> getAllUsers() {
 		return userService.getAllUsers();
-	} 
-	
+	}
+
 	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public User getUser(@PathVariable Long id) {
 		return userService.getByUserId(id);
-	} 
+	}
 
 	@GetMapping("/page/{pageNo}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
@@ -45,18 +46,16 @@ public class UserController {
 		return null;
 	}
 
-	
 	@PostMapping("/{id}/profile")
-	@ResponseStatus(HttpStatus.CREATED) 
-	public User uploadProfile(@PathVariable Long id, @RequestBody StorageRequest storage) 
-	{
+	@ResponseStatus(HttpStatus.CREATED)
+	public User uploadProfile(@PathVariable Long id, @RequestBody StorageRequest storage) {
 		User user = userService.getByUserId(id);
-		
+
 		user = userService.uploadProfilePicture(user, storage);
-		
+
 		return user;
 	}
-	
+
 	@PatchMapping("/{id}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public Long updatePartialUser(@PathVariable Long id, @RequestBody Map<String, Object> userInfo) {
@@ -68,11 +67,25 @@ public class UserController {
 	public void deleteUser(@PathVariable Long id) {
 		userService.deleteUser(id);
 	}
-	
+
 	@DeleteMapping("/remove/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void removeUser(@PathVariable Long id) {
 		userService.removeUser(id);
+	}
+
+	@PostMapping("/validatePhone")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void validatePhone(@RequestBody Map<String, Object> userInfo) {
+		String phone = Optional.ofNullable((String) userInfo.get("phone")).orElse("").trim();
+		userService.validateUserPhone(phone);
+	}
+	
+	@PostMapping("/validateEmail")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void validateEmail(@RequestBody Map<String, Object> userInfo) {
+		String email = Optional.ofNullable((String) userInfo.get("email")).orElse("").trim();
+		userService.validateUserEmail(email);
 	}
 
 }

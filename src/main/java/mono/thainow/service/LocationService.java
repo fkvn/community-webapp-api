@@ -14,9 +14,7 @@ public interface LocationService {
 
 	List<User> findUsersOfLocation(Location location);
 	
-	Location validateIfLocationExist(Location location);
-	
-	Location getLocationByAddress(String address);
+	Location createLocationByAddress(String address);
 	
 	Location getLocationFromSignUpRequest(SignUpRequest signUpRequest);
 

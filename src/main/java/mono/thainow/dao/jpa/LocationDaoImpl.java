@@ -75,6 +75,19 @@ public class LocationDaoImpl implements LocationDao {
 		entityManager.remove(location);
 	}
 
+	@Override
+	public Location getLocationByEitherPlaceidOrAddress(String placeid, String address) {
+		try {
+			return entityManager
+					.createQuery("from Location where placeid =:placeid or formattedAddress =:address ", Location.class)
+					.setParameter("placeid", placeid).setParameter("address", address)
+					.getSingleResult();
+		} catch (Exception ex) {
+//			if location is new 
+			return null;
+		}
+	}
+
 
 
 
