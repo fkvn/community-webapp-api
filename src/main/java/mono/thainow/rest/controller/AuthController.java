@@ -47,10 +47,10 @@ public class AuthController {
 		return new MessageResponse("Token was verified successfully!");
 	}
 	
-	@PostMapping("/signin")
+	@PostMapping("/login")
 	public JwtResponse authenticateUser(@Valid @RequestBody SignInRequest loginRequest) {
 
-		return authService.signin(loginRequest);
+		return authService.login(loginRequest);
 	}
 
 

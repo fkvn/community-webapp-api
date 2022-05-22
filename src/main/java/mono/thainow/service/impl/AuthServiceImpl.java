@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
@@ -21,6 +22,7 @@ import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.TokenResponse;
 import mono.thainow.security.verify.TwilioVerification;
 import mono.thainow.service.AuthService;
+import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
 
 @Service
@@ -28,6 +30,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private StorageService storageService;
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -82,6 +87,24 @@ public class AuthServiceImpl implements AuthService {
 //		persist user info into database 
 		user = userService.saveUser(user);
 
+//		add user profile
+		if (user.getProfileUrl() == null) {
+
+//			this is manual add, please make sure the id is available first
+			Long uploadedStorageId = (long) 35;
+			Storage profile = storageService.getStorage(uploadedStorageId);
+
+//			if found
+			if (profile != null) {
+
+//			save profile
+				user.setProfileUrl(profile);
+
+//			update user info into database 
+				user = userService.saveUser(user);
+			}
+		}
+
 		/*
 		 * 1. Validate company information if user registered as BUSINESS 2. Add company
 		 * into business 3. Revert user if company registered failed
@@ -97,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public JwtResponse signin(SignInRequest loginRequest) {
+	public JwtResponse login(SignInRequest loginRequest) {
 
 		String channel = Optional.ofNullable(loginRequest.getChannel()).orElse("");
 

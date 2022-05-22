@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.dao.StorageDao;
 import mono.thainow.domain.storage.Storage;
+import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.FirebaseService;
 import mono.thainow.service.StorageService;
@@ -95,6 +96,23 @@ public class StorageServiceImpl implements StorageService {
 	@Override
 	public Storage saveStorage(Storage storage) {
 		return storageDao.saveStorage(storage);
+	}
+
+	@Override
+	public Storage getStoragefromStorageRequest(StorageRequest storageRequest) {
+		Storage profile = new Storage(); 
+		
+		profile.setName(storageRequest.getName());
+		profile.setType(storageRequest.getType());
+		profile.setUrl(storageRequest.getUrl());
+		profile.setSize(storageRequest.getSize());
+				
+		return profile;
+	}
+
+	@Override
+	public Storage getStorage(Long id) {
+		return storageDao.getStorage(id);
 	}
 
 }

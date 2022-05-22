@@ -150,6 +150,8 @@ public class User implements Serializable {
 
 //		validate phone number
 		PhoneUtil.validatePhoneNumberWithGoogleAPI(this.phone, "US");
+		
+
 	}
 	
 	@Transient

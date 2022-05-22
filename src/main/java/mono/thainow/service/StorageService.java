@@ -5,6 +5,7 @@ import java.io.File;
 import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.domain.storage.Storage;
+import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.response.StorageResponse;
 
 public interface StorageService {
@@ -19,5 +20,9 @@ public interface StorageService {
 	
 	String uploadFile(File file, String fileName, String fileType);
 	
+	Storage getStoragefromStorageRequest(StorageRequest storageRequest);
+	
 	Storage saveStorage(Storage storage);
+	
+	Storage getStorage(Long id);
 }
