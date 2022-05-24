@@ -16,7 +16,7 @@ import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.security.payload.request.SignInRequest;
-import mono.thainow.security.payload.request.SignUpRequest;
+import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.TokenResponse;
@@ -71,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public boolean signUp(SignUpRequest signUpRequest) {
+	public boolean signUp(SignupRequest signUpRequest) {
 
 		User user = userService.getUserFromSignUpRequest(signUpRequest);
 

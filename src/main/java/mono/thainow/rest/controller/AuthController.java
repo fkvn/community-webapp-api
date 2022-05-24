@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import mono.thainow.security.payload.request.SignInRequest;
-import mono.thainow.security.payload.request.SignUpRequest;
+import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.MessageResponse;
@@ -55,7 +55,7 @@ public class AuthController {
 
 
 	@PostMapping("/signup")
-	public MessageResponse registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+	public MessageResponse registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
 
 		Assert.isTrue(authService.signUp(signUpRequest), "Registration Failed!");
 

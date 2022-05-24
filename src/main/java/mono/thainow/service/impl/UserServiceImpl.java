@@ -21,7 +21,7 @@ import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.security.payload.request.SignUpRequest;
+import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
 	
 	@Override
-	public User addBusinessCompanyFromSignUpRequest(User user, SignUpRequest signUpRequest) {
+	public User addBusinessCompanyFromSignUpRequest(User user, SignupRequest signUpRequest) {
 
 		try {
 
@@ -242,7 +242,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromSignUpRequest(SignUpRequest signUpRequest) {
+	public User getUserFromSignUpRequest(SignupRequest signUpRequest) {
 
 //		initialize user based on its role
 		String role = Optional.ofNullable(signUpRequest.getRole()).orElse(null);

@@ -16,7 +16,7 @@ import mono.thainow.domain.company.Company;
 
 @Getter
 @Setter
-public class SignUpRequest {
+public class SignupRequest {
 	
 //	if false, otp was not verified
 	private Boolean isVerified;

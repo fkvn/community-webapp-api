@@ -6,7 +6,7 @@ import java.util.Map;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.security.payload.request.SignUpRequest;
+import mono.thainow.security.payload.request.SignupRequest;
 
 public interface UserService {
 	
@@ -38,8 +38,8 @@ public interface UserService {
 
 	User initializeUserByRole(UserRole role);
 	
-	User getUserFromSignUpRequest(SignUpRequest signUpRequest);
+	User getUserFromSignUpRequest(SignupRequest signUpRequest);
 	
-	User addBusinessCompanyFromSignUpRequest(User user, SignUpRequest signUpRequest);
+	User addBusinessCompanyFromSignUpRequest(User user, SignupRequest signUpRequest);
 	
 }

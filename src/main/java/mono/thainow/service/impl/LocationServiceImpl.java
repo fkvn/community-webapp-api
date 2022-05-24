@@ -18,7 +18,7 @@ import mono.thainow.domain.google.GoogleGeoAPI;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.PostRequest;
-import mono.thainow.security.payload.request.SignUpRequest;
+import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.LocationService;
 
 @Service
@@ -34,7 +34,7 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public Location getLocationFromSignUpRequest(SignUpRequest signUpRequest) {
+	public Location getLocationFromSignUpRequest(SignupRequest signUpRequest) {
 
 //		get placeid - MUST NOT NULL
 		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("").trim();
