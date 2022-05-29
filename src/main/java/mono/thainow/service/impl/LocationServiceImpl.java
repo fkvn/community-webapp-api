@@ -18,7 +18,6 @@ import mono.thainow.domain.google.GoogleGeoAPI;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.PostRequest;
-import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.LocationService;
 
 @Service
@@ -34,15 +33,13 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public Location getLocationFromSignUpRequest(SignupRequest signUpRequest) {
+	public Location getLocationFromPlaceidAndAddress(String placeid, String address) {
 
-//		get placeid - MUST NOT NULL
-		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("").trim();
-		Assert.isTrue(!placeid.isEmpty(), "Invalid Placeid!");
+//		placeid - MUST NOT Empty and NOT Null
+		Assert.isTrue(placeid!= null && !placeid.trim().isEmpty(), "Invalid Placeid!");
 
-//		get address - MUST NOT NULL
-		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("").trim();
-		Assert.isTrue(!address.isEmpty(), "Invalid Address!");
+//		address - MUST NOT Empty and NOT Null
+		Assert.isTrue(address!= null && !address.trim().isEmpty(), "Invalid Address!");
 
 //		search location
 		Location location = locationDao.getLocationByEitherPlaceidOrAddress(placeid, address);

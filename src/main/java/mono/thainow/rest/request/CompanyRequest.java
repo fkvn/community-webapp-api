@@ -43,7 +43,10 @@ public class CompanyRequest {
 	private String size;
 	
 	@NotNull
-	private Location location; 
+	private String address; 
+	
+	@NotNull
+	private String placeid;
 	
 	private String administratorRole;
 }

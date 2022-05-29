@@ -19,6 +19,7 @@
 	<description>Monolithic of ThaiNow project</description>
 	<properties>
 		<java.version>11</java.version>
+		<elasticsearch.version>7.15.2</elasticsearch.version>
 	</properties>
 
 	<!-- Add Spring Cloud GCP Dependency BOM -->
@@ -175,14 +176,14 @@
 
 		<!-- Elasticsearch -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-mapper-orm</artifactId>
+			<version>6.1.5.Final</version>
 		</dependency>
-		
 		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-high-level-client</artifactId>
-		
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-backend-elasticsearch</artifactId>
+			<version>6.1.5.Final</version>
 		</dependency>
 	</dependencies>
 

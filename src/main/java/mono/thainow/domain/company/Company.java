@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.util.Assert;
 
@@ -43,6 +45,7 @@ import mono.thainow.domain.user.BusinessUser;
 @ToString
 @EqualsAndHashCode
 @Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = true) })
+@Indexed
 public class Company implements Serializable {
 
 	/**
@@ -58,6 +61,7 @@ public class Company implements Serializable {
 
 	@NotEmpty
 	@Column(name = "COMPANY_NAME")
+	@FullTextField
 	private String name;
 
 	@NotEmpty

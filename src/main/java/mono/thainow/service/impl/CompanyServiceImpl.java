@@ -1,6 +1,8 @@
 package mono.thainow.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +17,17 @@ import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
-import mono.thainow.repository.CompanyRepository;
+//import mono.thainow.repository.CompanyRepositoryElastic;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.service.CompanyService;
+import mono.thainow.service.LocationService;
 import mono.thainow.service.UserService;
 
 @Repository
 public class CompanyServiceImpl implements CompanyService {
 
-	@Autowired
-	private CompanyRepository compRepo;
+//	@Autowired
+//	private CompanyRepositoryElastic compRepo;
 
 	@Autowired
 	private CompanyDao compDao;
@@ -32,14 +35,19 @@ public class CompanyServiceImpl implements CompanyService {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private LocationService locationService;
+
 	@Override
 	public List<Company> getAllCompanies() {
-		return compRepo.findAll();
+//		return compRepo.findAll();
+		return new ArrayList<>();
 	}
 
 	@Override
 	public Company getCompanyById(Long id) {
-		return compRepo.getById(id);
+//		return compRepo.getById(id);
+		return compDao.getCompanyById(id);
 	}
 
 	@Override
@@ -100,13 +108,22 @@ public class CompanyServiceImpl implements CompanyService {
 	public Company createCompany(CompanyRequest companyRequest, boolean isWithUser, BusinessUser user) {
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		Company company = objectMapper.convertValue(companyRequest, Company.class);
+//		Company company = objectMapper.convertValue(companyRequest, Company.class);
+		Company company = new Company();
 
 //		with administrator 
 		if (isWithUser) {
 			company = createCompanyWithAdministrator(company, user, companyRequest.getAdministratorRole());
 		} else {
 //			no administrator
+
+			String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("");
+			String address = Optional.ofNullable(companyRequest.getAddress()).orElse("");
+			company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+
+			company.setName(companyRequest.getName());
+			company.setIndustry(companyRequest.getIndustry());
+
 			company = compDao.saveCompany(company);
 		}
 
@@ -115,16 +132,16 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public Company createCompanyWithAdministrator(Company company, BusinessUser user, String administratorRole) {
-			
+
 //		the administrator has to be BUSINESS Role
 		Assert.isTrue(user.getRole() == UserRole.BUSINESS && user != null, "Invalid Company Administrator!");
 
 //		Company Location at the moment is the same with the user - 4/16/22
 		company.setLocation(user.getLocation());
-		
+
 //		validate company
 		company = validateIfCompnayExist(company);
-		
+
 //		Assert that company doesn't have any business account attached
 		Assert.isTrue(company.getAdministrator() == null, "Company has been registered by another administrator!");
 
@@ -138,7 +155,7 @@ public class CompanyServiceImpl implements CompanyService {
 
 //		update administrator
 		company.setAdministrator(user);
-		
+
 //		update administrator
 		company.setAdministratorRole(administratorRole);
 
@@ -153,36 +170,35 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public Company validateIfCompnayExist(Company company) {
-		
+
 		Company dbCompany = compDao.getCompany(company.getName(), company.getLocation());
-		
+
 //		new company
 		if (dbCompany == null) {
-			
+
 //			persit company into database
 			company.setStatus(CompanyStatus.UNREGISTERED);
 			company.setAdministratorRole("");
 			company = compDao.saveCompany(company);
-		}
-		else {
+		} else {
 			company = dbCompany;
 		}
-		
+
 		return company;
 	}
 
 	@Override
 	public Company validateCompanyWithUserById(Long companyId, BusinessUser user) {
-		
+
 //		assert that company is not missing
 		Assert.isTrue(companyId != null, "Invalid Company ID!");
 
 //		get company
 		Company company = getCompanyById(companyId);
-		
+
 //		assert that the company belongs to the author
 		Assert.isTrue(user.getCompanies().contains(company), "Invalid Company!");
-		
+
 		return company;
 	}
 

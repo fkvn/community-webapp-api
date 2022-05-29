@@ -288,7 +288,9 @@ public class UserServiceImpl implements UserService {
 				"Users must have at least email or phone number to register!");
 
 //		user location
-		user.setLocation(locationService.getLocationFromSignUpRequest(signUpRequest));
+		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
+		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
+		user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 
 //		initialize user status as DEACTIVATED
 		user.setStatus(UserStatus.DEACTIVATED);

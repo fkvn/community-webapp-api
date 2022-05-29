@@ -7,3 +7,4 @@ import mono.thainow.domain.company.Company;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 	
 }
+
