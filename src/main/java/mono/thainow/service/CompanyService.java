@@ -22,4 +22,6 @@ public interface CompanyService {
 	Company createCompanyWithAdministrator(Company company, BusinessUser user,  String administratorRole);
 	
 	Company validateCompanyWithUserById(Long companyId, BusinessUser user);
+	
+	List<Company> searchCompany(String keywords, boolean fetchAll, int fetchLimit);
 }

@@ -12,6 +12,7 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import mono.thainow.dao.CompanyDao;
+import mono.thainow.dao.ElasticSearchDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.user.BusinessUser;
@@ -37,6 +38,9 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Autowired
 	private LocationService locationService;
+
+	@Autowired
+	private ElasticSearchDao elasticSearchDao;
 
 	@Override
 	public List<Company> getAllCompanies() {
@@ -200,6 +204,11 @@ public class CompanyServiceImpl implements CompanyService {
 		Assert.isTrue(user.getCompanies().contains(company), "Invalid Company!");
 
 		return company;
+	}
+
+	@Override
+	public List<Company> searchCompany(String keywords, boolean fetchAll, int fetchLimit) {
+		return elasticSearchDao.searchCompany(keywords, fetchAll, fetchLimit);
 	}
 
 }

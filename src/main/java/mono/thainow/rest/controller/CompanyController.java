@@ -62,14 +62,22 @@ public class CompanyController {
 	@PutMapping("{id}/status")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public Company updateCompanyStatus(@PathVariable Long id, @RequestParam String newStatus) {
-		
+
 		Company company = compService.getCompanyById(id);
 
 //		if newstatus, if old status, no change
 		if (CompanyStatus.valueOf(newStatus) != company.getStatus()) {
 			return compService.updateCompanyStatus(company, CompanyStatus.valueOf(newStatus));
 		}
-		
+
 		return company;
+	}
+
+	@GetMapping("/search")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public List<Company> updateCompanyStatus(@RequestParam String keywords, @RequestParam boolean fetchAll,
+			@RequestParam int fetchLimit) {
+
+		return compService.searchCompany(keywords, fetchAll, fetchLimit);
 	}
 }
