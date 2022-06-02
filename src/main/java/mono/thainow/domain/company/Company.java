@@ -20,8 +20,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.util.Assert;
 
@@ -61,7 +61,8 @@ public class Company implements Serializable {
 
 	@NotEmpty
 	@Column(name = "COMPANY_NAME")
-	@FullTextField
+//	@FullTextField
+	@KeywordField
 	private String name;
 
 	@NotEmpty
