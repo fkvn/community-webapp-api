@@ -255,13 +255,17 @@ public class UserServiceImpl implements UserService {
 //		add user privileges
 		user.setPrivileges(privileges);
 
-//		user's profile information 
-		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
-		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
-
-//		add user profile information
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
+////		user's profile information 
+//		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
+//		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
+//
+////		add user profile information
+//		user.setFirstName(firstName);
+//		user.setLastName(lastName);
+		
+//		username
+		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse(null);
+		user.setUsername(username);
 
 //		password validation
 		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());

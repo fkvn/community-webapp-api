@@ -43,11 +43,12 @@ public class SignupRequest {
 	@Size(min = 8, max = 20)
 	private String password;
 	
-	@NotBlank
 	private String firstname = "";
 
-	@NotBlank
 	private String lastname = "";
+	
+	@NotBlank
+	private String username = "";
 	
 	@NotNull
 	private String address; 
