@@ -105,7 +105,7 @@ public class LocationServiceImpl implements LocationService {
 		location.setPlaceid(geoResult.placeId);
 
 //		formattedAddress
-		location.setFormattedAddress(geoResult.formattedAddress);
+		location.setDescription(geoResult.formattedAddress);
 
 //		lat
 		location.setLat(String.valueOf(geoResult.geometry.location.lat));

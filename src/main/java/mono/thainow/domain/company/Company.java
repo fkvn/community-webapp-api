@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import lombok.EqualsAndHashCode;
@@ -73,16 +74,19 @@ public class Company implements Serializable {
 	private String email;
 
 	@Column(name = "IS_COMPANY_EMAIL_VERIFIED")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private boolean isEmailVerified = false;
 
 	@Column(name = "COMPANY_PHONE")
 	private String phone;
 
 	@Column(name = "IS_COMPANY_PHONE_VERIFIED")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private boolean isPhoneVerified = false;
 
 	@Lob
 	@Column(name = "COMPANY_DESCRIPTION")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String description;
 
 	@Column(name = "COMPANY_WEBSITE")
@@ -90,9 +94,11 @@ public class Company implements Serializable {
 	private String website;
 
 	@Column(name = "COMPANY_FOUNDED")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String founded;
 
 	@Column(name = "COMPANY_REVENUE")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String revenue;
 
 	@Column(name = "COMPANY_SIZE")
@@ -101,10 +107,12 @@ public class Company implements Serializable {
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "COMPANY_CREATED_ON")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Date createdOn = new Date();
 
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@Column(name = "COMPANY_UPDATED_ON")
 	private Date updatedOn = new Date();
 
@@ -116,26 +124,29 @@ public class Company implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")
 	@NotNull
-	private Location location;
+	private Location address;
 	
 	@Column(name = "COMPANY_FIXED_POSTION")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Integer fixedPostion;
 	
 	@Column(name = "COMPANY_WEIGHT")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private int weight  = 0;
 
 	@ManyToOne
 	@JoinColumn(name = "ADMINISTRATOR_ID")
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private BusinessUser administrator;
 
 	@Column(name = "ADMINISTRATOR_ROLE")
 	private String administratorRole;
 
-	public static String getDefaultCompIndustry() {
-		return DEFAULT_COMP_INDUSTRY;
-	}
+//	public static String getDefaultCompIndustry() {
+//		return DEFAULT_COMP_INDUSTRY;
+//	}
 
 	@PrePersist
 	private void validateCompany() {

@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -56,12 +57,15 @@ public class Location implements Serializable {
 	private String placeid;
 
 	@Column(name = "LOCATION_ADDRESS1")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String address1 = "";
 
 	@Column(name = "LOCATION_ADDRESS2")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String address2 = "";
 
 	@Column(name = "LOCATION_NEIGHBERHOOD")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String neighberhood = "";
 
 	@Column(name = "LOCATION_CITY")
@@ -69,6 +73,7 @@ public class Location implements Serializable {
 	private String locality = "";
 
 	@Column(name = "LOCATION_COUNTY")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String county = "";
 
 	@Column(name = "LOCATION_STATE")
@@ -76,6 +81,7 @@ public class Location implements Serializable {
 	private String state = "";
 
 	@Column(name = "LOCATION_COUNTRY")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String country = "USA";
 
 	@Column(name = "LOCATION_ZIPCODE")
@@ -83,9 +89,10 @@ public class Location implements Serializable {
 	private String zipcode = "";
 
 	@Column(name = "LOCATION_FORMATTED_ADDRESS")
-	private String formattedAddress;
+	private String description;
 
 	@Column(name = "LOCATION_FULL_ADDRESS")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String fullAddress;
 
 	@Column(name = "LOCATION_LAT")
@@ -95,16 +102,19 @@ public class Location implements Serializable {
 	private String lng;
 
 	@Column(name = "LOCATION_TYPE")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String type;
 
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "LOCATION_CREATED_ON")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Date createdOn = new Date();
 
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "LOCATION_UPDATED_ON")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Date updatedOn = new Date();
 
 	@JsonIgnore

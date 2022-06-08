@@ -123,7 +123,7 @@ public class CompanyServiceImpl implements CompanyService {
 
 			String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("");
 			String address = Optional.ofNullable(companyRequest.getAddress()).orElse("");
-			company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			company.setAddress(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 
 			company.setName(companyRequest.getName());
 			company.setIndustry(companyRequest.getIndustry());
@@ -141,7 +141,7 @@ public class CompanyServiceImpl implements CompanyService {
 		Assert.isTrue(user.getRole() == UserRole.BUSINESS && user != null, "Invalid Company Administrator!");
 
 //		Company Location at the moment is the same with the user - 4/16/22
-		company.setLocation(user.getLocation());
+		company.setAddress(user.getLocation());
 
 //		validate company
 		company = validateIfCompnayExist(company);
@@ -175,7 +175,7 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public Company validateIfCompnayExist(Company company) {
 
-		Company dbCompany = compDao.getCompany(company.getName(), company.getLocation());
+		Company dbCompany = compDao.getCompany(company.getName(), company.getAddress());
 
 //		new company
 		if (dbCompany == null) {
