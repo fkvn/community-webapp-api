@@ -152,8 +152,8 @@ public class Company implements Serializable {
 	private void validateCompany() {
 		
 //		assert that the industry is valid
-		Assert.isTrue(!this.industry.isEmpty() && DEFAULT_COMP_INDUSTRY.contains(this.industry),
-				"Invalid Company Industry");
+//		Assert.isTrue(!this.industry.isEmpty() && DEFAULT_COMP_INDUSTRY.contains(this.industry),
+//				"Invalid Company Industry");
 		
 //		assert that once we have the administrator, then the administratorRole cannot be null
 		if (this.administrator != null) {
