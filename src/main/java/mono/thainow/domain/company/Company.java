@@ -54,8 +54,6 @@ public class Company implements Serializable {
 	*/
 	private static final long serialVersionUID = 1L;
 
-	private static final String DEFAULT_COMP_INDUSTRY = "Aquarium and Pet;Attorney;Auto Service;Bank;Bar;Bodyshop;Book Store;Bookkeeping;Boxing;Car Dealer;Car Towing;Chiropractic;Clothing;Community Service;Construction;Consulate;Consultant;Cosmetic;Credit Card Services;Dance;Dentist;Doctor Clinic;Drink and Dessert;DVD, CD, Games;Education;Elderly Care;Embassy;Factory;Flower;Fusion Restaurant;Gift Shop;Hair Salon;Handyman;Insurance;Information Technology;Japanese Restaurant;Jewelry and Watch;Market;Mobile;Money Transfer;Nail;Newspaper;Notary Public;Optical;Others;Painter;Personal Trainer;Printing;Real Estate;School;Shipping;Tailor;Tax;Taxi;Television;Thai Church;Thai Massage;Thai Restaurant;Thai Temple;Trader;Travel Agency;Vegan Restaurant";
-
 	@Id
 	@GeneratedValue
 	private Long id;

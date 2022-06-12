@@ -7,6 +7,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,31 +69,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return null;
 //	}
 
-	@ExceptionHandler
-	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
-//		System.out.println("aaa " + ex.getClass().getSimpleName());
-		ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("Unexpected error! Please contact your administrator.");
-
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
 	
 	
-	
-
-	@ExceptionHandler({ IllegalArgumentException.class })
+	@ExceptionHandler({ IllegalArgumentException.class, InvalidDataAccessApiUsageException.class })
 	protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
+		
+		System.out.println("caught here!");
 
 		ApiError apiError = new ApiError();
 		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -109,47 +94,47 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 
-	@ExceptionHandler({ DataIntegrityViolationException.class })
-	protected ResponseEntity<Object> handleDataIntegrityViolationException(Exception ex, WebRequest request) {
-
-		ex.printStackTrace();
-
-		String message = "Unexpected error! Please contact your administrator.";
-
-		if (ex.getCause() instanceof ConstraintViolationException) {
-			ConstraintViolationException cve = (ConstraintViolationException) ex.getCause();
-			String constraint = cve.getConstraintName();
-
-			switch (constraint) {
-			case "user.user_email_UNIQUE":
-				message = "The email has already existed or registered by another user.";
-				break;
-			case "user.user_phone_UNIQUE":
-				message = "The phone number has already existed or registered by another user.";
-				break;
-			case "user.user_username_UNIQUE":
-				message = "The username has already existed or registered by another user.";
-				break;
-			case "location.location_placeid_UNIQUE":
-				message = "Unexpected error! Please contact your administrator.";
-				break;
-			default:
-			}
-		}
-
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
-
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage(message);
-
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+//	@ExceptionHandler({ DataIntegrityViolationException.class })
+//	protected ResponseEntity<Object> handleDataIntegrityViolationException(Exception ex, WebRequest request) {
+//
+//		ex.printStackTrace();
+//
+//		String message = "Unexpected error! Please contact your administrator.";
+//
+//		if (ex.getCause() instanceof ConstraintViolationException) {
+//			ConstraintViolationException cve = (ConstraintViolationException) ex.getCause();
+//			String constraint = cve.getConstraintName();
+//
+//			switch (constraint) {
+//			case "user.user_email_UNIQUE":
+//				message = "The email has already existed or registered by another user.";
+//				break;
+//			case "user.user_phone_UNIQUE":
+//				message = "The phone number has already existed or registered by another user.";
+//				break;
+//			case "user.user_username_UNIQUE":
+//				message = "The username has already existed or registered by another user.";
+//				break;
+//			case "location.location_placeid_UNIQUE":
+//				message = "Unexpected error! Please contact your administrator.";
+//				break;
+//			default:
+//			}
+//		}
+//
+//		ApiError apiError = new ApiError();
+//		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+//		try {
+//			apiError.setError(ex.getCause().getLocalizedMessage());
+//		} catch (Exception e) {
+//			apiError.setError(ex.getLocalizedMessage());
+//		}
+//
+//		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+//		apiError.setMessage(message);
+//
+//		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+//	}
 
 	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class })
 	protected ResponseEntity<Object> handleEmptyResultDataAccessException(Exception ex, WebRequest request) {
@@ -240,6 +225,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
 		apiError.setMessage("Access is denied!");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+	
+	@ExceptionHandler
+	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("Unexpected error! Please contact your administrator.");
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}

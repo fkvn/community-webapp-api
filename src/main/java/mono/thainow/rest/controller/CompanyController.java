@@ -1,6 +1,8 @@
 package mono.thainow.rest.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +31,7 @@ import mono.thainow.service.UserService;
 public class CompanyController {
 
 	@Autowired
-	private CompanyService compService;
+	private CompanyService companyService;
 
 	@Autowired
 	private UserService userService;
@@ -37,13 +39,13 @@ public class CompanyController {
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public List<Company> getAllCompanies() {
-		return compService.getAllCompanies();
+		return companyService.getAllCompanies();
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Company createCompany(@RequestBody CompanyRequest compRequest) {
-		return compService.createCompany(compRequest, false, null);
+		return companyService.createCompany(compRequest, false, null);
 	}
 
 	@PostMapping("/withAdministrator/{administratorId}")
@@ -56,18 +58,18 @@ public class CompanyController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		Company company = objectMapper.convertValue(compRequest, Company.class);
 
-		return compService.createCompanyWithAdministrator(company, user, compRequest.getAdministratorRole());
+		return companyService.createCompanyWithAdministrator(company, user, compRequest.getAdministratorRole());
 	}
 
 	@PutMapping("{id}/status")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public Company updateCompanyStatus(@PathVariable Long id, @RequestParam String newStatus) {
 
-		Company company = compService.getCompanyById(id);
+		Company company = companyService.getCompanyById(id);
 
 //		if newstatus, if old status, no change
 		if (CompanyStatus.valueOf(newStatus) != company.getStatus()) {
-			return compService.updateCompanyStatus(company, CompanyStatus.valueOf(newStatus));
+			return companyService.updateCompanyStatus(company, CompanyStatus.valueOf(newStatus));
 		}
 
 		return company;
@@ -78,6 +80,20 @@ public class CompanyController {
 	public List<Company> updateCompanyStatus(@RequestParam String keywords, @RequestParam boolean fetchAll,
 			@RequestParam int fetchLimit) {
 
-		return compService.searchCompany(keywords, fetchAll, fetchLimit);
+		return companyService.searchCompany(keywords, fetchAll, fetchLimit);
+	}
+	
+	@PostMapping("/validatePhone")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void validatePhone(@RequestBody Map<String, Object> companyInfo) {
+		String phone = Optional.ofNullable((String) companyInfo.get("phone")).orElse("").trim();
+		companyService.validateCompanyPhone(phone);
+	}
+	
+	@PostMapping("/validateEmail")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void validateEmail(@RequestBody Map<String, Object> companyInfo) {
+		String email = Optional.ofNullable((String) companyInfo.get("email")).orElse("").trim();
+		companyService.validateCompanyEmail(email);
 	}
 }

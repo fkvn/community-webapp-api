@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,15 +23,16 @@ import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.UserService;
+import mono.thainow.util.PhoneUtil;
 
-@Repository
+@Service
 public class CompanyServiceImpl implements CompanyService {
 
 //	@Autowired
 //	private CompanyRepositoryElastic compRepo;
 
 	@Autowired
-	private CompanyDao compDao;
+	private CompanyDao companyDao;
 
 	@Autowired
 	private UserService userService;
@@ -51,7 +52,7 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public Company getCompanyById(Long id) {
 //		return compRepo.getById(id);
-		return compDao.getCompanyById(id);
+		return companyDao.getCompanyById(id);
 	}
 
 	@Override
@@ -103,7 +104,7 @@ public class CompanyServiceImpl implements CompanyService {
 		company.setStatus(newStatus);
 
 //		merge company into database
-		company = compDao.saveCompany(company);
+		company = companyDao.saveCompany(company);
 
 		return company;
 	}
@@ -128,7 +129,7 @@ public class CompanyServiceImpl implements CompanyService {
 			company.setName(companyRequest.getName());
 			company.setIndustry(companyRequest.getIndustry());
 
-			company = compDao.saveCompany(company);
+			company = companyDao.saveCompany(company);
 		}
 
 		return company;
@@ -167,7 +168,7 @@ public class CompanyServiceImpl implements CompanyService {
 		company.setStatus(CompanyStatus.PENDING);
 
 //		Merge into database with updated information 
-		company = compDao.saveCompany(company);
+		company = companyDao.saveCompany(company);
 
 		return company;
 	}
@@ -175,7 +176,7 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public Company validateIfCompnayExist(Company company) {
 
-		Company dbCompany = compDao.getCompany(company.getName(), company.getAddress());
+		Company dbCompany = companyDao.getCompany(company.getName(), company.getAddress());
 
 //		new company
 		if (dbCompany == null) {
@@ -183,7 +184,7 @@ public class CompanyServiceImpl implements CompanyService {
 //			persit company into database
 			company.setStatus(CompanyStatus.UNREGISTERED);
 			company.setAdministratorRole("");
-			company = compDao.saveCompany(company);
+			company = companyDao.saveCompany(company);
 		} else {
 			company = dbCompany;
 		}
@@ -209,6 +210,29 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public List<Company> searchCompany(String keywords, boolean fetchAll, int fetchLimit) {
 		return elasticSearchDao.searchCompany(keywords, fetchAll, fetchLimit);
+	}
+
+	@Override
+	public String validateCompanyPhone(String phone) {
+//		validate phone unique
+		boolean isPhoneUnique = companyDao.isPhoneUnique(phone);
+
+		Assert.isTrue(isPhoneUnique, "Phone already existed!");
+		
+//		validate phone number
+		PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
+
+		return phone;
+	}
+
+	@Override
+	public String validateCompanyEmail(String email) {
+//		validate email unique
+		boolean isEmailUnique = companyDao.isEmailUnique(email);
+
+		Assert.isTrue(isEmailUnique, "Email already existed!");
+
+		return email;
 	}
 
 }

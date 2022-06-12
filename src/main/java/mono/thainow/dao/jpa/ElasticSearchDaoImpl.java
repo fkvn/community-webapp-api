@@ -2,6 +2,7 @@ package mono.thainow.dao.jpa;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -10,9 +11,11 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import mono.thainow.dao.ElasticSearchDao;
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.company.CompanyStatus;
 
 @Repository
 public class ElasticSearchDaoImpl implements ElasticSearchDao {
@@ -40,9 +43,9 @@ public class ElasticSearchDaoImpl implements ElasticSearchDao {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} else {
-			System.out.println("Invalid Class");
-		}
+		} 
+		
+		Assert.isTrue(indexer != null, "Index Failed!");
 
 	}
 
@@ -54,7 +57,8 @@ public class ElasticSearchDaoImpl implements ElasticSearchDao {
 		SearchSession searchSession = Search.session(entityManager);
 
 		companies = searchSession.search(Company.class).where(f -> f.match().fields("name").matching(keywords))
-				.fetchHits(fetchAll ? null : fetchLimit);
+				.fetchHits(fetchAll ? null : fetchLimit).stream()
+				.filter(company -> company.getStatus() != CompanyStatus.REJECTED).collect(Collectors.toList());
 
 		return companies;
 

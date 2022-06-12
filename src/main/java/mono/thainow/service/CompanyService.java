@@ -24,4 +24,8 @@ public interface CompanyService {
 	Company validateCompanyWithUserById(Long companyId, BusinessUser user);
 	
 	List<Company> searchCompany(String keywords, boolean fetchAll, int fetchLimit);
+	
+	String validateCompanyPhone(String phone);
+	
+	String validateCompanyEmail(String email);
 }

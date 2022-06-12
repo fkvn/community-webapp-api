@@ -13,6 +13,10 @@ public interface CompanyDao {
 	
 	Company saveCompany(Company company);
 	
+	boolean isEmailUnique(String email);
+	
+	boolean isPhoneUnique(String phone);
+	
 	void removeCompany(Long id);
 	
 }

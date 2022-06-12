@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import mono.thainow.dao.CompanyDao;
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.location.Location;
 
 @Repository
@@ -55,6 +56,49 @@ public class CompanyDaoImpl implements CompanyDao {
 		} catch (Exception ex) {
 //			if location is new 
 			return null;
+		}
+	}
+	
+	
+//	=====================================================
+
+	@Override
+	public boolean isEmailUnique(String email) {
+		try {
+
+			/*
+			 * if no error, means active user with the given email existed -> return false
+			 * 
+			 * We don't check email unique for users who are NOT ACTIVE
+			 */
+			entityManager.createQuery("from Company where status !=:status and email =:email and email <> ''", Company.class)
+					.setParameter("status", CompanyStatus.REJECTED).setParameter("email", email).getSingleResult();
+
+			return false;
+
+		} catch (Exception ex) {
+//			email is available
+			return true;
+		}
+	}
+
+	@Override
+	public boolean isPhoneUnique(String phone) {
+		try {
+
+			/*
+			 * if no error, means active user with the given phone existed -> return false
+			 * 
+			 * We don't check phone unique for users who are NOT ACTIVE
+			 */
+			entityManager.createQuery("from Company where status !=:status and phone =:phone and phone <> ''", Company.class)
+					.setParameter("status", CompanyStatus.REJECTED).setParameter("phone", phone).getSingleResult();
+
+			return false;
+
+		} catch (Exception ex) {
+//			phone is available
+			return true;
 		}
 	}
 
