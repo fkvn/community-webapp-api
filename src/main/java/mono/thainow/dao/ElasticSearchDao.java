@@ -8,5 +8,5 @@ public interface ElasticSearchDao {
 
 	void reIndexPersistedData(String className);
 	
-	List<Company> searchCompany(String keywords, boolean fetchAll, int fetchLimit);
+	List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit);
 }

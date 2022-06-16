@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 		User user = userService.getUserFromSignUpRequest(signUpRequest);
 
 //		check Type of verification
-		boolean isVerified = Optional.ofNullable(signUpRequest.getIsVerified()).orElse(false);
+		boolean isVerified = Optional.ofNullable(signUpRequest.isVerified()).orElse(false);
 
 //		verification is required for classic users
 		if (user.getRole() == UserRole.CLASSIC) {

@@ -13,7 +13,7 @@ import mono.thainow.rest.request.CompanyRequest;
 public class SignupRequest {
 	
 //	if false, otp was not verified
-	private Boolean isVerified = false;
+	private boolean isVerified = false;
 	
 	private String role;
 

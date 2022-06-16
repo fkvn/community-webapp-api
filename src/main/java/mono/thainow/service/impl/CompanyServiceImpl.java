@@ -209,8 +209,8 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public List<Company> searchCompany(String keywords, boolean fetchAll, int fetchLimit) {
-		return elasticSearchDao.searchCompany(keywords, fetchAll, fetchLimit);
+	public List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit) {
+		return elasticSearchDao.searchCompanyByNameOnly(keywords, fetchAll, fetchLimit);
 	}
 
 	@Override

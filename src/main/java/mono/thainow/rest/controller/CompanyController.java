@@ -78,12 +78,12 @@ public class CompanyController {
 		return company;
 	}
 
-	@GetMapping("/search")
+	@GetMapping("/searchName")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public List<Company> updateCompanyStatus(@RequestParam String keywords, @RequestParam boolean fetchAll,
 			@RequestParam int fetchLimit) {
 
-		return companyService.searchCompany(keywords, fetchAll, fetchLimit);
+		return companyService.searchCompanyByNameOnly(keywords, fetchAll, fetchLimit);
 	}
 	
 	@PostMapping("/validatePhone")

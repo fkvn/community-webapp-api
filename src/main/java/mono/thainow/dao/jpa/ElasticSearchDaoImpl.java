@@ -43,14 +43,14 @@ public class ElasticSearchDaoImpl implements ElasticSearchDao {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} 
-		
+		}
+
 		Assert.isTrue(indexer != null, "Index Failed!");
 
 	}
 
 	@Override
-	public List<Company> searchCompany(String keywords, boolean fetchAll, int fetchLimit) {
+	public List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit) {
 
 		List<Company> companies = new ArrayList<>();
 
@@ -58,7 +58,10 @@ public class ElasticSearchDaoImpl implements ElasticSearchDao {
 
 		companies = searchSession.search(Company.class).where(f -> f.match().fields("name").matching(keywords))
 				.fetchHits(fetchAll ? null : fetchLimit).stream()
-				.filter(company -> company.getStatus() != CompanyStatus.REJECTED).collect(Collectors.toList());
+//				in default, we only return company with status as Registered and Unregistered
+				.filter(company -> company.getStatus() == CompanyStatus.UNREGISTERED
+						|| company.getStatus() == CompanyStatus.PENDING)
+				.collect(Collectors.toList());
 
 		return companies;
 
