@@ -16,20 +16,19 @@ import mono.thainow.repository.StorageRepository;
 @Repository
 public class StorageDaoImpl implements StorageDao {
 
-
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	@Autowired
 	private StorageRepository storageRepository;
-	
+
 //	======================================================
-	
+
 	@Override
 	public List<Storage> getAllStorages() {
 		return storageRepository.findAll();
 	}
-	
+
 	@Override
 	public Storage getStorage(long id) {
 		return entityManager.find(Storage.class, id);
@@ -48,6 +47,16 @@ public class StorageDaoImpl implements StorageDao {
 
 	}
 
+	@Override
+	public Storage getStorage(String fileName) {
+		try {
+			Storage storage = entityManager.createQuery("from Storage where name =:name ", Storage.class)
+					.setParameter("name", fileName).getSingleResult();
 
+			return storage;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
 
 }

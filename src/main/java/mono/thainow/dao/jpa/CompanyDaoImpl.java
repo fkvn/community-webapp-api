@@ -49,17 +49,15 @@ public class CompanyDaoImpl implements CompanyDao {
 	@Override
 	public Company getCompany(String name, Location location) {
 		try {
-			return entityManager.createQuery("from Company where UPPER(name) =:name and location =:location", Company.class)
-					.setParameter("name", name.toUpperCase())
-					.setParameter("location", location)
-					.getSingleResult();
+			return entityManager
+					.createQuery("from Company where UPPER(name) =:name and location =:location", Company.class)
+					.setParameter("name", name.toUpperCase()).setParameter("location", location).getSingleResult();
 		} catch (Exception ex) {
 //			if location is new 
 			return null;
 		}
 	}
-	
-	
+
 //	=====================================================
 
 	@Override
@@ -71,8 +69,10 @@ public class CompanyDaoImpl implements CompanyDao {
 			 * 
 			 * We don't check email unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from Company where status !=:status and email =:email and email <> ''", Company.class)
-					.setParameter("status", CompanyStatus.REJECTED).setParameter("email", email).getSingleResult();
+			entityManager.createQuery(
+					"from Company where (status =:status1 or status =:status2) and email =:email and email <> ''",
+					Company.class).setParameter("status1", CompanyStatus.UNREGISTERED)
+					.setParameter("status2", CompanyStatus.REGISTERED).setParameter("email", email).getSingleResult();
 
 			return false;
 
@@ -91,8 +91,10 @@ public class CompanyDaoImpl implements CompanyDao {
 			 * 
 			 * We don't check phone unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from Company where status !=:status and phone =:phone and phone <> ''", Company.class)
-					.setParameter("status", CompanyStatus.REJECTED).setParameter("phone", phone).getSingleResult();
+			entityManager.createQuery(
+					"from Company where (status =:status1 or status =:status2) and phone =:phone and phone <> ''",
+					Company.class).setParameter("status1", CompanyStatus.UNREGISTERED)
+					.setParameter("status2", CompanyStatus.REGISTERED).setParameter("phone", phone).getSingleResult();
 
 			return false;
 

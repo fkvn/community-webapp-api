@@ -25,4 +25,6 @@ public interface StorageService {
 	Storage saveStorage(Storage storage);
 	
 	Storage getStorage(Long id);
+	
+	Storage getStorage(String fileName);
 }

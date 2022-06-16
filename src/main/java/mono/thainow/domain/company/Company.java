@@ -13,6 +13,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.BusinessUser;
 
 @Entity
@@ -45,7 +47,7 @@ import mono.thainow.domain.user.BusinessUser;
 @Setter
 @ToString
 @EqualsAndHashCode
-@Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = true) })
+@Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = false) })
 @Indexed
 public class Company implements Serializable {
 
@@ -67,6 +69,13 @@ public class Company implements Serializable {
 	@NotEmpty
 	@Column(name = "COMPANY_INDUSTRY")
 	private String industry;
+	
+	@OneToOne
+	private Storage logoUrl;
+	
+	
+	@Column(name = "IS_COMPANY_INFORMAL")
+	private boolean isInformal = false;
 
 	@Column(name = "COMPANY_EMAIL")
 	private String email;
@@ -122,7 +131,7 @@ public class Company implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")
 	@NotNull
-	private Location address;
+	private Location location;
 	
 	@Column(name = "COMPANY_FIXED_POSTION")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -141,7 +150,7 @@ public class Company implements Serializable {
 
 	@Column(name = "ADMINISTRATOR_ROLE")
 	private String administratorRole;
-
+	
 //	public static String getDefaultCompIndustry() {
 //		return DEFAULT_COMP_INDUSTRY;
 //	}

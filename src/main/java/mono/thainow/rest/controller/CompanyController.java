@@ -53,12 +53,15 @@ public class CompanyController {
 	public Company createCompanyWithAdministrator(@RequestBody CompanyRequest compRequest,
 			@PathVariable Long administratorId) {
 
-		BusinessUser user = (BusinessUser) userService.getByUserId(administratorId);
+//		BusinessUser user = (BusinessUser) userService.getByUserId(administratorId);
+//
+//		ObjectMapper objectMapper = new ObjectMapper();
+//		Company company = objectMapper.convertValue(compRequest, Company.class);
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		Company company = objectMapper.convertValue(compRequest, Company.class);
+//		return companyService.createCompanyWithAdministrator(company, user, compRequest.getAdministratorRole());
+		
+		return null;
 
-		return companyService.createCompanyWithAdministrator(company, user, compRequest.getAdministratorRole());
 	}
 
 	@PutMapping("{id}/status")

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import mono.thainow.dao.UserDao;
-import mono.thainow.domain.company.Company;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.ClassicUser;
@@ -22,10 +21,10 @@ import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.security.payload.request.SignupRequest;
-import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserPrivilegeService;
+import mono.thainow.service.UserRoleService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
 
@@ -36,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private LocationService locationService;
-	
+
 	@Autowired
 	private UserDao userDao;
 
@@ -47,8 +46,8 @@ public class UserServiceImpl implements UserService {
 	private UserPrivilegeService userPrivilegeService;
 
 	@Autowired
-	private CompanyService companyService;
-	
+	private UserRoleService userRoleService;
+
 	@Autowired
 	private StorageService storageService;
 
@@ -88,85 +87,86 @@ public class UserServiceImpl implements UserService {
 
 //	=============================== Modify User - Start =========================== 
 
-	
 	@Override
 	public User addBusinessCompanyFromSignUpRequest(User user, SignupRequest signUpRequest) {
 
-		try {
+//		try {
+//
+////			this method is for BUSINESS user only
+//			Assert.isTrue(user.getRole() == UserRole.BUSINESS, "Invalid User Type");
+//
+////			assert that user is persisted in the database
+//			Assert.isTrue(user.getId() != null, "Invalid User");
+//
+////			cast user
+//			BusinessUser businessUser = (BusinessUser) user;
+//
+////			initialize company
+//			Company company = Optional.ofNullable(signUpRequest.getCompany()).orElse(new Company());
+//			company = companyService.createCompanyWithAdministrator(company, businessUser,
+//					signUpRequest.getCompany().getAdministratorRole());
+//
+////			add company to the business user list and assert that company is successfully added
+//			boolean isAddCompany = businessUser.getCompanies().add(company);
+//			Assert.isTrue(isAddCompany, "Failed Adding Company");
+//
+////			update business company list
+//			businessUser.setCompanies(businessUser.getCompanies());
+//
+//			/*
+//			 * At this sign-up step, company is still pending, so business status would be
+//			 * DEACTIVED
+//			 */
+//			businessUser.setStatus(UserStatus.DEACTIVATED);
+//
+////			merge user into database
+//			user = saveUser(businessUser);
+//
+//			return user;
+//
+//		} catch (Exception ex) {
+//
+//			/*
+//			 * At the moment - 4/16/22, if errors happened -> company is failed to add then
+//			 * register process would be failed and revert user, but the location is not
+//			 * affected
+//			 */
+//
+//			ex.printStackTrace();
+//
+////			revert user
+//			userDao.removeUser(user.getId());
+//
+//			return null;
+//
+//		}
 
-//			this method is for BUSINESS user only
-			Assert.isTrue(user.getRole() == UserRole.BUSINESS, "Invalid User Type");
-
-//			assert that user is persisted in the database
-			Assert.isTrue(user.getId() != null, "Invalid User");
-
-//			cast user
-			BusinessUser businessUser = (BusinessUser) user;
-
-//			initialize company
-			Company company = Optional.ofNullable(signUpRequest.getCompany()).orElse(new Company());
-			company = companyService.createCompanyWithAdministrator(company, businessUser,
-					signUpRequest.getCompany().getAdministratorRole());
-
-//			add company to the business user list and assert that company is successfully added
-			boolean isAddCompany = businessUser.getCompanies().add(company);
-			Assert.isTrue(isAddCompany, "Failed Adding Company");
-
-//			update business company list
-			businessUser.setCompanies(businessUser.getCompanies());
-
-			/*
-			 * At this sign-up step, company is still pending, so business status would be
-			 * DEACTIVED
-			 */
-			businessUser.setStatus(UserStatus.DEACTIVATED);
-
-//			merge user into database
-			user = saveUser(businessUser);
-
-			return user;
-
-		} catch (Exception ex) {
-
-			/*
-			 * At the moment - 4/16/22, if errors happened -> company is failed to add then
-			 * register process would be failed and revert user, but the location is not
-			 * affected
-			 */
-
-			ex.printStackTrace();
-
-//			revert user
-			userDao.removeUser(user.getId());
-
-			return null;
-
-		}
+		return null;
 	}
-	
+
 	@Override
 	public User uploadProfilePicture(User user, StorageRequest storageRequest) {
-		
+
 //		persist storage into database
-		Storage profile = new Storage(); 
-		
+		Storage profile = new Storage();
+
 		profile.setName(storageRequest.getName());
 		profile.setType(storageRequest.getType());
 		profile.setUrl(storageRequest.getUrl());
 		profile.setSize(storageRequest.getSize());
-				
-		profile =	storageService.saveStorage(profile);
-	
+
+		profile = storageService.saveStorage(profile);
+
 //		attach into user
 		user.setProfileUrl(profile);
-		
+
 //		persist into database
 		user = saveUser(user);
-		
+
 		return user;
 
 	}
-	
+
 	@Override
 	public User saveUser(User user) {
 		return userDao.saveUser(user);
@@ -244,9 +244,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUserFromSignUpRequest(SignupRequest signUpRequest) {
 
-//		initialize user based on its role
-		String role = Optional.ofNullable(signUpRequest.getRole()).orElse(null);
-		User user = initializeUserByRole(UserRole.valueOf(role));
+//		verify role and initialize user based on its role
+		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
+		UserRole role = userRoleService.verifyRoles(roleName);
+		User user = initializeUserByRole(role);
 
 //		validate users' privileges
 		Set<String> strPrivileges = signUpRequest.getPrivileges();
@@ -255,24 +256,18 @@ public class UserServiceImpl implements UserService {
 //		add user privileges
 		user.setPrivileges(privileges);
 
-////		user's profile information 
-//		String firstName = Optional.ofNullable(signUpRequest.getFirstname()).orElse(null);
-//		String lastName = Optional.ofNullable(signUpRequest.getLastname()).orElse(null);
-//
-////		add user profile information
-//		user.setFirstName(firstName);
-//		user.setLastName(lastName);
-		
 //		username
-		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse(null);
+		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse("").trim();
+		Assert.isTrue(!username.isEmpty(), "Invalid Preferred Name");
 		user.setUsername(username);
 
 //		password validation
-		Optional<String> password = Optional.ofNullable(signUpRequest.getPassword());
-		user.setPassword(validateAndEncodeUserPassword(password.get()));
+		String password = Optional.ofNullable(signUpRequest.getPassword()).orElse("").trim();
+		user.setPassword(validateAndEncodeUserPassword(password));
 
 //		user email
 		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse("").trim();
+		Assert.isTrue(email.length() <= 50, "Email can't be more than 50 characters");
 		user.setEmail(validateUserEmail(email));
 
 //		email Verified
@@ -280,24 +275,52 @@ public class UserServiceImpl implements UserService {
 		user.setEmailVerified(isEmailVerified);
 
 //		user phone
-		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse("");
+		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse("").trim();
+//		phone is optional as default
+		Assert.isTrue(phone.length() == 14 || phone.length() == 0,
+				"Invalid Phone Number! Phone number must be in format (xxx) xxx-xxxx");
 		user.setPhone(validateUserPhone(phone));
 
 //		phone Verified
 		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(false);
 		user.setPhoneVerified(isPhoneVerified);
 
-//		assert user has at least email or phone number
-		Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
-				"Users must have at least email or phone number to register!");
+//		login credential
+		if (user.getRole() == UserRole.CLASSIC) {
+//			assert user has at least email or phone number
+			Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
+					"Users must have at least email or phone number to register!");
+		} else if (user.getRole() == UserRole.BUSINESS) {
+//			assert user has at least email or phone number
+			Assert.isTrue(!phone.isEmpty(), "Business user must have phone number to register!");
+		}
 
 //		user location
-		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
-		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
-		user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		if (user.getRole() == UserRole.CLASSIC) {
+			String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
+			String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
+			user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		}
 
-//		initialize user status as DEACTIVATED
-		user.setStatus(UserStatus.DEACTIVATED);
+//		user profile
+		String defaultProfile = "";
+		if (user.getRole() == UserRole.CLASSIC) {
+			defaultProfile = "f01a55de-c66e-4937-9050-6a2e34152c1d.png";
+		} else if (user.getRole() == UserRole.BUSINESS) {
+			defaultProfile = "79433c58-7b7e-4789-b497-7566989ed02b.png";
+		}
+		Storage profile = storageService.getStorage(defaultProfile);
+		user.setProfileUrl(profile);
+
+//		user status
+		if (user.getRole() == UserRole.CLASSIC) {
+			user.setStatus(UserStatus.ACTIVATED);
+		} else if (user.getRole() == UserRole.BUSINESS) {
+			user.setStatus(UserStatus.PENDING);
+		} else {
+//			initialize user status as DEACTIVATED
+			user.setStatus(UserStatus.DEACTIVATED);
+		}
 
 		return user;
 	}
@@ -308,7 +331,7 @@ public class UserServiceImpl implements UserService {
 		boolean isPhoneUnique = userDao.isPhoneUnique(phone);
 
 		Assert.isTrue(isPhoneUnique, "Phone already existed!");
-		
+
 //		validate phone number
 		PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
 
@@ -338,8 +361,6 @@ public class UserServiceImpl implements UserService {
 
 		return encodedPwd;
 	}
-
-
 
 //	=============================== Business Service - End ===============================
 

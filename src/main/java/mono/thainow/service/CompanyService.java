@@ -17,6 +17,8 @@ public interface CompanyService {
 	
 	Company updateCompanyStatus(Company company, CompanyStatus newStatus);
 	
+	Company getCompanyFromRequest(CompanyRequest companyRequest);
+	
 	Company createCompany(CompanyRequest companyRequest, boolean isWithUser, BusinessUser user);
 	
 	Company createCompanyWithAdministrator(Company company, BusinessUser user,  String administratorRole);
@@ -28,4 +30,6 @@ public interface CompanyService {
 	String validateCompanyPhone(String phone);
 	
 	String validateCompanyEmail(String email);
+	
+	Company saveCompany(Company company);
 }

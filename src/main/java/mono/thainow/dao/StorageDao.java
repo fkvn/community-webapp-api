@@ -9,6 +9,8 @@ public interface StorageDao {
 	public List<Storage> getAllStorages();
 	
 	public Storage getStorage(long id);
+	
+	public Storage getStorage(String fileName);
 
 	public Storage saveStorage(Storage file);
 

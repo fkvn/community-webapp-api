@@ -33,7 +33,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.Transient;
 
@@ -49,7 +48,6 @@ import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.util.PhoneUtil;
 
 @RequiredArgsConstructor
 @Getter
@@ -77,7 +75,6 @@ public class User implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@NotNull(message = "User password can't be null")
 	@Column(name = "USER_PASSWORD")
-	@Type(type = "text")
 	private String password;
 
 	@Email(message = "Email is not valid")
@@ -127,7 +124,6 @@ public class User implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")
-	@NotNull
 	private Location location;
 	
 	@OneToOne
@@ -147,11 +143,6 @@ public class User implements Serializable {
 	private void validateUser() {
 		this.setSub(UUID.randomUUID().toString());
 		this.setFullName(this.firstName + " " + this.lastName);
-
-//		validate phone number
-		PhoneUtil.validatePhoneNumberWithGoogleAPI(this.phone, "US");
-		
-
 	}
 	
 	@Transient

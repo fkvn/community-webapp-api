@@ -54,6 +54,8 @@ public class StorageServiceImpl implements StorageService {
 	public String getFileName(MultipartFile file) {
 
 		String fileName = file.getOriginalFilename(); // to get original file name
+		
+		// generate a unique file name
 		fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
 
 		return fileName;
@@ -113,6 +115,11 @@ public class StorageServiceImpl implements StorageService {
 	@Override
 	public Storage getStorage(Long id) {
 		return storageDao.getStorage(id);
+	}
+
+	@Override
+	public Storage getStorage(String fileName) {
+		return storageDao.getStorage(fileName);
 	}
 
 }

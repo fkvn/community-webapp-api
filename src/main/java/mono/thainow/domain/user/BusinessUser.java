@@ -2,7 +2,6 @@ package mono.thainow.domain.user;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.company.Company;
-import mono.thainow.domain.company.CompanyStatus;
 
 @Entity
 @DiscriminatorValue("BUSINESS")
@@ -38,9 +36,9 @@ public class BusinessUser extends User {
 	@JsonIdentityReference(alwaysAsId = true)
 	private List<Company> companies = new ArrayList<>();
 
-	public List<Company> getCompanies() {
-		return this.companies.stream().filter(comp -> comp.getStatus() == CompanyStatus.APPROVED)
-				.collect(Collectors.toList());
-	}
+//	public List<Company> getCompanies() {
+//		return this.companies.stream().filter(comp -> comp.getStatus() == CompanyStatus.REGISTERED)
+//				.collect(Collectors.toList());
+//	}
 
 }

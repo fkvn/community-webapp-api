@@ -10,10 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import mono.thainow.domain.storage.Storage;
+import mono.thainow.domain.company.Company;
+import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
-import mono.thainow.domain.user.UserStatus;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.security.payload.request.SignInRequest;
 import mono.thainow.security.payload.request.SignupRequest;
@@ -22,7 +22,7 @@ import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.TokenResponse;
 import mono.thainow.security.verify.TwilioVerification;
 import mono.thainow.service.AuthService;
-import mono.thainow.service.StorageService;
+import mono.thainow.service.CompanyService;
 import mono.thainow.service.UserService;
 
 @Service
@@ -30,9 +30,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserService userService;
-
+	
 	@Autowired
-	private StorageService storageService;
+	private CompanyService companyService;
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -81,38 +81,42 @@ public class AuthServiceImpl implements AuthService {
 //		verification is required for classic users
 		if (user.getRole() == UserRole.CLASSIC) {
 			Assert.isTrue(isVerified, "Users must be verified to register!");
-			user.setStatus(UserStatus.ACTIVATED);
-		}
+		} 
 
 //		persist user info into database 
 		user = userService.saveUser(user);
-
-//		add user profile
-		if (user.getProfileUrl() == null) {
-
-//			this is manual add, please make sure the id is available first
-			Long uploadedStorageId = (long) 35;
-			Storage profile = storageService.getStorage(uploadedStorageId);
-
-//			if found
-			if (profile != null) {
-
-//			save profile
-				user.setProfileUrl(profile);
-
-//			update user info into database 
-				user = userService.saveUser(user);
-			}
-		}
 
 		/*
 		 * 1. Validate company information if user registered as BUSINESS 2. Add company
 		 * into business 3. Revert user if company registered failed
 		 */ if (user.getRole() == UserRole.BUSINESS) {
 
-			user = userService.addBusinessCompanyFromSignUpRequest(user, signUpRequest);
-
-			Assert.isTrue(user != null, "Company Registered Failed");
+//			add company
+			Company company = companyService.getCompanyFromRequest(signUpRequest.getCompany());
+			
+//			bind business profile url with company logo url
+			company.setLogoUrl(user.getProfileUrl());
+			
+//			persist company
+			company = companyService.saveCompany(company);
+			
+			
+//			bind business location with company location
+			user.setLocation(company.getLocation());
+			user = userService.saveUser(user);
+			
+//			update company and business relationship
+			String administratorRole = Optional.ofNullable(signUpRequest.getAdministratorRole()).orElse("");
+			
+//			company - user
+			BusinessUser businessUser = (BusinessUser) user;
+			company.setAdministratorRole(administratorRole);
+			company.setAdministrator(businessUser);
+			company = companyService.saveCompany(company);
+			
+//			user - company
+			businessUser.getCompanies().add(company);
+			businessUser = (BusinessUser) userService.saveUser(businessUser);
 
 		}
 

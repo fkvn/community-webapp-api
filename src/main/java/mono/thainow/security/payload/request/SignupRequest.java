@@ -3,15 +3,9 @@ package mono.thainow.security.payload.request;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import lombok.Getter;
 import lombok.Setter;
-import mono.thainow.domain.company.Company;
+import mono.thainow.rest.request.CompanyRequest;
 
 
 @Getter
@@ -19,45 +13,33 @@ import mono.thainow.domain.company.Company;
 public class SignupRequest {
 	
 //	if false, otp was not verified
-	private Boolean isVerified;
-
-	@Size(max = 50, message = "Email can't be more than 50 characters")
-	@Email
-	private String email;
+	private Boolean isVerified = false;
 	
-//	 email validation - if user uses email for otp verification
-	private boolean isEmailVerified;
-
-	@Size(max = 15, message = "Phone number can't be more than 15 digit numbers")
-	private String phone;
-	
-//	phone validation - if user uses phone for otp verification
-	private boolean isPhoneVerified;
-	
-	private Set<String> privileges = new HashSet<>();
-	
-	@NotEmpty
 	private String role;
 
-	@NotBlank
-	@Size(min = 8, max = 20)
+	private String email;
+	private boolean isEmailVerified = false;
+
+	private String phone;
+	private boolean isPhoneVerified = false;
+	
+	private Set<String> privileges = new HashSet<>();
+
 	private String password;
+	
+	private String username = "";
 	
 	private String firstname = "";
 
 	private String lastname = "";
 	
-	@NotBlank
-	private String username = "";
-	
-	@NotNull
 	private String address; 
 	
-	@NotNull
 	private String placeid;
 
 //	Business account Information
-	private Company company; 
+	private CompanyRequest company; 
 	
+	private String administratorRole;
 	
 }
