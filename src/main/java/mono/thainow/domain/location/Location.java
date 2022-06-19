@@ -96,10 +96,10 @@ public class Location implements Serializable {
 	private String fullAddress;
 
 	@Column(name = "LOCATION_LAT")
-	private String lat;
+	private double lat;
 
 	@Column(name = "LOCATION_LNG")
-	private String lng;
+	private double lng;
 
 	@Column(name = "LOCATION_TYPE")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

@@ -49,11 +49,9 @@ public class LocationDaoImpl implements LocationDao {
 	@Override
 	public Location getLocationByFormattedAddress(String address) {
 		
-		System.out.println(address);
-		
 		try {
 			return entityManager
-					.createQuery("from Location where formattedAddress =:address", Location.class)
+					.createQuery("from Location where description =:address", Location.class)
 					.setParameter("address", address)
 					.getSingleResult();
 		} catch (Exception ex) {
@@ -79,7 +77,7 @@ public class LocationDaoImpl implements LocationDao {
 	public Location getLocationByEitherPlaceidOrAddress(String placeid, String address) {
 		try {
 			return entityManager
-					.createQuery("from Location where placeid =:placeid or formattedAddress =:address ", Location.class)
+					.createQuery("from Location where placeid =:placeid or description =:address ", Location.class)
 					.setParameter("placeid", placeid).setParameter("address", address)
 					.getSingleResult();
 		} catch (Exception ex) {

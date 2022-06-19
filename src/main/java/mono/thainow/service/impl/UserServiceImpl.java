@@ -24,7 +24,6 @@ import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserPrivilegeService;
-import mono.thainow.service.UserRoleService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
 
@@ -45,8 +44,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserPrivilegeService userPrivilegeService;
 
-	@Autowired
-	private UserRoleService userRoleService;
+//	@Autowired
+//	private UserRoleService userRoleService;
 
 	@Autowired
 	private StorageService storageService;
@@ -246,8 +245,9 @@ public class UserServiceImpl implements UserService {
 
 //		verify role and initialize user based on its role
 		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
-		UserRole role = userRoleService.verifyRoles(roleName);
-		User user = initializeUserByRole(role);
+//		UserRole role = userRoleService.verifyRoles(roleName);
+		User user = initializeUserByRole(UserRole.valueOf(roleName));
+//		User user = initializeUserByRole(role);
 
 //		validate users' privileges
 		Set<String> strPrivileges = signUpRequest.getPrivileges();
@@ -296,11 +296,9 @@ public class UserServiceImpl implements UserService {
 		}
 
 //		user location
-		if (user.getRole() == UserRole.CLASSIC) {
-			String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
-			String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
-			user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
-		}
+		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
+		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
+		user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 
 //		user profile
 		String defaultProfile = "";
