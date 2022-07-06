@@ -323,6 +323,17 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
+	
+	@Override
+	public String validateUsername(String username) {
+		
+		boolean isUsernameUnique = userDao.isUsernameUnique(username);
+		
+		Assert.isTrue(isUsernameUnique, "This name already existed");
+		
+		return username;
+	}
+	
 	@Override
 	public String validateUserPhone(String phone) {
 //		validate phone unique
@@ -359,6 +370,8 @@ public class UserServiceImpl implements UserService {
 
 		return encodedPwd;
 	}
+
+
 
 //	=============================== Business Service - End ===============================
 

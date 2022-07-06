@@ -69,14 +69,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return null;
 //	}
 
-
-
-	
-	
 	@ExceptionHandler({ IllegalArgumentException.class, InvalidDataAccessApiUsageException.class })
 	protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
-		
+
 		System.out.println("caught here!");
 
 		ApiError apiError = new ApiError();
@@ -92,7 +88,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-
 
 //	@ExceptionHandler({ DataIntegrityViolationException.class })
 //	protected ResponseEntity<Object> handleDataIntegrityViolationException(Exception ex, WebRequest request) {
@@ -153,7 +148,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
+
 	@ExceptionHandler({ ApiException.class })
 	protected ResponseEntity<Object> handleTwilioApiException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
@@ -167,12 +162,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		}
 
 		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("Invalid Code. Please try again or request a new code!!!");
+		
+		if (apiError.getError().indexOf("VerificationCheck was not found") > -1) {
+			
+			apiError.setMessage("Token Verification Failed. Please try again or request a new code!!!");
+		} else {
+			apiError.setMessage("Token Verification Process Error!!!");
+		}
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
-	
+
 	@ExceptionHandler({ BadCredentialsException.class })
 	protected ResponseEntity<Object> handleBadCredentialsException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
@@ -190,8 +190,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
-	
+
 	@ExceptionHandler({ InternalAuthenticationServiceException.class })
 	protected ResponseEntity<Object> handleInternalAuthenticationServiceException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
@@ -209,8 +208,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
-	
+
 	@ExceptionHandler({ AccessDeniedException.class })
 	protected ResponseEntity<Object> handleAccessDeniedException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
@@ -228,7 +226,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
+
 	@ExceptionHandler
 	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
 		ex.printStackTrace();

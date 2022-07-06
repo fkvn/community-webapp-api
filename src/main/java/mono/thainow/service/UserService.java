@@ -30,6 +30,8 @@ public interface UserService {
 	
 //	========= business requirement service =================
 	
+	String validateUsername(String username);
+	
 	String validateUserPhone(String phone);
 	
 	String validateUserEmail(String email);

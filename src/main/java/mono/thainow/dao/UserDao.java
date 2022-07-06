@@ -22,6 +22,8 @@ public interface UserDao {
 	
 	User getActiveUserBySub(String sub);
 	
+	boolean isUsernameUnique(String username);
+	
 	boolean isEmailUnique(String email);
 	
 	boolean isPhoneUnique(String phone);

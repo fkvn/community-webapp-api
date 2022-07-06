@@ -149,6 +149,27 @@ public class UserDaoImpl implements UserDao {
 		}
 	}
 
+	@Override
+	public boolean isUsernameUnique(String username) {
+		try {
+
+			/*
+			 * if no error, means active user with the given username existed -> return false
+			 * 
+			 * We don't check username unique for users who are NOT ACTIVE
+			 */
+			entityManager.createQuery("from User where status <> :statusDelete and username =:username and username <> ''", User.class)
+					.setParameter("statusDelete", UserStatus.DELETED)
+					.setParameter("username", username).getSingleResult();
+
+			return false;
+
+		} catch (Exception ex) {
+//			phone is available
+			return true;
+		}
+	}
+
 
 
 }

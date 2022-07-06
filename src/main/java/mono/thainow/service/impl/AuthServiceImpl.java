@@ -20,9 +20,9 @@ import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.TokenResponse;
-import mono.thainow.security.verify.TwilioVerification;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.CompanyService;
+import mono.thainow.service.TwilioService;
 import mono.thainow.service.UserService;
 
 @Service
@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
 	JwtUtils jwtUtils;
 
 	@Autowired
-	TwilioVerification twilio;
+	TwilioService twilioService;
 
 	@Override
 	public void sendVerificationToken(TokenRequest tokenRequest) {
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
 		String channel = Optional.ofNullable(tokenRequest.getChannel()).orElse("").trim();
 
 //		send verification token
-		twilio.sendVerficationToken(phone, region, email, channel);
+		twilioService.sendVerficationToken(phone, region, email, channel);
 	}
 
 	@Override
@@ -61,13 +61,13 @@ public class AuthServiceImpl implements AuthService {
 
 //		inputs
 		String phone = Optional.ofNullable(tokenResponse.getPhone()).orElse("").trim();
-		String region = Optional.ofNullable(tokenResponse.getRegion()).orElse("").trim();
+		String region = Optional.ofNullable(tokenResponse.getRegion()).orElse("US").trim();
 		String email = Optional.ofNullable(tokenResponse.getEmail()).orElse("").trim();
 		String channel = Optional.ofNullable(tokenResponse.getChannel()).orElse("").trim();
 		String token = Optional.ofNullable(tokenResponse.getToken()).orElse("").trim();
 
 //		check verification token
-		twilio.checkVerficationToken(phone, region, email, channel, token);
+		twilioService.checkVerficationToken(phone, region, email, channel, token);
 	}
 
 	@Override
