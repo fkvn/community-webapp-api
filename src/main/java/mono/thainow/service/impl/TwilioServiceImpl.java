@@ -102,8 +102,10 @@ public class TwilioServiceImpl implements TwilioService {
 		Assert.isTrue(!receiver.isEmpty(), "Missing receiver!");
 
 //		validate token
-		VerificationCheck.creator(twilioVerification.getServiceID(), token)
+		VerificationCheck verificationCheck = VerificationCheck.creator(twilioVerification.getServiceID(), token)
 				.setTo(receiver).create();
+		
+		Assert.isTrue(verificationCheck.getStatus().equals("approved"), "Token Verification Failed. Please try again or request a new code!!!");
 		
 	}
 

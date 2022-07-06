@@ -24,6 +24,7 @@ import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserPrivilegeService;
+import mono.thainow.service.UserRoleService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
 
@@ -44,8 +45,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserPrivilegeService userPrivilegeService;
 
-//	@Autowired
-//	private UserRoleService userRoleService;
+	@Autowired
+	private UserRoleService userRoleService;
 
 	@Autowired
 	private StorageService storageService;
@@ -245,9 +246,9 @@ public class UserServiceImpl implements UserService {
 
 //		verify role and initialize user based on its role
 		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
-//		UserRole role = userRoleService.verifyRoles(roleName);
-		User user = initializeUserByRole(UserRole.valueOf(roleName));
-//		User user = initializeUserByRole(role);
+//		User user = initializeUserByRole(UserRole.valueOf(roleName));
+		UserRole role = userRoleService.verifyRoles(roleName);
+		User user = initializeUserByRole(role);
 
 //		validate users' privileges
 		Set<String> strPrivileges = signUpRequest.getPrivileges();
@@ -259,7 +260,7 @@ public class UserServiceImpl implements UserService {
 //		username
 		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse("").trim();
 		Assert.isTrue(!username.isEmpty(), "Invalid Preferred Name");
-		user.setUsername(username);
+		user.setUsername(validateUsername(username));
 
 //		password validation
 		String password = Optional.ofNullable(signUpRequest.getPassword()).orElse("").trim();
@@ -286,15 +287,9 @@ public class UserServiceImpl implements UserService {
 		user.setPhoneVerified(isPhoneVerified);
 
 //		login credential
-		if (user.getRole() == UserRole.CLASSIC) {
-//			assert user has at least email or phone number
-			Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
-					"Users must have at least email or phone number to register!");
-		} else if (user.getRole() == UserRole.BUSINESS) {
-//			assert user has at least email or phone number
-			Assert.isTrue(!phone.isEmpty(), "Business user must have phone number to register!");
-		}
-
+		Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
+				"Users must have at least email or phone number to register!");
+		
 //		user location
 		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
 		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
@@ -311,14 +306,7 @@ public class UserServiceImpl implements UserService {
 		user.setProfileUrl(profile);
 
 //		user status
-		if (user.getRole() == UserRole.CLASSIC) {
-			user.setStatus(UserStatus.ACTIVATED);
-		} else if (user.getRole() == UserRole.BUSINESS) {
-			user.setStatus(UserStatus.PENDING);
-		} else {
-//			initialize user status as DEACTIVATED
-			user.setStatus(UserStatus.DEACTIVATED);
-		}
+		user.setStatus(UserStatus.ACTIVATED);
 
 		return user;
 	}
@@ -329,7 +317,7 @@ public class UserServiceImpl implements UserService {
 		
 		boolean isUsernameUnique = userDao.isUsernameUnique(username);
 		
-		Assert.isTrue(isUsernameUnique, "This name already existed");
+		Assert.isTrue(isUsernameUnique, "Username already existed");
 		
 		return username;
 	}
