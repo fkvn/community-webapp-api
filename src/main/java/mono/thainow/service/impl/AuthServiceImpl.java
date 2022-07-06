@@ -162,7 +162,7 @@ public class AuthServiceImpl implements AuthService {
 			break;
 
 		default:
-			break;
+			break; 
 		}
 
 		Authentication authentication = authenticationManager
