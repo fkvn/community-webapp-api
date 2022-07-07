@@ -144,8 +144,8 @@ public class Company implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "ADMINISTRATOR_ID")
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-	@JsonIdentityReference(alwaysAsId = true)
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonIdentityReference(alwaysAsId = true)
 	private BusinessUser administrator;
 
 	@Column(name = "ADMINISTRATOR_ROLE")

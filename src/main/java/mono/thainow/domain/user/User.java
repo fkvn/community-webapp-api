@@ -81,8 +81,11 @@ public class User implements Serializable {
 	@Column(name = "USER_EMAIL")
 	private String email;
 
-	@Column(name = "IS_USER_EMAIL_VERIFIED")
+	@Column(name = "IS_USER_EMAIL_VERIFIED")	
 	private boolean isEmailVerified = false;
+	
+	@Column(name = "IS_USER_EMAIL_PUBLIC")
+	private boolean isEmailPublic = false;
 
 	@Column(name = "USER_FIRSTNAME")
 	private String firstName = "";
@@ -91,6 +94,7 @@ public class User implements Serializable {
 	private String lastName = "";
 
 	@Column(name = "USER_FULLNAME")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String fullName = firstName + lastName;
 
 	@Column(name = "USER_USERNAME")
@@ -99,15 +103,20 @@ public class User implements Serializable {
 	@Column(name = "USER_PHONE")
 	private String phone;
 
+	@Column(name = "IS_USER_PHONE_PUBLIC")
+	private boolean isPhonePublic = false;
+	
 	@Column(name = "IS_USER_PHONE_VERIFIED")
 	private boolean isPhoneVerified = false;
 
 	@ElementCollection(fetch = FetchType.EAGER)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
 	@Column(name = "USER_PRIVILEGES", nullable = false)
 	private Set<UserPrivilege> privileges = new HashSet<>();
 
 	@NotNull(message = "User status can't be null!")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@Enumerated(EnumType.STRING)
 	@Column(name = "USER_STATUS")
 	private UserStatus status;
@@ -115,14 +124,16 @@ public class User implements Serializable {
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "USER_CREATED_ON")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Date createdOn = new Date();
 
 	@UpdateTimestamp
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "USER_UPDATED_ON")
 	private Date updatedOn = new Date();
 
-	@ManyToOne
+	@ManyToOne	
 	@JoinColumn(name = "LOCATION_ID")
 	private Location location;
 	
@@ -130,6 +141,7 @@ public class User implements Serializable {
 	private Storage profileUrl;
 
 	@Transient
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	public UserRole getRole() {
 		return UserRole.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
 	}

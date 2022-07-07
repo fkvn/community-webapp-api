@@ -1,9 +1,14 @@
 package mono.thainow.security.payload.response;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import lombok.Getter;
 import lombok.Setter;
-import mono.thainow.domain.storage.Storage;
-import mono.thainow.domain.user.UserRole;
+import mono.thainow.domain.company.Company;
+import mono.thainow.service.impl.UserDetailsImpl;
 
 @Getter
 @Setter
@@ -11,29 +16,38 @@ public class JwtResponse {
 
 	private String access_token;
 	private String type = "Bearer";
-	private Long id;
-	private String username;
-	private Storage profileUrl;
-	private UserRole role;
-	
+
+	private Map<String, Object> user = new HashMap<>();
+	private List<Company> companies = new ArrayList<>();
+
 	public JwtResponse(String accessToken) {
 		this.access_token = accessToken;
 	}
 
-	public JwtResponse(String accessToken, Long id, String username, Storage profileUrl, UserRole role) {
+	public JwtResponse(String accessToken, UserDetailsImpl userDetails) {
 		this.access_token = accessToken;
-		this.id = id;
-		this.username = username;
-		this.profileUrl = profileUrl;
-		this.role = role;
+		this.user = getUserInfo(userDetails);
+		this.companies = userDetails.getCompanies();
 	}
 
-//	public JwtResponse(String accessToken, Long id, String username, String email, List<String> roles) {
-//		this.token = accessToken;
-//		this.id = id;
-//		this.username = username;
-//		this.email = email;
-//		this.roles = roles;
-//	}
+	private Map<String, Object> getUserInfo(UserDetailsImpl userDetails) {
+		Map<String, Object> userInfo = new HashMap<>();
+
+		userInfo.put("id", userDetails.getId());
+		userInfo.put("username", userDetails.getUsername());
+		userInfo.put("profileUrl", userDetails.getProfileUrl());
+		userInfo.put("role", userDetails.getRole());
+		userInfo.put("firstname", userDetails.getFirstname());
+		userInfo.put("lastname", userDetails.getLastname());
+		userInfo.put("email", userDetails.getEmail());
+		userInfo.put("isEmailVerified", userDetails.isEmailVerified());
+		userInfo.put("isEmailPublic", userDetails.isEmailPublic());
+		userInfo.put("phone", userDetails.getPhone());
+		userInfo.put("isPhoneVerified", userDetails.isPhoneVerified());
+		userInfo.put("isPhonePublic", userDetails.isPhonePublic());
+		userInfo.put("location", userDetails.getLocation());
+
+		return userInfo;
+	}
 
 }

@@ -175,8 +175,7 @@ public class AuthServiceImpl implements AuthService {
 //		JwtResponse jwtClaims = new JwtResponse(jwt);
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
-				userDetails.getProfileUrl(), userDetails.getRole());
+		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
 
 //		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 //				.collect(Collectors.toList());
