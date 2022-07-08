@@ -119,16 +119,16 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public JwtResponse login(SignInRequest loginRequest) {
+	public JwtResponse signin(SignInRequest signinRequest) {
 
-		String channel = Optional.ofNullable(loginRequest.getChannel()).orElse("");
+		String channel = Optional.ofNullable(signinRequest.getChannel()).orElse("");
 
 //		only verify by email and phone
 		Assert.isTrue(channel.equals("email") || channel.equals("phone"),
 				"Only Email and Phone are supported at the moment!");
 
 //		password verification
-		Optional<String> password = Optional.ofNullable(loginRequest.getPassword());
+		Optional<String> password = Optional.ofNullable(signinRequest.getPassword());
 		Assert.isTrue(!password.isEmpty(), "Password can't be blank!");
 
 		String username = "";
@@ -137,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
 
 		case "email": {
 
-			Optional<String> email = Optional.ofNullable(loginRequest.getEmail());
+			Optional<String> email = Optional.ofNullable(signinRequest.getEmail());
 
 //			email is required
 			Assert.isTrue(email != null && !email.isEmpty(), "Email is required for the login process!");
@@ -150,7 +150,7 @@ public class AuthServiceImpl implements AuthService {
 
 		case "phone": {
 
-			Optional<String> phone = Optional.ofNullable(loginRequest.getPhone());
+			Optional<String> phone = Optional.ofNullable(signinRequest.getPhone());
 
 //			phone number is required
 			Assert.isTrue(phone != null && !phone.isEmpty(), "Phone number is required for the login process!");

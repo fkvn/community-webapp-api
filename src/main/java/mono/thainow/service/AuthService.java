@@ -14,6 +14,6 @@ public interface AuthService {
 	
 	boolean signUp(SignupRequest signUpRequest);
 	
-	JwtResponse login(SignInRequest loginRequest);
+	JwtResponse signin(SignInRequest loginRequest);
 
 }
