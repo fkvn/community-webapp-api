@@ -21,7 +21,6 @@ import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.security.payload.request.SignupRequest;
-import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserPrivilegeService;
 import mono.thainow.service.UserRoleService;
@@ -33,8 +32,8 @@ import mono.thainow.util.PhoneUtil;
 //@Qualifier
 public class UserServiceImpl implements UserService {
 
-	@Autowired
-	private LocationService locationService;
+//	@Autowired
+//	private LocationService locationService;
 
 	@Autowired
 	private UserDao userDao;
@@ -291,9 +290,12 @@ public class UserServiceImpl implements UserService {
 				"Users must have at least email or phone number to register!");
 		
 //		user location
-		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
-		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
-		user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+//		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
+//		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
+//		if (!placeid.isEmpty() && !address.isEmpty()) {
+//			user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+//		}
+		
 
 //		user profile
 		String defaultProfile = "";
