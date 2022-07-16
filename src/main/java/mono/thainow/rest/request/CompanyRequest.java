@@ -34,5 +34,9 @@ public class CompanyRequest {
 	private String address; 
 	
 	private String placeid;
+	
+	private boolean withAdministrator = true;
+	
+	private Long administratorId;
 
 }

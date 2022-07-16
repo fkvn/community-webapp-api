@@ -6,7 +6,6 @@ import java.util.Map;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.post.deal.DealPost;
-import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.PostRequest;
 import mono.thainow.rest.response.PostResponse;
@@ -21,7 +20,7 @@ public interface PostService {
 
 	Post getPostInfoFromPostRequest(PostRequest postRequest);
 
-	Post validateCompanyPost(Post post, Long companyId, BusinessUser user, boolean isCompanyPost);
+//	Post validateCompanyPost(Post post, Long companyId, BusinessUser user, boolean isCompanyPost);
 	
 	Post getPostDetailInfoFromPostRequest(Post post, PostRequest postRequest, User user);
 	

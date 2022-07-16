@@ -13,8 +13,6 @@ import org.springframework.util.Assert;
 
 import mono.thainow.dao.UserDao;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.domain.user.BusinessUser;
-import mono.thainow.domain.user.ClassicUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
@@ -222,17 +220,17 @@ public class UserServiceImpl implements UserService {
 
 		User user = null;
 
-		switch (role) {
-		case BUSINESS:
-			user = new BusinessUser();
-			break;
-		case CLASSIC:
-			user = new ClassicUser();
-			break;
-		default:
-			user = new User();
-			break;
-		}
+//		switch (role) {
+//		case BUSINESS:
+//			user = new BusinessUser();
+//			break;
+//		case CLASSIC:
+//			user = new ClassicUser();
+//			break;
+//		default:
+//			user = new User();
+//			break;
+//		}
 
 //		assert that user is not null
 		Assert.isTrue(user != null, "Failed Initialized User");
@@ -247,7 +245,8 @@ public class UserServiceImpl implements UserService {
 		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
 //		User user = initializeUserByRole(UserRole.valueOf(roleName));
 		UserRole role = userRoleService.verifyRoles(roleName);
-		User user = initializeUserByRole(role);
+//		User user = initializeUserByRole(role);
+		User user = new User();
 
 //		validate users' privileges
 		Set<String> strPrivileges = signUpRequest.getPrivileges();
@@ -273,7 +272,7 @@ public class UserServiceImpl implements UserService {
 //		email Verified
 		boolean isEmailVerified = Optional.ofNullable(signUpRequest.isEmailVerified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
-
+ 
 //		user phone
 		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse("").trim();
 //		phone is optional as default
@@ -285,7 +284,7 @@ public class UserServiceImpl implements UserService {
 		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(false);
 		user.setPhoneVerified(isPhoneVerified);
 
-//		login credential
+//		login credential 
 		Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
 				"Users must have at least email or phone number to register!");
 		

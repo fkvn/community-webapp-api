@@ -2,7 +2,6 @@ package mono.thainow.service.impl;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,8 +11,8 @@ import mono.thainow.dao.CompanyDao;
 import mono.thainow.dao.ElasticSearchDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
-import mono.thainow.domain.user.BusinessUser;
-import mono.thainow.domain.user.UserStatus;
+import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserRole;
 import mono.thainow.repository.CompanyRepository;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.service.CompanyService;
@@ -29,7 +28,7 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Autowired
 	private CompanyDao companyDao;
-	
+
 	@Autowired
 	private CompanyRepository companyRepo;
 
@@ -57,85 +56,75 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public Company updateCompanyStatus(Company company, CompanyStatus newStatus) {
 
-		BusinessUser administrator = (BusinessUser) userService.getByUserId(company.getAdministrator().getId());
-
-//		update administrator status
-		switch (newStatus) {
-		/*
-		 * Status = PENDING or REJECTED -> business account related would be update to
-		 * DEACTIVATED status
-		 */
-		case PENDING:
-		case REJECTED:
-			administrator.setStatus(UserStatus.DEACTIVATED);
-			break;
-		/*
-		 * Status = UNREGISTERED -> there is no administrator or business belongs to
-		 * this company
-		 * 
-		 */
-		case UNREGISTERED: {
-
-			company.setAdministrator(null);
-			company.setAdministratorRole(null);
-
-			administrator.getCompanies().remove(company);
-		}
-			break;
-		/*
-		 * Status = APPROVED -> business account related would be update to ACTIVE
-		 * status
-		 */
-		case REGISTERED: {
-			Assert.isTrue(
-					administrator.getCompanies().stream().filter(comp -> comp.getStatus() == CompanyStatus.REGISTERED)
-							.collect(Collectors.toList()).size() < 1,
-					"Only 1 active company per business at the moment!");
-
-			administrator.setStatus(UserStatus.ACTIVATED);
-		}
-			break;
-		default:
-			break;
-		}
-
-//		update company status
-		company.setStatus(newStatus);
-
-//		merge company into database
-		company = companyDao.saveCompany(company);
-
-		return company;
-	}
-
-	@Override
-	public Company createCompany(CompanyRequest companyRequest, boolean isWithUser, BusinessUser user) {
-
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		Company company = objectMapper.convertValue(companyRequest, Company.class);
-		Company company = new Company();
-
-////		with administrator 
-//		if (isWithUser) {
-//			company = createCompanyWithAdministrator(company, user, companyRequest.getAdministratorRole());
-//		} else {
-////			no administrator
+//		BusinessUser administrator = (BusinessUser) userService.getByUserId(company.getAdministrator().getId());
 //
-//			String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("");
-//			String address = Optional.ofNullable(companyRequest.getAddress()).orElse("");
-//			company.setAddress(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+////		update administrator status
+//		switch (newStatus) {
+//		/*
+//		 * Status = PENDING or REJECTED -> business account related would be update to
+//		 * DEACTIVATED status
+//		 */
+//		case PENDING:
+//		case REJECTED:
+//			administrator.setStatus(UserStatus.DEACTIVATED);
+//			break;
+//		/*
+//		 * Status = UNREGISTERED -> there is no administrator or business belongs to
+//		 * this company
+//		 * 
+//		 */
+//		case UNREGISTERED: {
 //
-//			company.setName(companyRequest.getName());
-//			company.setIndustry(companyRequest.getIndustry());
+//			company.setAdministrator(null);
+//			company.setAdministratorRole(null);
 //
-//			company = companyDao.saveCompany(company);
+//			administrator.getCompanies().remove(company);
 //		}
+//			break;
+//		/*
+//		 * Status = APPROVED -> business account related would be update to ACTIVE
+//		 * status
+//		 */
+//		case REGISTERED: {
+//			Assert.isTrue(
+//					administrator.getCompanies().stream().filter(comp -> comp.getStatus() == CompanyStatus.REGISTERED)
+//							.collect(Collectors.toList()).size() < 1,
+//					"Only 1 active company per business at the moment!");
+//
+//			administrator.setStatus(UserStatus.ACTIVATED);
+//		}
+//			break;
+//		default:
+//			break;
+//		}
+//
+////		update company status
+//		company.setStatus(newStatus);
+//
+////		merge company into database
+//		company = companyDao.saveCompany(company);
 
 		return company;
 	}
 
 	@Override
-	public Company createCompanyWithAdministrator(Company company, BusinessUser user, String administratorRole) {
+	public Company createCompany(CompanyRequest companyRequest) {
+
+		Company company = getCompanyFromRequest(companyRequest);
+
+		company = saveCompany(company);
+		
+//		update administrator
+		User user = company.getAdministrator();
+		user.getCompanies().add(company);
+		user.setRole(UserRole.BUSINESS);
+		user = userService.saveUser(user);
+
+		return company;
+	}
+
+//	@Override
+//	public Company createCompanyWithAdministrator(Company company, BusinessUser user, String administratorRole) {
 //
 ////		the administrator has to be BUSINESS Role
 //		Assert.isTrue(user.getRole() == UserRole.BUSINESS && user != null, "Invalid Company Administrator!");
@@ -169,20 +158,19 @@ public class CompanyServiceImpl implements CompanyService {
 ////		Merge into database with updated information 
 //		company = companyDao.saveCompany(company);
 
-		return company;
-	}
-
+//		return company;
+//	}
+//
 	@Override
 	public Company validateIfCompnayExist(Company company) {
-		
-		return null;
 
-//		Company dbCompany = companyDao.getCompany(company.getName(), company.getAddress());
+		return null;
+//		Company dbCompany = companyDao.getCompany(company.getName(), company.getLocation());
 //
-////		new company
+//		// new company
 //		if (dbCompany == null) {
 //
-////			persit company into database
+//		//	persit company into database
 //			company.setStatus(CompanyStatus.UNREGISTERED);
 //			company.setAdministratorRole("");
 //			company = companyDao.saveCompany(company);
@@ -193,20 +181,20 @@ public class CompanyServiceImpl implements CompanyService {
 //		return company;
 	}
 
-	@Override
-	public Company validateCompanyWithUserById(Long companyId, BusinessUser user) {
-
-//		assert that company is not missing
-		Assert.isTrue(companyId != null, "Invalid Company ID!");
-
-//		get company
-		Company company = getCompanyById(companyId);
-
-//		assert that the company belongs to the author
-		Assert.isTrue(user.getCompanies().contains(company), "Invalid Company!");
-
-		return company;
-	}
+//	@Override
+//	public Company validateCompanyWithUserById(Long companyId, BusinessUser user) {
+//
+////		assert that company is not missing
+//		Assert.isTrue(companyId != null, "Invalid Company ID!");
+//
+////		get company
+//		Company company = getCompanyById(companyId);
+//
+////		assert that the company belongs to the author
+//		Assert.isTrue(user.getCompanies().contains(company), "Invalid Company!");
+//
+//		return company;
+//	}
 
 	@Override
 	public List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit) {
@@ -240,7 +228,17 @@ public class CompanyServiceImpl implements CompanyService {
 	public Company getCompanyFromRequest(CompanyRequest companyRequest) {
 		Company company = new Company();
 
-//		is Informal company
+//		administrator register
+		Long administratorId = Optional.ofNullable(companyRequest.getAdministratorId()).orElse(null);
+		User administrator = userService.getByUserId(administratorId);
+
+		boolean withAdministrator = Optional.ofNullable(companyRequest.isWithAdministrator()).orElse(true);
+		if (withAdministrator) {
+			Assert.isTrue(administrator != null, "Invalid Administrator Credential!");
+		}
+		company.setAdministrator(administrator);
+
+//		Informal company is a company not having physical address 
 		boolean isInformal = Optional.ofNullable(companyRequest.isInformal()).orElse(false);
 		company.setInformal(isInformal);
 
@@ -287,28 +285,27 @@ public class CompanyServiceImpl implements CompanyService {
 		if (!website.isEmpty()) {
 			company.setWebsite(website);
 		}
-		
-		
+
 //		company founded 
 		String founded = Optional.ofNullable(companyRequest.getFounded()).orElse("").trim();
 		company.setFounded(founded);
-		
-		
+
 //		company revenue 
 		String revenue = Optional.ofNullable(companyRequest.getRevenue()).orElse("").trim();
 		company.setRevenue(revenue);
-		
+
 //		company size 
 		String size = Optional.ofNullable(companyRequest.getSize()).orElse("").trim();
 		company.setSize(size);
-		
-//		company location OR company service location (informal company) 
-		String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("").trim();
-		String address = Optional.ofNullable(companyRequest.getAddress()).orElse("").trim();
-		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-		company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
-		
-		
+
+//		company location is not required for informal company
+		if (!isInformal) {
+			String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("").trim();
+			String address = Optional.ofNullable(companyRequest.getAddress()).orElse("").trim();
+			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
+			company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		}
+
 //		company status
 		company.setStatus(CompanyStatus.PENDING);
 

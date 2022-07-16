@@ -39,7 +39,7 @@ import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.domain.user.BusinessUser;
+import mono.thainow.domain.user.User;
 
 @Entity
 @RequiredArgsConstructor
@@ -146,10 +146,10 @@ public class Company implements Serializable {
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@JsonIdentityReference(alwaysAsId = true)
-	private BusinessUser administrator;
+	private User administrator;
 
 	@Column(name = "ADMINISTRATOR_ROLE")
-	private String administratorRole;
+	private String administratorRole = "Owner";
 	
 //	public static String getDefaultCompIndustry() {
 //		return DEFAULT_COMP_INDUSTRY;

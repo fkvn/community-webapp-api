@@ -13,7 +13,6 @@ import org.springframework.util.Assert;
 
 import mono.thainow.dao.PostDao;
 import mono.thainow.dao.UserDao;
-import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.Post;
@@ -21,7 +20,6 @@ import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.post.deal.DealDiscountType;
 import mono.thainow.domain.post.deal.DealPost;
-import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.rest.request.PostRequest;
@@ -100,7 +98,7 @@ public class PostServiceImpl implements PostService {
 //		validate company post
 		boolean isCompanyPost = Optional.ofNullable(postRequest.isCompanyPost()).orElse(false);
 		Long companyId = Optional.ofNullable(postRequest.getCompanyId()).orElse(null);
-		post = validateCompanyPost(post, companyId, (BusinessUser) user, isCompanyPost);
+//		post = validateCompanyPost(post, companyId, (BusinessUser) user, isCompanyPost);
 
 //		post detail info
 		post = getPostDetailInfoFromPostRequest(post, postRequest, user);
@@ -108,24 +106,24 @@ public class PostServiceImpl implements PostService {
 		return post;
 	}
 
-	@Override
-	public Post validateCompanyPost(Post post, Long companyId, BusinessUser user, boolean isCompanyPost) {
-		
-//		business need to be a company post
-		if (user.getRole()  == UserRole.BUSINESS) {
-			
-			Assert.isTrue(isCompanyPost, "Invalid Company Post Request!");
-
-			post.setCompanyPost(isCompanyPost);
-			
-			Company company = companyService.validateCompanyWithUserById(companyId, user);
-
-//			assign company
-			post.setCompany(company);
-		}
-		
-		return post;
-	}
+//	@Override
+//	public Post validateCompanyPost(Post post, Long companyId, BusinessUser user, boolean isCompanyPost) {
+//		
+////		business need to be a company post
+//		if (user.getRole()  == UserRole.BUSINESS) {
+//			
+//			Assert.isTrue(isCompanyPost, "Invalid Company Post Request!");
+//
+//			post.setCompanyPost(isCompanyPost);
+//			
+//			Company company = companyService.validateCompanyWithUserById(companyId, user);
+//
+////			assign company
+//			post.setCompany(company);
+//		}
+//		
+//		return post;
+//	}
 	
 	@Override
 	public Post getPostDetailInfoFromPostRequest(Post post, PostRequest postRequest, User user) {

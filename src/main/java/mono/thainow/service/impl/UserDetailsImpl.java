@@ -19,7 +19,6 @@ import lombok.Setter;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.domain.user.BusinessUser;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 
@@ -81,7 +80,7 @@ public class UserDetailsImpl implements UserDetails {
 		List<Company> companies = new ArrayList<>();
 
 		if (user.getRole() == UserRole.BUSINESS) {
-			companies = ((BusinessUser) user).getCompanies();
+			companies = user.getCompanies();
 		}
 
 // 		this list of GrantedAuthority would be used for PreAuthorize annotation

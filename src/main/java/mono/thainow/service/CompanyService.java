@@ -4,7 +4,7 @@ import java.util.List;
 
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
-import mono.thainow.domain.user.BusinessUser;
+import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.CompanyRequest;
 
 public interface CompanyService {
@@ -19,11 +19,11 @@ public interface CompanyService {
 	
 	Company getCompanyFromRequest(CompanyRequest companyRequest);
 	
-	Company createCompany(CompanyRequest companyRequest, boolean isWithUser, BusinessUser user);
+	Company createCompany(CompanyRequest companyRequest);
 	
-	Company createCompanyWithAdministrator(Company company, BusinessUser user,  String administratorRole);
-	
-	Company validateCompanyWithUserById(Long companyId, BusinessUser user);
+//	Company createCompanyWithAdministrator(Company company, BusinessUser user,  String administratorRole);
+//	
+//	Company validateCompanyWithUserById(Long companyId, BusinessUser user);
 	
 	List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit);
 	

@@ -37,14 +37,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import mono.thainow.domain.company.Company;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.storage.Storage;
@@ -56,8 +60,8 @@ import mono.thainow.domain.storage.Storage;
 @EqualsAndHashCode
 @Entity
 @Table(indexes = { @Index(name = "user_sub_UNIQUE", columnList = "USER_SUB", unique = true) })
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "USER_ROLE", discriminatorType = DiscriminatorType.STRING)
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@DiscriminatorColumn(name = "USER_ROLE", discriminatorType = DiscriminatorType.STRING)
 public class User implements Serializable {
 	/**
 	* 
@@ -71,6 +75,11 @@ public class User implements Serializable {
 	@NotNull
 	@Column(name = "USER_SUB")
 	private String sub;
+	
+	@NotNull
+	@Column(name = "USER_ROLE")
+	@Enumerated(EnumType.STRING)
+	private UserRole role = UserRole.CLASSIC;
 
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@NotNull(message = "User password can't be null")
@@ -137,14 +146,19 @@ public class User implements Serializable {
 	@JoinColumn(name = "LOCATION_ID")
 	private Location location;
 	
+	@OneToMany(mappedBy = "administrator")
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+	@JsonIdentityReference(alwaysAsId = true)
+	private List<Company> companies = new ArrayList<>();
+	
 	@OneToOne
 	private Storage profileUrl;
 
-	@Transient
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	public UserRole getRole() {
-		return UserRole.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
-	}
+//	@Transient
+//	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//	public UserRole getRole() {
+//		return UserRole.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
+//	}
 
 	@NotNull
 	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
