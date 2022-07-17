@@ -2,17 +2,17 @@ package mono.thainow.rest.controllerAdvice;
 
 import javax.persistence.EntityNotFoundException;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -73,8 +73,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 
-		System.out.println("caught here!");
-
 		ApiError apiError = new ApiError();
 		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		try {
@@ -131,7 +129,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 //	}
 
-	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class })
+	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class, NullPointerException.class })
 	protected ResponseEntity<Object> handleEmptyResultDataAccessException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 
@@ -172,6 +170,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
+	
+	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class })
+	protected ResponseEntity<Object> handleAuthenticationApiException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage(ex.getLocalizedMessage());
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+
 
 	@ExceptionHandler({ BadCredentialsException.class })
 	protected ResponseEntity<Object> handleBadCredentialsException(Exception ex, WebRequest request) {

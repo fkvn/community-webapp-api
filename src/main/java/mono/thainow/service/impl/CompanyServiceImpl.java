@@ -11,12 +11,15 @@ import mono.thainow.dao.CompanyDao;
 import mono.thainow.dao.ElasticSearchDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
+import mono.thainow.domain.storage.Storage;
+import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.repository.CompanyRepository;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
+import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
 
@@ -37,6 +40,9 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Autowired
 	private LocationService locationService;
+
+	@Autowired
+	private StorageService storageService;
 
 	@Autowired
 	private ElasticSearchDao elasticSearchDao;
@@ -113,7 +119,7 @@ public class CompanyServiceImpl implements CompanyService {
 		Company company = getCompanyFromRequest(companyRequest);
 
 		company = saveCompany(company);
-		
+
 //		update administrator
 		User user = company.getAdministrator();
 		user.getCompanies().add(company);
@@ -251,6 +257,12 @@ public class CompanyServiceImpl implements CompanyService {
 		String industry = Optional.ofNullable(companyRequest.getIndustry()).orElse("").trim();
 		Assert.isTrue(!industry.isEmpty(), "Invalid Company Industry");
 		company.setIndustry(industry);
+
+//		Company Logo / Profile
+		StorageDefault storageDefault = new StorageDefault();
+		Storage profile = storageService
+				.getStorage(storageDefault.getIndustryLogoUrl().get(company.getIndustry().toUpperCase().trim()));
+		company.setLogoUrl(profile);
 
 //		company email 
 		String email = Optional.ofNullable(companyRequest.getEmail()).orElse("").trim();

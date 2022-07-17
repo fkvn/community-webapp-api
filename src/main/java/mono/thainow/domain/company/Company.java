@@ -56,6 +56,8 @@ public class Company implements Serializable {
 	*/
 	private static final long serialVersionUID = 1L;
 
+
+
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -75,6 +77,7 @@ public class Company implements Serializable {
 	
 	
 	@Column(name = "IS_COMPANY_INFORMAL")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private boolean isInformal = false;
 
 	@Column(name = "COMPANY_EMAIL")
@@ -109,6 +112,7 @@ public class Company implements Serializable {
 	private String revenue;
 
 	@Column(name = "COMPANY_SIZE")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String size;
 
 	@CreationTimestamp
@@ -149,11 +153,15 @@ public class Company implements Serializable {
 	private User administrator;
 
 	@Column(name = "ADMINISTRATOR_ROLE")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String administratorRole = "Owner";
 	
-//	public static String getDefaultCompIndustry() {
-//		return DEFAULT_COMP_INDUSTRY;
+//	@Transient
+//	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//	public Map<String, Long> getIndustryLogoUrl() {
+//		return Company.industryLogoUrl;
 //	}
+
 
 	@PrePersist
 	private void validateCompany() {

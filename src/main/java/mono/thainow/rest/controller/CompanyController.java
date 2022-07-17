@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
+import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.UserService;
@@ -37,6 +38,12 @@ public class CompanyController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public List<Company> getAllCompanies() {
 		return companyService.getAllCompanies();
+	}
+	
+	@GetMapping("/industryLogoUrl")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public StorageDefault getIndustryLogoUrl() {
+		return new StorageDefault();
 	}
 
 	@PostMapping

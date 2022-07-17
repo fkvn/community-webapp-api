@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import mono.thainow.domain.company.Company;
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.UserService;
@@ -41,12 +42,13 @@ public class UserController {
 		return userService.getByUserId(id);
 	}
 
-	@GetMapping("/page/{pageNo}")
+	@GetMapping("/{id}/companies")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Map<String, Object> getUserPaginated(@PathVariable Long pageNo, @RequestBody Map<String, Object> pageInfo) {
-		return null;
+	public List<Company> getCompanies(@PathVariable Long id) {
+		User user = userService.getByUserId(id);
+		return user.getCompanies();
 	}
-
+	
 	@PostMapping("/{id}/profile")
 	@ResponseStatus(HttpStatus.CREATED)
 	public User uploadProfile(@PathVariable Long id, @RequestBody StorageRequest storage) {
@@ -67,6 +69,12 @@ public class UserController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUser(@PathVariable Long id) {
 		userService.deleteUser(id);
+	}
+	
+	@GetMapping("/page/{pageNo}")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public Map<String, Object> getUserPaginated(@PathVariable Long pageNo, @RequestBody Map<String, Object> pageInfo) {
+		return null;
 	}
 
 	@DeleteMapping("/remove/{id}")

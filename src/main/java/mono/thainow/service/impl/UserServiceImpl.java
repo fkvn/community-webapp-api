@@ -13,6 +13,7 @@ import org.springframework.util.Assert;
 
 import mono.thainow.dao.UserDao;
 import mono.thainow.domain.storage.Storage;
+import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
@@ -241,12 +242,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUserFromSignUpRequest(SignupRequest signUpRequest) {
 
+		User user = new User();
+		
 //		verify role and initialize user based on its role
 		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
 //		User user = initializeUserByRole(UserRole.valueOf(roleName));
 		UserRole role = userRoleService.verifyRoles(roleName);
 //		User user = initializeUserByRole(role);
-		User user = new User();
+		user.setRole(role);
 
 //		validate users' privileges
 		Set<String> strPrivileges = signUpRequest.getPrivileges();
@@ -297,13 +300,8 @@ public class UserServiceImpl implements UserService {
 		
 
 //		user profile
-		String defaultProfile = "";
-		if (user.getRole() == UserRole.CLASSIC) {
-			defaultProfile = "f01a55de-c66e-4937-9050-6a2e34152c1d.png";
-		} else if (user.getRole() == UserRole.BUSINESS) {
-			defaultProfile = "79433c58-7b7e-4789-b497-7566989ed02b.png";
-		}
-		Storage profile = storageService.getStorage(defaultProfile);
+		StorageDefault storageDefault = new StorageDefault();
+		Storage profile = storageService.getStorage(storageDefault.getUserProfileDefault());
 		user.setProfileUrl(profile);
 
 //		user status

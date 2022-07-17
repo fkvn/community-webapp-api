@@ -21,6 +21,7 @@ import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
+import mono.thainow.domain.user.UserStatus;
 
 /*
  * contains necessary information (such as: username, password, authorities) to
@@ -36,6 +37,7 @@ public class UserDetailsImpl implements UserDetails {
 	private String username;
 	private Storage profileUrl;
 	private UserRole role;
+	private UserStatus status;
 	private String sub;
 	private Location location;
 	private String firstname;
@@ -47,6 +49,7 @@ public class UserDetailsImpl implements UserDetails {
 	private boolean isPhoneVerified;
 	private boolean isPhonePublic;
 	private List<Company> companies;
+	
 
 	@JsonIgnore
 	private String password;
@@ -60,6 +63,7 @@ public class UserDetailsImpl implements UserDetails {
 		this.sub = user.getSub();
 		this.profileUrl = user.getProfileUrl();
 		this.role = user.getRole();
+		this.status = user.getStatus();
 		this.authorities = authorities;
 		this.location = user.getLocation();
 		this.firstname = user.getFirstName();
@@ -109,8 +113,14 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		return true;
+		
+		System.out.println(this.getStatus());
+		System.out.println(this.getStatus() == UserStatus.ACTIVATED);
+		
+		return this.getStatus() == UserStatus.ACTIVATED;
 	}
+	
+
 
 	@Override
 	public boolean equals(Object o) {
