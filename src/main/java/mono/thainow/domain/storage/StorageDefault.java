@@ -31,6 +31,8 @@ public class StorageDefault {
 	
 	private Long otherIndustryProfileDefault = (long) 180;
 	
+	private Long companyProfileDefault = (long) 183;
+	
 	private Long userProfileDefault = (long) 181;
 
 	public StorageDefault() {

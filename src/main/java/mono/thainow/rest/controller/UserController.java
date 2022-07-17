@@ -2,7 +2,6 @@ package mono.thainow.rest.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -83,24 +81,6 @@ public class UserController {
 		userService.removeUser(id);
 	}
 	
-	@PostMapping("/validateUsername")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateUsername(@RequestParam String username) {
-		userService.validateUsername(username.trim());
-	}
 
-	@PostMapping("/validatePhone")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validatePhone(@RequestBody Map<String, Object> userInfo) {
-		String phone = Optional.ofNullable((String) userInfo.get("phone")).orElse("").trim();
-		userService.validateUserPhone(phone);
-	}
-	
-	@PostMapping("/validateEmail")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateEmail(@RequestBody Map<String, Object> userInfo) {
-		String email = Optional.ofNullable((String) userInfo.get("email")).orElse("").trim();
-		userService.validateUserEmail(email);
-	}
 
 }

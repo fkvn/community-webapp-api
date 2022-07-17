@@ -260,8 +260,11 @@ public class CompanyServiceImpl implements CompanyService {
 
 //		Company Logo / Profile
 		StorageDefault storageDefault = new StorageDefault();
-		Storage profile = storageService
-				.getStorage(storageDefault.getIndustryLogoUrl().get(company.getIndustry().toUpperCase().trim()));
+		Long profileId = storageDefault.getIndustryLogoUrl().get(company.getIndustry().toUpperCase().trim());
+		if (profileId == null) {
+			profileId = storageDefault.getCompanyProfileDefault();
+		}
+		Storage profile = storageService.getStorage(profileId);
 		company.setLogoUrl(profile);
 
 //		company email 

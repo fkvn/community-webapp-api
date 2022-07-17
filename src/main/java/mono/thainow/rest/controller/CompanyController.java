@@ -1,8 +1,6 @@
 package mono.thainow.rest.controller;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +19,6 @@ import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.service.CompanyService;
-import mono.thainow.service.UserService;
 
 @RestController
 //@PreAuthorize("hasAnyAuthority('COMPANY_MANAGE')")
@@ -30,9 +27,6 @@ public class CompanyController {
 
 	@Autowired
 	private CompanyService companyService;
-
-	@Autowired
-	private UserService userService;
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
@@ -90,17 +84,5 @@ public class CompanyController {
 		return companyService.searchCompanyByNameOnly(keywords, fetchAll, fetchLimit);
 	}
 	
-	@PostMapping("/validatePhone")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validatePhone(@RequestBody Map<String, Object> companyInfo) {
-		String phone = Optional.ofNullable((String) companyInfo.get("phone")).orElse("").trim();
-		companyService.validateCompanyPhone(phone);
-	}
-	
-	@PostMapping("/validateEmail")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateEmail(@RequestBody Map<String, Object> companyInfo) {
-		String email = Optional.ofNullable((String) companyInfo.get("email")).orElse("").trim();
-		companyService.validateCompanyEmail(email);
-	}
+
 }
