@@ -3,9 +3,12 @@ package mono.thainow.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
-import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.security.payload.request.SignupRequest;
 
 public interface UserService {
@@ -20,7 +23,7 @@ public interface UserService {
 	
 	Long updatePartialUser(Long id, Map<String, Object> userInfo);
 	
-	User uploadProfilePicture(User user, StorageRequest storageRequest);
+	Storage uploadProfilePicture(User user, @RequestParam("file") MultipartFile file);
 	
 	User saveUser(User user);
 	

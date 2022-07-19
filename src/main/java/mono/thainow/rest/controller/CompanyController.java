@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
-import mono.thainow.domain.storage.StorageDefault;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.service.CompanyService;
 
@@ -34,10 +35,14 @@ public class CompanyController {
 		return companyService.getAllCompanies();
 	}
 	
-	@GetMapping("/industryLogoUrl")
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	public StorageDefault getIndustryLogoUrl() {
-		return new StorageDefault();
+	@PostMapping("/{id}/logo")
+	@ResponseStatus(HttpStatus.CREATED)
+	public Storage uploadProfile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+		Company company = companyService.getCompanyById(id);
+
+		Storage profile  = companyService.uploadLogoPicture(company, file);
+
+		return profile;
 	}
 
 	@PostMapping

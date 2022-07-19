@@ -2,6 +2,7 @@ package mono.thainow.rest.controllerAdvice;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.twilio.exception.ApiException;
@@ -129,7 +131,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 //	}
 
-	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class, NullPointerException.class })
+	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class,
+			NullPointerException.class })
 	protected ResponseEntity<Object> handleEmptyResultDataAccessException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 
@@ -160,9 +163,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		}
 
 		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		
+
 		if (apiError.getError().indexOf("VerificationCheck was not found") > -1) {
-			
+
 			apiError.setMessage("Token Verification Failed. Please try again or request a new code!!!");
 		} else {
 			apiError.setMessage("Token Verification Process Error!!!");
@@ -170,8 +173,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
-	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class })
+
+	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class,  })
 	protected ResponseEntity<Object> handleAuthenticationApiException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 
@@ -188,7 +191,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
+	
+	@ExceptionHandler({ FileSizeLimitExceededException.class, MaxUploadSizeExceededException.class, })
+	protected ResponseEntity<Object> handleSizeExceededException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
 
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("Maximum upload size exceeded!");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
 
 	@ExceptionHandler({ BadCredentialsException.class })
 	protected ResponseEntity<Object> handleBadCredentialsException(Exception ex, WebRequest request) {
@@ -213,7 +233,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ex.printStackTrace();
 
 		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.UNAUTHORIZED);
+		apiError.setStatus(HttpStatus.NOT_FOUND);
 		try {
 			apiError.setError(ex.getCause().getLocalizedMessage());
 		} catch (Exception e) {

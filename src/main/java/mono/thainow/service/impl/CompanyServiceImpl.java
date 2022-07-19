@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.dao.CompanyDao;
 import mono.thainow.dao.ElasticSearchDao;
@@ -17,6 +18,7 @@ import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.repository.CompanyRepository;
 import mono.thainow.rest.request.CompanyRequest;
+import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
@@ -330,6 +332,29 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public Company saveCompany(Company company) {
 		return companyDao.saveCompany(company);
+	}
+
+	@Override
+	public Storage uploadLogoPicture(Company company, MultipartFile file) {
+		StorageResponse storageResponse= storageService.upload(file);
+		
+//		persist storage into database
+		Storage profile = new Storage();
+
+		profile.setName(storageResponse.getName());
+		profile.setType(storageResponse.getType());
+		profile.setUrl(storageResponse.getUrl());
+		profile.setSize(storageResponse.getSize());
+
+		profile = storageService.saveStorage(profile);
+
+//		attach into company
+		company.setLogoUrl(profile);
+
+//		persist into database
+		company = saveCompany(company);
+
+		return company.getLogoUrl();
 	}
 
 }

@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.UserService;
 
 @RestController
@@ -49,12 +51,12 @@ public class UserController {
 	
 	@PostMapping("/{id}/profile")
 	@ResponseStatus(HttpStatus.CREATED)
-	public User uploadProfile(@PathVariable Long id, @RequestBody StorageRequest storage) {
+	public Storage uploadProfile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
 		User user = userService.getByUserId(id);
 
-		user = userService.uploadProfilePicture(user, storage);
+		Storage profile  = userService.uploadProfilePicture(user, file);
 
-		return user;
+		return profile;
 	}
 
 	@PatchMapping("/{id}")

@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.dao.UserDao;
 import mono.thainow.domain.storage.Storage;
@@ -18,7 +20,7 @@ import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
-import mono.thainow.rest.request.StorageRequest;
+import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserPrivilegeService;
@@ -143,15 +145,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User uploadProfilePicture(User user, StorageRequest storageRequest) {
+	public Storage uploadProfilePicture(User user, @RequestParam("file") MultipartFile file) {
 
+		
+		StorageResponse storageResponse= storageService.upload(file);
+		
 //		persist storage into database
 		Storage profile = new Storage();
 
-		profile.setName(storageRequest.getName());
-		profile.setType(storageRequest.getType());
-		profile.setUrl(storageRequest.getUrl());
-		profile.setSize(storageRequest.getSize());
+		profile.setName(storageResponse.getName());
+		profile.setType(storageResponse.getType());
+		profile.setUrl(storageResponse.getUrl());
+		profile.setSize(storageResponse.getSize());
 
 		profile = storageService.saveStorage(profile);
 
@@ -161,7 +166,7 @@ public class UserServiceImpl implements UserService {
 //		persist into database
 		user = saveUser(user);
 
-		return user;
+		return user.getProfileUrl();
 
 	}
 

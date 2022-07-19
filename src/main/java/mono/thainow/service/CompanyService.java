@@ -2,9 +2,12 @@ package mono.thainow.service;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
-import mono.thainow.domain.user.User;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.rest.request.CompanyRequest;
 
 public interface CompanyService {
@@ -20,6 +23,8 @@ public interface CompanyService {
 	Company getCompanyFromRequest(CompanyRequest companyRequest);
 	
 	Company createCompany(CompanyRequest companyRequest);
+	
+	Storage uploadLogoPicture(Company company, @RequestParam("file") MultipartFile file);
 	
 //	Company createCompanyWithAdministrator(Company company, BusinessUser user,  String administratorRole);
 //	
