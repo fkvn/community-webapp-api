@@ -13,6 +13,6 @@ public class AccessForbidden extends RuntimeException {
 
 	public AccessForbidden() {
 
-		super("Forbidden");
+		super("Forbidden Access");
 	}
 }

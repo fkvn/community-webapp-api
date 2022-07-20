@@ -56,7 +56,7 @@ public class ElasticSearchDaoImpl implements ElasticSearchDao {
 
 		SearchSession searchSession = Search.session(entityManager);
 
-		companies = searchSession.search(Company.class).where(f -> f.phrase().fields("name").matching(keywords).slop(3))
+		companies = searchSession.search(Company.class).where(f -> f.phrase().fields("name").matching(keywords).slop(2))
 				.fetchHits(fetchAll ? null : fetchLimit).stream()
 //				in default, we only return company with status as Registered and Unregistered
 				.filter(company -> company.getStatus() != CompanyStatus.REJECTED).collect(Collectors.toList());

@@ -4,6 +4,7 @@ import mono.thainow.domain.location.Location;
 
 public class LocationUtil {
 
+
 	public static String getFormattedAddress(Location location) {
 		
 		String formattedAddress = "";

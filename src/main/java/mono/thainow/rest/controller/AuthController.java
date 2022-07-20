@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import mono.thainow.rest.request.UserSignupRequest;
 import mono.thainow.security.payload.request.SignInRequest;
-import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.MessageResponse;
@@ -35,10 +35,10 @@ public class AuthController {
 
 	@Autowired
 	private AuthService authService;
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private CompanyService companyService;
 
@@ -52,7 +52,7 @@ public class AuthController {
 
 		return new MessageResponse("Token was sent successfully!");
 	}
-	
+
 	@PostMapping("/verifyToken")
 	public MessageResponse verifyToken(@Valid @RequestBody TokenResponse tokenResponse) {
 
@@ -60,22 +60,21 @@ public class AuthController {
 
 		return new MessageResponse("Token was verified successfully!");
 	}
-	
+
 	@PostMapping("/signin")
 	public JwtResponse authenticateUser(@Valid @RequestBody SignInRequest loginRequest) {
 
 		return authService.signin(loginRequest);
 	}
 
-
 	@PostMapping("/signup")
-	public MessageResponse registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+	public MessageResponse registerUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
 
 		Assert.isTrue(authService.signUp(signUpRequest), "Registration Failed!");
 
 		return new MessageResponse("User registered successfully!");
 	}
-	
+
 	@PostMapping("/users/validateUsername")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void validateUsername(@RequestParam String username) {
@@ -88,21 +87,21 @@ public class AuthController {
 		String phone = Optional.ofNullable((String) userInfo.get("phone")).orElse("").trim();
 		userService.validateUserPhone(phone);
 	}
-	
+
 	@PostMapping("/users/validateEmail")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void validateUserEmail(@RequestBody Map<String, Object> userInfo) {
 		String email = Optional.ofNullable((String) userInfo.get("email")).orElse("").trim();
 		userService.validateUserEmail(email);
 	}
-	
+
 	@PostMapping("/companies/validatePhone")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void validateCompanyPhone(@RequestBody Map<String, Object> companyInfo) {
 		String phone = Optional.ofNullable((String) companyInfo.get("phone")).orElse("").trim();
 		companyService.validateCompanyPhone(phone);
 	}
-	
+
 	@PostMapping("/companies/validateEmail")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void validateCompanyEmail(@RequestBody Map<String, Object> companyInfo) {

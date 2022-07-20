@@ -3,7 +3,6 @@ package mono.thainow.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -17,14 +16,11 @@ import mono.thainow.dao.UserDao;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
-import mono.thainow.domain.user.UserPrivilege;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
+import mono.thainow.rest.request.UserSignupRequest;
 import mono.thainow.rest.response.StorageResponse;
-import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.service.StorageService;
-import mono.thainow.service.UserPrivilegeService;
-import mono.thainow.service.UserRoleService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
 
@@ -42,11 +38,11 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private PasswordEncoder encoder;
 
-	@Autowired
-	private UserPrivilegeService userPrivilegeService;
-
-	@Autowired
-	private UserRoleService userRoleService;
+//	@Autowired
+//	private UserPrivilegeService userPrivilegeService;
+//
+//	@Autowired
+//	private UserRoleService userRoleService;
 
 	@Autowired
 	private StorageService storageService;
@@ -88,7 +84,7 @@ public class UserServiceImpl implements UserService {
 //	=============================== Modify User - Start =========================== 
 
 	@Override
-	public User addBusinessCompanyFromSignUpRequest(User user, SignupRequest signUpRequest) {
+	public User addBusinessCompanyFromSignUpRequest(User user, UserSignupRequest signUpRequest) {
 
 //		try {
 //
@@ -245,37 +241,37 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromSignUpRequest(SignupRequest signUpRequest) {
+	public User getUserFromSignUpRequest(UserSignupRequest signUpRequest) {
 
 		User user = new User();
 		
-//		verify role and initialize user based on its role
-		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
-//		User user = initializeUserByRole(UserRole.valueOf(roleName));
-		UserRole role = userRoleService.verifyRoles(roleName);
-//		User user = initializeUserByRole(role);
-		user.setRole(role);
+////		verify role and initialize user based on its role
+//		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
+////		User user = initializeUserByRole(UserRole.valueOf(roleName));
+//		UserRole role = userRoleService.verifyRoles(roleName);
+////		User user = initializeUserByRole(role);
+//		user.setRole(role);
 
 //		validate users' privileges
-		Set<String> strPrivileges = signUpRequest.getPrivileges();
-		Set<UserPrivilege> privileges = userPrivilegeService.verifyPrivileges(strPrivileges);
+//		Set<String> strPrivileges = signUpRequest.getPrivileges();
+//		Set<UserPrivilege> privileges = userPrivilegeService.verifyPrivileges(strPrivileges);
 
 //		add user privileges
-		user.setPrivileges(privileges);
+//		user.setPrivileges(privileges);
 
 //		username
 		String username = Optional.ofNullable(signUpRequest.getUsername()).orElse("").trim();
-		Assert.isTrue(!username.isEmpty(), "Invalid Preferred Name");
-		user.setUsername(validateUsername(username));
+		Assert.isTrue(!username.isEmpty(), "Preferred Name can't be empty!");
+		user.setUsername(username);
 
 //		password validation
 		String password = Optional.ofNullable(signUpRequest.getPassword()).orElse("").trim();
+		Assert.isTrue(!password.isEmpty(), "Password can't be empty!");
 		user.setPassword(validateAndEncodeUserPassword(password));
 
 //		user email
 		String email = Optional.ofNullable(signUpRequest.getEmail()).orElse("").trim();
-		Assert.isTrue(email.length() <= 50, "Email can't be more than 50 characters");
-		user.setEmail(validateUserEmail(email));
+		user.setEmail(email);
 
 //		email Verified
 		boolean isEmailVerified = Optional.ofNullable(signUpRequest.isEmailVerified()).orElse(false);
@@ -283,10 +279,7 @@ public class UserServiceImpl implements UserService {
  
 //		user phone
 		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse("").trim();
-//		phone is optional as default
-		Assert.isTrue(phone.length() == 14 || phone.length() == 0,
-				"Invalid Phone Number! Phone number must be in format (xxx) xxx-xxxx");
-		user.setPhone(validateUserPhone(phone));
+		user.setPhone(phone);
 
 //		phone Verified
 		boolean isPhoneVerified = Optional.ofNullable(signUpRequest.isPhoneVerified()).orElse(false);
@@ -352,10 +345,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String validateAndEncodeUserPassword(String password) {
 
-		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-
-		Assert.isTrue(password.matches(passwordRegex),
-				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
+//		String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
+//
+//		Assert.isTrue(password.matches(passwordRegex),
+//				"Your password must be between 8 and 20 characters (at least 1 upper, 1 lower, 1 number, and no white space)");
 
 		// password encoded
 		String encodedPwd = encoder.encode(password);

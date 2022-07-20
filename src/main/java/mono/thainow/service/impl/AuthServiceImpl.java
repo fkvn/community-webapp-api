@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import mono.thainow.domain.user.User;
+import mono.thainow.rest.request.UserSignupRequest;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.security.payload.request.SignInRequest;
-import mono.thainow.security.payload.request.SignupRequest;
 import mono.thainow.security.payload.request.TokenRequest;
 import mono.thainow.security.payload.response.JwtResponse;
 import mono.thainow.security.payload.response.TokenResponse;
@@ -67,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public boolean signUp(SignupRequest signUpRequest) {
+	public boolean signUp(UserSignupRequest signUpRequest) {
 
 		User user = userService.getUserFromSignUpRequest(signUpRequest);
 

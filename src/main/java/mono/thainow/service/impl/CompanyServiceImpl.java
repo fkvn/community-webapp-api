@@ -17,7 +17,7 @@ import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.repository.CompanyRepository;
-import mono.thainow.rest.request.CompanyRequest;
+import mono.thainow.rest.request.CompanySignupRequest;
 import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
@@ -116,7 +116,7 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public Company createCompany(CompanyRequest companyRequest) {
+	public Company createCompany(CompanySignupRequest companyRequest) {
 
 		Company company = getCompanyFromRequest(companyRequest);
 
@@ -233,17 +233,13 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public Company getCompanyFromRequest(CompanyRequest companyRequest) {
+	public Company getCompanyFromRequest(CompanySignupRequest companyRequest) {
 		Company company = new Company();
 
 //		administrator register
 		Long administratorId = Optional.ofNullable(companyRequest.getAdministratorId()).orElse(null);
 		User administrator = userService.getByUserId(administratorId);
-
-		boolean withAdministrator = Optional.ofNullable(companyRequest.isWithAdministrator()).orElse(true);
-		if (withAdministrator) {
-			Assert.isTrue(administrator != null, "Invalid Administrator Credential!");
-		}
+		Assert.isTrue(administrator != null, "Invalid Administrator Credential!");
 		company.setAdministrator(administrator);
 
 //		Informal company is a company not having physical address 
@@ -271,31 +267,15 @@ public class CompanyServiceImpl implements CompanyService {
 
 //		company email 
 		String email = Optional.ofNullable(companyRequest.getEmail()).orElse("").trim();
-		Assert.isTrue(email.length() <= 50, "Email can't be more than 50 characters");
 		company.setEmail(email);
-
-//		email Verified
-		boolean isEmailVerified = Optional.ofNullable(companyRequest.isEmailVerified()).orElse(false);
-		company.setEmailVerified(isEmailVerified);
 
 //		company phone 
 		String phone = Optional.ofNullable(companyRequest.getPhone()).orElse("").trim();
-//		phone is optional as default
-		Assert.isTrue(phone.length() == 14 || phone.length() == 0,
-				"Invalid Phone Number! Phone number must be in format (xxx) xxx-xxxx");
 //		required for informal company
 		if (isInformal) {
 			Assert.isTrue(!phone.isEmpty(), "Company phone is required for an informal company");
 		}
 		company.setPhone(phone);
-
-//		phone Verified
-		boolean isPhoneVerified = Optional.ofNullable(companyRequest.isPhoneVerified()).orElse(false);
-		company.setPhoneVerified(isPhoneVerified);
-
-//		company description 
-		String description = Optional.ofNullable(companyRequest.getDescription()).orElse("").trim();
-		company.setDescription(description);
 
 //		company website - only add if the website is not empty
 		String website = Optional.ofNullable(companyRequest.getWebsite()).orElse("").trim();
@@ -303,25 +283,11 @@ public class CompanyServiceImpl implements CompanyService {
 			company.setWebsite(website);
 		}
 
-//		company founded 
-		String founded = Optional.ofNullable(companyRequest.getFounded()).orElse("").trim();
-		company.setFounded(founded);
-
-//		company revenue 
-		String revenue = Optional.ofNullable(companyRequest.getRevenue()).orElse("").trim();
-		company.setRevenue(revenue);
-
-//		company size 
-		String size = Optional.ofNullable(companyRequest.getSize()).orElse("").trim();
-		company.setSize(size);
-
 //		company location is not required for informal company
-		if (!isInformal) {
-			String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("").trim();
-			String address = Optional.ofNullable(companyRequest.getAddress()).orElse("").trim();
-			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-			company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
-		}
+		String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("").trim();
+		String address = Optional.ofNullable(companyRequest.getAddress()).orElse("").trim();
+		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
+		company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 
 //		company status
 		company.setStatus(CompanyStatus.PENDING);
@@ -336,8 +302,8 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public Storage uploadLogoPicture(Company company, MultipartFile file) {
-		StorageResponse storageResponse= storageService.upload(file);
-		
+		StorageResponse storageResponse = storageService.upload(file);
+
 //		persist storage into database
 		Storage profile = new Storage();
 

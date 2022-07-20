@@ -118,8 +118,8 @@ public class UserDaoImpl implements UserDao {
 			 * 
 			 * We don't check email unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from User where status =:status and email =:email and email <> ''", User.class)
-					.setParameter("status", UserStatus.ACTIVATED).setParameter("email", email).getSingleResult();
+			entityManager.createQuery("from User where status <> :statusDelete and email =:email and email <> ''", User.class)
+					.setParameter("statusDelete", UserStatus.DELETED).setParameter("email", email).getSingleResult();
 
 			return false;
 
@@ -138,8 +138,8 @@ public class UserDaoImpl implements UserDao {
 			 * 
 			 * We don't check phone unique for users who are NOT ACTIVE
 			 */
-			entityManager.createQuery("from User where status =:status and phone =:phone and phone <> ''", User.class)
-					.setParameter("status", UserStatus.ACTIVATED).setParameter("phone", phone).getSingleResult();
+			entityManager.createQuery("from User where status <> :statusDelete and phone =:phone and phone <> ''", User.class)
+					.setParameter("statusDelete", UserStatus.DELETED).setParameter("phone", phone).getSingleResult();
 
 			return false;
 

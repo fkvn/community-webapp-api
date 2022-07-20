@@ -210,7 +210,7 @@ public class PostServiceImpl implements PostService {
 //		classic user
 		else {
 			User user = post.getAuthor();
-			authorName = user.getDisplayName();
+//			authorName = user.getDisplayName();
 		}
 
 		return authorName;

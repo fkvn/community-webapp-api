@@ -23,7 +23,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.util.Assert;
 
@@ -31,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import lombok.EqualsAndHashCode;
@@ -41,6 +41,7 @@ import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
+import mono.thainow.view.View;
 
 @Entity
 @RequiredArgsConstructor
@@ -57,94 +58,96 @@ public class Company implements Serializable {
 	*/
 	private static final long serialVersionUID = 1L;
 
-
+	// Basic property
 
 	@Id
 	@GeneratedValue
+	@JsonView(View.Company.Basic.class)
 	private Long id;
+
+	@CreationTimestamp
+	@Column(name = "COMPANY_CREATED_ON")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonView(View.Company.Basic.class)
+	private Date createdOn = new Date();
 
 	@NotEmpty
 	@Column(name = "COMPANY_NAME")
+	@JsonView(View.Company.Basic.class)
 	@FullTextField
-//	@KeywordField
 	private String name;
 
 	@NotEmpty
 	@Column(name = "COMPANY_INDUSTRY")
+	@JsonView(View.Company.Basic.class)
 	private String industry;
-	
+
 	@OneToOne
+	@JsonView(View.Company.Basic.class)
 	private Storage logoUrl;
-	
-	
+
 	@Column(name = "IS_COMPANY_INFORMAL")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.Company.Basic.class)
 	private boolean isInformal = false;
 
+	@ManyToOne
+	@JoinColumn(name = "LOCATION_ID")
+	@JsonView(View.Company.Basic.class)
+	private Location location;
+
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	@Column(name = "COMPANY_STATUS")
+	@JsonView(View.Company.Basic.class)
+	private CompanyStatus status = CompanyStatus.UNREGISTERED;
+
 	@Column(name = "COMPANY_EMAIL")
+	@JsonView(View.Company.Basic.class)
 	private String email;
+
+	@Column(name = "COMPANY_PHONE")
+	@JsonView(View.Company.Basic.class)
+	private String phone;
+
+	@Column(name = "COMPANY_WEBSITE")
+	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Company website must be a valid URL")
+	@JsonView(View.Company.Basic.class)
+	private String website;
+
+	// Detail property
+
+	@UpdateTimestamp
+	@Column(name = "COMPANY_UPDATED_ON")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonView(View.Company.Detail.class)
+	private Date updatedOn = new Date();
+	
+	@Lob
+	@Column(name = "COMPANY_DESCRIPTION")
+	@JsonView(View.Company.Detail.class)
+	private String description;
+
+	@Column(name = "COMPANY_FOUNDED")
+	@JsonView(View.Company.Detail.class)
+	private String founded;
+
+	@Column(name = "COMPANY_REVENUE")
+	@JsonView(View.Company.Detail.class)
+	private String revenue;
+
+	@Column(name = "COMPANY_SIZE")
+	@JsonView(View.Company.Detail.class)
+	private String size;
+
+	// Write ONLY property
 
 	@Column(name = "IS_COMPANY_EMAIL_VERIFIED")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private boolean isEmailVerified = false;
 
-	@Column(name = "COMPANY_PHONE")
-	private String phone;
-
 	@Column(name = "IS_COMPANY_PHONE_VERIFIED")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private boolean isPhoneVerified = false;
-
-	@Lob
-	@Column(name = "COMPANY_DESCRIPTION")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String description;
-
-	@Column(name = "COMPANY_WEBSITE")
-	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Company website must be a valid URL")
-	private String website;
-
-	@Column(name = "COMPANY_FOUNDED")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String founded;
-
-	@Column(name = "COMPANY_REVENUE")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String revenue;
-
-	@Column(name = "COMPANY_SIZE")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String size;
-
-	@CreationTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "COMPANY_CREATED_ON")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private Date createdOn = new Date();
-
-	@UpdateTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@Column(name = "COMPANY_UPDATED_ON")
-	private Date updatedOn = new Date();
-
-	@NotNull
-	@Enumerated(EnumType.STRING)
-	@Column(name = "COMPANY_STATUS")
-	private CompanyStatus status = CompanyStatus.UNREGISTERED;
-
-	@ManyToOne
-	@JoinColumn(name = "LOCATION_ID")
-	@NotNull
-	private Location location;
-	
-	@Column(name = "COMPANY_FIXED_POSTION")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private Integer fixedPostion;
-	
-	@Column(name = "COMPANY_WEIGHT")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private int weight  = 0;
 
 	@ManyToOne
 	@JoinColumn(name = "ADMINISTRATOR_ID")
@@ -156,27 +159,18 @@ public class Company implements Serializable {
 	@Column(name = "ADMINISTRATOR_ROLE")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String administratorRole = "Owner";
-	
-//	@Transient
-//	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-//	public Map<String, Long> getIndustryLogoUrl() {
-//		return Company.industryLogoUrl;
-//	}
 
+	// Config
 
 	@PrePersist
 	private void validateCompany() {
-		
-//		assert that the industry is valid
-//		Assert.isTrue(!this.industry.isEmpty() && DEFAULT_COMP_INDUSTRY.contains(this.industry),
-//				"Invalid Company Industry");
-		
-//		assert that once we have the administrator, then the administratorRole cannot be null
+
+		// assert that once we have the administrator, then the administratorRole cannot be null
 		if (this.administrator != null) {
 			Assert.isTrue(!this.administratorRole.isEmpty(), "Invalid Administrator Role!");
 		}
-		
-//		assert that once we have the administrator Role, then the administrator cannot be null
+
+		// assert that once we have the administrator Role, then the administrator cannot be null
 		if (this.administratorRole != null && !this.administratorRole.isEmpty()) {
 			Assert.isTrue(this.administrator != null, "Invalid Administrator!");
 		}

@@ -23,6 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.twilio.exception.ApiException;
 
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.util.ApiError;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -174,7 +175,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
-	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class,  })
+	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class, AccessForbidden.class  })
 	protected ResponseEntity<Object> handleAuthenticationApiException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,10 +18,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.service.UserService;
+import mono.thainow.service.impl.UserDetailsImpl;
+import mono.thainow.view.View;
 
 @RestController
 //@PreAuthorize("hasAnyAuthority('USER_MANAGE')")
@@ -30,6 +36,16 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
+	private void validateUserAccess(Long id) {
+//		user binded the access_token
+		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal();
+
+		if (!id.equals(userDetails.getId())) {
+			throw new AccessForbidden();
+		}
+	}
+
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public List<User> getAllUsers() {
@@ -37,24 +53,29 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}")
+	@JsonView(View.UserView.Private.class)
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public User getUser(@PathVariable Long id) {
+		validateUserAccess(id);
 		return userService.getByUserId(id);
 	}
 
 	@GetMapping("/{id}/companies")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public List<Company> getCompanies(@PathVariable Long id) {
+		validateUserAccess(id);
 		User user = userService.getByUserId(id);
 		return user.getCompanies();
 	}
-	
+
 	@PostMapping("/{id}/profile")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Storage uploadProfile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+		validateUserAccess(id);
+		
 		User user = userService.getByUserId(id);
 
-		Storage profile  = userService.uploadProfilePicture(user, file);
+		Storage profile = userService.uploadProfilePicture(user, file);
 
 		return profile;
 	}
@@ -62,15 +83,17 @@ public class UserController {
 	@PatchMapping("/{id}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public Long updatePartialUser(@PathVariable Long id, @RequestBody Map<String, Object> userInfo) {
+		validateUserAccess(id);
 		return userService.updatePartialUser(id, userInfo);
 	}
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUser(@PathVariable Long id) {
+		validateUserAccess(id);
 		userService.deleteUser(id);
 	}
-	
+
 	@GetMapping("/page/{pageNo}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public Map<String, Object> getUserPaginated(@PathVariable Long pageNo, @RequestBody Map<String, Object> pageInfo) {
@@ -80,9 +103,8 @@ public class UserController {
 	@DeleteMapping("/remove/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void removeUser(@PathVariable Long id) {
+		validateUserAccess(id);
 		userService.removeUser(id);
 	}
-	
-
 
 }

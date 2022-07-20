@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.rest.request.CompanyRequest;
+import mono.thainow.rest.request.CompanySignupRequest;
 import mono.thainow.service.CompanyService;
 
 @RestController
@@ -47,13 +47,13 @@ public class CompanyController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Company createCompany(@RequestBody CompanyRequest compRequest) {		
+	public Company createCompany(@RequestBody CompanySignupRequest compRequest) {		
 		return companyService.createCompany(compRequest);
 	}
 
 	@PostMapping("/withAdministrator/{administratorId}")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Company createCompanyWithAdministrator(@RequestBody CompanyRequest compRequest,
+	public Company createCompanyWithAdministrator(@RequestBody CompanySignupRequest compRequest,
 			@PathVariable Long administratorId) {
 
 //		BusinessUser user = (BusinessUser) userService.getByUserId(administratorId);

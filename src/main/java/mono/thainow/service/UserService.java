@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
-import mono.thainow.security.payload.request.SignupRequest;
+import mono.thainow.rest.request.UserSignupRequest;
 
 public interface UserService {
 	
@@ -43,8 +43,8 @@ public interface UserService {
 
 	User initializeUserByRole(UserRole role);
 	
-	User getUserFromSignUpRequest(SignupRequest signUpRequest);
+	User getUserFromSignUpRequest(UserSignupRequest signUpRequest);
 	
-	User addBusinessCompanyFromSignUpRequest(User user, SignupRequest signUpRequest);
+	User addBusinessCompanyFromSignUpRequest(User user, UserSignupRequest signUpRequest);
 	
 }

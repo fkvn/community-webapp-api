@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.rest.request.CompanyRequest;
+import mono.thainow.rest.request.CompanySignupRequest;
 
 public interface CompanyService {
 
@@ -20,9 +20,9 @@ public interface CompanyService {
 	
 	Company updateCompanyStatus(Company company, CompanyStatus newStatus);
 	
-	Company getCompanyFromRequest(CompanyRequest companyRequest);
+	Company getCompanyFromRequest(CompanySignupRequest companyRequest);
 	
-	Company createCompany(CompanyRequest companyRequest);
+	Company createCompany(CompanySignupRequest companyRequest);
 	
 	Storage uploadLogoPicture(Company company, @RequestParam("file") MultipartFile file);
 	
