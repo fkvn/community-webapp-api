@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import mono.thainow.rest.request.SignInRequest;
+import mono.thainow.rest.request.TokenRequest;
 import mono.thainow.rest.request.UserSignupRequest;
-import mono.thainow.security.payload.request.SignInRequest;
-import mono.thainow.security.payload.request.TokenRequest;
-import mono.thainow.security.payload.response.JwtResponse;
-import mono.thainow.security.payload.response.MessageResponse;
-import mono.thainow.security.payload.response.TokenResponse;
+import mono.thainow.rest.response.JwtResponse;
+import mono.thainow.rest.response.MessageResponse;
+import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.UserService;

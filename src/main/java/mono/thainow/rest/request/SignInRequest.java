@@ -1,4 +1,4 @@
-package mono.thainow.security.payload.request;
+package mono.thainow.rest.request;
 
 import lombok.Getter;
 import lombok.Setter;

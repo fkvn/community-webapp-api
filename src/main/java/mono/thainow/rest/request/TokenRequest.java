@@ -1,4 +1,4 @@
-package mono.thainow.security.payload.response;
+package mono.thainow.rest.request;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TokenResponse {
+public class TokenRequest {
 	
 	@Size(max = 15, message = "Phone number can't be more than 15 digit numbers")
 	private String phone;
@@ -23,8 +23,5 @@ public class TokenResponse {
 	
 	@NotEmpty( message = "Channel can't be empty")
 	private String channel;
-	
-//	verification token
-	@Size(min = 4, message = "Token length is at least 4 digit numbers")
-	private String token;
+
 }

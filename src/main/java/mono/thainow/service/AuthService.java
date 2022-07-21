@@ -1,10 +1,10 @@
 package mono.thainow.service;
 
+import mono.thainow.rest.request.SignInRequest;
+import mono.thainow.rest.request.TokenRequest;
 import mono.thainow.rest.request.UserSignupRequest;
-import mono.thainow.security.payload.request.SignInRequest;
-import mono.thainow.security.payload.request.TokenRequest;
-import mono.thainow.security.payload.response.JwtResponse;
-import mono.thainow.security.payload.response.TokenResponse;
+import mono.thainow.rest.response.JwtResponse;
+import mono.thainow.rest.response.TokenResponse;
 
 public interface AuthService {
 	

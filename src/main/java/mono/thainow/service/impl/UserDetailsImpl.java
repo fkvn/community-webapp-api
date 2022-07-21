@@ -1,6 +1,5 @@
 package mono.thainow.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import mono.thainow.domain.company.Company;
-import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
@@ -39,16 +36,7 @@ public class UserDetailsImpl implements UserDetails {
 	private UserRole role;
 	private UserStatus status;
 	private String sub;
-	private Location location;
-	private String firstname;
-	private String lastname;
-	private String email;
-	private boolean isEmailVerified;
-	private boolean isEmailPublic;
-	private String phone;
-	private boolean isPhoneVerified;
-	private boolean isPhonePublic;
-	private List<Company> companies;
+
 	
 
 	@JsonIgnore
@@ -56,7 +44,7 @@ public class UserDetailsImpl implements UserDetails {
 
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(User user, List<Company> companies, Collection<? extends GrantedAuthority> authorities) {
+	public UserDetailsImpl(User user,  Collection<? extends GrantedAuthority> authorities) {
 		this.id = user.getId();
 		this.username = user.getUsername();
 		this.password = user.getPassword();
@@ -65,27 +53,16 @@ public class UserDetailsImpl implements UserDetails {
 		this.role = user.getRole();
 		this.status = user.getStatus();
 		this.authorities = authorities;
-		this.location = user.getLocation();
-		this.firstname = user.getFirstName();
-		this.lastname = user.getLastName();
-		this.email = user.getEmail();
-		this.isEmailVerified = user.isEmailVerified();
-		this.isEmailPublic = user.isEmailPublic();
-		this.phone = user.getPhone();
-		this.isPhoneVerified = user.isPhoneVerified();
-		this.isPhonePublic = user.isPhonePublic();
-
-		this.companies = companies;
 
 	}
 
 	public static UserDetailsImpl build(User user) {
 
-		List<Company> companies = new ArrayList<>();
-
-		if (user.getRole() == UserRole.BUSINESS) {
-			companies = user.getCompanies();
-		}
+//		List<Company> companies = new ArrayList<>();
+//
+//		if (user.getRole() == UserRole.BUSINESS) {
+//			companies = user.getCompanies();
+//		}
 
 // 		this list of GrantedAuthority would be used for PreAuthorize annotation
 //		in this case, we add both Privileges and Roles into stream and concat together to authority
@@ -93,7 +70,7 @@ public class UserDetailsImpl implements UserDetails {
 				.concat(user.getPrivileges().stream(), Stream.of("ROLE_" + user.getRole()))
 				.map(role -> new SimpleGrantedAuthority(role.toString())).collect(Collectors.toList());
 
-		return new UserDetailsImpl(user, companies, authorities);
+		return new UserDetailsImpl(user, authorities);
 	}
 
 	@Override
@@ -113,9 +90,6 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		
-		System.out.println(this.getStatus());
-		System.out.println(this.getStatus() == UserStatus.ACTIVATED);
 		
 		return this.getStatus() == UserStatus.ACTIVATED;
 	}

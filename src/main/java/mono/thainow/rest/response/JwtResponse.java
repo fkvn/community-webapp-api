@@ -1,4 +1,4 @@
-package mono.thainow.security.payload.response;
+package mono.thainow.rest.response;
 
 import java.util.HashMap;
 import java.util.Map;
