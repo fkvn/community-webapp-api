@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
+import mono.thainow.rest.request.GoogleSignInRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 
 public interface UserService {
@@ -37,6 +38,8 @@ public interface UserService {
 	
 	String validateUserPhone(String phone);
 	
+	boolean isUserEmailUnique(String email);
+	
 	String validateUserEmail(String email);
 	
 	String validateAndEncodeUserPassword(String password);
@@ -44,6 +47,8 @@ public interface UserService {
 	User initializeUserByRole(UserRole role);
 	
 	User getUserFromSignUpRequest(UserSignupRequest signUpRequest);
+	
+	User getUserFromGoogleSignInRequest(GoogleSignInRequest googleSignInRequest);
 	
 	User addBusinessCompanyFromSignUpRequest(User user, UserSignupRequest signUpRequest);
 	

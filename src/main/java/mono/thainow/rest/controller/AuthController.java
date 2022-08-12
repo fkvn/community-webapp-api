@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import mono.thainow.rest.request.GoogleSignInRequest;
 import mono.thainow.rest.request.SignInRequest;
 import mono.thainow.rest.request.TokenRequest;
 import mono.thainow.rest.request.UserSignupRequest;
@@ -62,9 +63,14 @@ public class AuthController {
 	}
 
 	@PostMapping("/signin")
-	public JwtResponse authenticateUser(@Valid @RequestBody SignInRequest loginRequest) {
+	public JwtResponse authenticateUser(@Valid @RequestBody SignInRequest signinRequest) {
 
-		return authService.signin(loginRequest);
+		return authService.signin(signinRequest);
+	}
+	
+	@PostMapping("/signin/google")
+	public JwtResponse authenticateGoogleUser(@Valid @RequestBody GoogleSignInRequest signinRequest) {
+		return authService.googleSignin(signinRequest);
 	}
 
 	@PostMapping("/signup")

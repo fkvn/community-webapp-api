@@ -38,25 +38,21 @@ public class Storage implements Serializable {/**
 	@GeneratedValue
     private Long id;
 	
-	@NotEmpty
 	@JsonIgnore
 	@Column(name = "STORAGE_NAME")
-	private String name;
+	private String name = "";
 
-	@NotEmpty
 	@JsonIgnore
 	@Column(name = "STORAGE_TYPE")
-	private String type;
+	private String type = "";
 	
 	@JsonValue
-	@NotEmpty
 	@Column(name = "STORAGE_URL")
 	private String url;
 
 	@JsonIgnore
-	@NotNull
 	@Column(name = "STORAGE_SIZE")
-	private Long size;
+	private Long size = (long) 0;
 	
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

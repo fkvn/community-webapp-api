@@ -1,7 +1,6 @@
 package mono.thainow.rest.request;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,16 +11,15 @@ import lombok.Setter;
 
 public class StorageRequest {
 	
-	@NotEmpty
-	private String name;
+
+	private String name = "";
 	
-	@NotEmpty
-	private String type;
+
+	private String type = "";
 	
 	@NotEmpty
 	private String url;
 	
-	@NotNull
-	private Long size;
+	private Long size = (long) 0;
 	
 }

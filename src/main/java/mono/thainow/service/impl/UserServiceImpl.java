@@ -18,6 +18,7 @@ import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
+import mono.thainow.rest.request.GoogleSignInRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.StorageService;
@@ -143,9 +144,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Storage uploadProfilePicture(User user, @RequestParam("file") MultipartFile file) {
 
-		
-		StorageResponse storageResponse= storageService.upload(file);
-		
+		StorageResponse storageResponse = storageService.upload(file);
+
 //		persist storage into database
 		Storage profile = new Storage();
 
@@ -244,7 +244,7 @@ public class UserServiceImpl implements UserService {
 	public User getUserFromSignUpRequest(UserSignupRequest signUpRequest) {
 
 		User user = new User();
-		
+
 ////		verify role and initialize user based on its role
 //		String roleName = Optional.ofNullable(signUpRequest.getRole()).orElse("").trim();
 ////		User user = initializeUserByRole(UserRole.valueOf(roleName));
@@ -276,7 +276,7 @@ public class UserServiceImpl implements UserService {
 //		email Verified
 		boolean isEmailVerified = Optional.ofNullable(signUpRequest.isEmailVerified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
- 
+
 //		user phone
 		String phone = Optional.ofNullable(signUpRequest.getPhone()).orElse("").trim();
 		user.setPhone(phone);
@@ -288,14 +288,13 @@ public class UserServiceImpl implements UserService {
 //		login credential 
 		Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
 				"Users must have at least email or phone number to register!");
-		
+
 //		user location
 //		String placeid = Optional.ofNullable(signUpRequest.getPlaceid()).orElse("");
 //		String address = Optional.ofNullable(signUpRequest.getAddress()).orElse("");
 //		if (!placeid.isEmpty() && !address.isEmpty()) {
 //			user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 //		}
-		
 
 //		user profile
 		StorageDefault storageDefault = new StorageDefault();
@@ -308,17 +307,16 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
-	
 	@Override
 	public String validateUsername(String username) {
-		
+
 		boolean isUsernameUnique = userDao.isUsernameUnique(username);
-		
+
 		Assert.isTrue(isUsernameUnique, "Username already existed");
-		
+
 		return username;
 	}
-	
+
 	@Override
 	public String validateUserPhone(String phone) {
 //		validate phone unique
@@ -333,9 +331,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public boolean isUserEmailUnique(String email) {
+		return userDao.isEmailUnique(email);
+	}
+
+	@Override
 	public String validateUserEmail(String email) {
 //		validate email unique
-		boolean isEmailUnique = userDao.isEmailUnique(email);
+		boolean isEmailUnique = isUserEmailUnique(email);
 
 		Assert.isTrue(isEmailUnique, "Email already existed!");
 
@@ -356,7 +359,55 @@ public class UserServiceImpl implements UserService {
 		return encodedPwd;
 	}
 
+	@Override
+	public User getUserFromGoogleSignInRequest(GoogleSignInRequest googleSignInRequest) {
+		String defaultPasswordForGoogleAccount = "THAINOW_GOOGLE_at!@#";
 
+		String email = Optional.ofNullable(googleSignInRequest.getEmail().trim()).orElse("");
+
+		User user = getActiveUserByEmail(email);
+
+//		new user
+		if (user == null) {
+			user = new User();
+			user.setPassword(validateAndEncodeUserPassword(defaultPasswordForGoogleAccount));
+		}
+
+//		update user information
+
+//		firstname
+		String firstname = Optional.ofNullable(googleSignInRequest.getGiven_name()).orElse("").trim();
+		user.setFirstName(firstname);
+
+//		lastname
+		String lastname = Optional.ofNullable(googleSignInRequest.getFamily_name()).orElse("").trim();
+		user.setLastName(lastname);
+
+//		username
+		String username = Optional.ofNullable(googleSignInRequest.getName()).orElse("").trim();
+		user.setUsername(username);
+
+//		user email
+		user.setEmail(email);
+
+		boolean isEmailVerified = Optional.ofNullable(googleSignInRequest.isEmail_verified()).orElse(false);
+		user.setEmailVerified(isEmailVerified);
+
+//		user profile
+		String profileUrl = Optional.ofNullable(googleSignInRequest.getPicture()).orElse("").trim();
+
+//		new profile storage
+		Storage profile = new Storage();
+		profile.setUrl(profileUrl);
+		profile = storageService.saveStorage(profile);
+
+		user.setProfileUrl(profile);
+
+//		set provider
+		user.setProvider("GOOGLE");
+
+		return user;
+	}
 
 //	=============================== Business Service - End ===============================
 

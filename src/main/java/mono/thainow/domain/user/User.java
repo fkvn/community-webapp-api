@@ -1,11 +1,9 @@
 package mono.thainow.domain.user;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -22,7 +20,6 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -35,21 +32,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import mono.thainow.domain.company.Company;
 import mono.thainow.domain.location.Location;
-import mono.thainow.domain.post.Post;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.view.View;
 
@@ -165,6 +156,11 @@ public class User implements Serializable {
 	private String sub;
 	
 	@NotNull
+	@Column(name = "USER_SOURCE")
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private String provider = "THAINOW";
+	
+	@NotNull
 	@Column(name = "USER_ROLE")
 	@Enumerated(EnumType.STRING)
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -199,17 +195,17 @@ public class User implements Serializable {
 	@Column(name = "USER_STATUS")
 	private UserStatus status = UserStatus.DEACTIVATED;
 
-	// Request ONLY property
+	// Request ONLY property 
 
-	@OneToMany(mappedBy = "administrator", fetch = FetchType.LAZY)
-	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-	@JsonIdentityReference(alwaysAsId = true)
-	private List<Company> companies = new ArrayList<>();
-	
-	@NotNull
-	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
-	@JsonIgnore
-	private List<Post> posts = new ArrayList<>();
+//	@OneToMany(mappedBy = "administrator", fetch = FetchType.LAZY)
+//	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//	@JsonIdentityReference(alwaysAsId = true)
+//	private List<Company> companies = new ArrayList<>();
+//	
+//	@NotNull
+//	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+//	@JsonIgnore
+//	private List<Post> posts = new ArrayList<>();
 	
 	
 	// Config

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import mono.thainow.domain.user.User;
+import mono.thainow.rest.request.GoogleSignInRequest;
 import mono.thainow.rest.request.SignInRequest;
 import mono.thainow.rest.request.TokenRequest;
 import mono.thainow.rest.request.UserSignupRequest;
@@ -18,6 +19,7 @@ import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.service.AuthService;
+import mono.thainow.service.StorageService;
 import mono.thainow.service.TwilioService;
 import mono.thainow.service.UserService;
 
@@ -26,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserService userService;
-	
+
 //	@Autowired
 //	private CompanyService companyService;
 
@@ -38,6 +40,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	TwilioService twilioService;
+	
+	@Autowired
+	StorageService storageService;
 
 	@Override
 	public void sendVerificationToken(TokenRequest tokenRequest) {
@@ -83,7 +88,7 @@ public class AuthServiceImpl implements AuthService {
 		/*
 		 * 1. Validate company information if user registered as BUSINESS 2. Add company
 		 * into business 3. Revert user if company registered failed
-		 */ 
+		 */
 //		if (user.getRole() == UserRole.BUSINESS) {
 //
 ////			add company
@@ -162,7 +167,7 @@ public class AuthServiceImpl implements AuthService {
 			break;
 
 		default:
-			break; 
+			break;
 		}
 
 		Authentication authentication = authenticationManager
@@ -182,6 +187,33 @@ public class AuthServiceImpl implements AuthService {
 
 		return jwtClaims;
 
+	}
+
+	@Override
+	public JwtResponse googleSignin(GoogleSignInRequest googleSigninRequest) {
+		
+//		get user
+		User user = userService.getUserFromGoogleSignInRequest(googleSigninRequest);
+		
+//		persit user
+		user = userService.saveUser(user);
+		
+//		validate process
+		String username = "email-login," + user.getEmail();
+		
+		Authentication authentication = authenticationManager
+				.authenticate(new UsernamePasswordAuthenticationToken(username, user.getPassword()));
+		
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		String jwt = jwtUtils.generateJwtToken(authentication);
+
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		
+		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
+
+		return jwtClaims;
+		
 	}
 
 }

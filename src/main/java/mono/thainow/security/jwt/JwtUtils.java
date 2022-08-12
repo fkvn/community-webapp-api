@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -30,10 +29,12 @@ public class JwtUtils {
 
 	public String generateJwtToken(Authentication authentication) {
 		
+		int expirationMs = jwtExpirationMs; 
+		
 		UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 		
 		return Jwts.builder().setSubject((userPrincipal.getSub())).setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+				.setExpiration(new Date((new Date()).getTime() + expirationMs))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
 	}
 
