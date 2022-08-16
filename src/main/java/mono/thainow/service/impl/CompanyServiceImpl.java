@@ -123,10 +123,10 @@ public class CompanyServiceImpl implements CompanyService {
 		company = saveCompany(company);
 
 //		update administrator
-		User user = company.getAdministrator();
-		user.getCompanies().add(company);
-		user.setRole(UserRole.BUSINESS);
-		user = userService.saveUser(user);
+//		User user = company.getAdministrator();
+//		user.getCompanies().add(company);
+//		user.setRole(UserRole.BUSINESS);
+//		user = userService.saveUser(user);
 
 		return company;
 	}
@@ -240,7 +240,7 @@ public class CompanyServiceImpl implements CompanyService {
 		Long administratorId = Optional.ofNullable(companyRequest.getAdministratorId()).orElse(null);
 		User administrator = userService.getByUserId(administratorId);
 		Assert.isTrue(administrator != null, "Invalid Administrator Credential!");
-		company.setAdministrator(administrator);
+//		company.setAdministrator(administrator);
 
 //		Informal company is a company not having physical address 
 		boolean isInformal = Optional.ofNullable(companyRequest.isInformal()).orElse(false);
@@ -263,7 +263,7 @@ public class CompanyServiceImpl implements CompanyService {
 			profileId = storageDefault.getCompanyProfileDefault();
 		}
 		Storage profile = storageService.getStorage(profileId);
-		company.setLogoUrl(profile);
+//		company.setLogoUrl(profile);
 
 //		company email 
 		String email = Optional.ofNullable(companyRequest.getEmail()).orElse("").trim();
@@ -315,12 +315,14 @@ public class CompanyServiceImpl implements CompanyService {
 		profile = storageService.saveStorage(profile);
 
 //		attach into company
-		company.setLogoUrl(profile);
+//		company.setLogoUrl(profile);
 
 //		persist into database
 		company = saveCompany(company);
 
-		return company.getLogoUrl();
+//		return company.getLogoUrl();
+		
+		return null;
 	}
 
 }

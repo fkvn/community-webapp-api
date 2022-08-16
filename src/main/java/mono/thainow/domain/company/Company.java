@@ -82,10 +82,6 @@ public class Company implements Serializable {
 	@JsonView(View.Company.Basic.class)
 	private String industry;
 
-	@OneToOne
-	@JsonView(View.Company.Basic.class)
-	private Storage logoUrl;
-
 	@Column(name = "IS_COMPANY_INFORMAL")
 	@JsonView(View.Company.Basic.class)
 	private boolean isInformal = false;
@@ -148,32 +144,5 @@ public class Company implements Serializable {
 	@Column(name = "IS_COMPANY_PHONE_VERIFIED")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private boolean isPhoneVerified = false;
-
-	@ManyToOne
-	@JoinColumn(name = "ADMINISTRATOR_ID")
-	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@JsonIdentityReference(alwaysAsId = true)
-	private User administrator;
-
-	@Column(name = "ADMINISTRATOR_ROLE")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String administratorRole = "Owner";
-
-	// Config
-
-	@PrePersist
-	private void validateCompany() {
-
-		// assert that once we have the administrator, then the administratorRole cannot be null
-		if (this.administrator != null) {
-			Assert.isTrue(!this.administratorRole.isEmpty(), "Invalid Administrator Role!");
-		}
-
-		// assert that once we have the administrator Role, then the administrator cannot be null
-		if (this.administratorRole != null && !this.administratorRole.isEmpty()) {
-			Assert.isTrue(this.administrator != null, "Invalid Administrator!");
-		}
-	}
 
 }

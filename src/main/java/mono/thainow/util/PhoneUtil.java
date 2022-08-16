@@ -35,6 +35,8 @@ public class PhoneUtil {
 		
 //		validate region
 		Assert.isTrue(region.length() == 2, "Region must has exactly 2 characters");
+		
+		Assert.isTrue(!phone.isEmpty(), "Phone can't be empty");
 
 		PhoneNumberUtil numberUtil = PhoneNumberUtil.getInstance();
 

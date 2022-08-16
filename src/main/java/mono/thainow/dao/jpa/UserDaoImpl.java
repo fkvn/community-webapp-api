@@ -40,56 +40,78 @@ public class UserDaoImpl implements UserDao {
 	public User getUserById(long id) {
 		return entityManager.find(User.class, id);
 	}
-	
+
 	@Override
 	public User getActiveUserById(long id) {
-		User user = entityManager.createQuery("from User where status =: status and id =:id", User.class)
+		return entityManager.createQuery("from User where status =: status and id =:id", User.class)
 				.setParameter("status", UserStatus.ACTIVATED).setParameter("id", id).getSingleResult();
-
-		return user;
 	}
 
 	@Override
 	public User getActiveUserByUsername(String username) {
-		User user = entityManager.createQuery("from User where status =: status and username =:username", User.class)
+		return entityManager.createQuery("from User where status =: status and username =:username", User.class)
 				.setParameter("status", UserStatus.ACTIVATED).setParameter("username", username).getSingleResult();
 
-		return user;
 	}
 
 	@Override
 	public User getActiveUserByEmail(String email) {
-		try {
-			User user = entityManager.createQuery("from User where status =:status and email =:email", User.class)
-					.setParameter("status", UserStatus.ACTIVATED).setParameter("email", email).getSingleResult();
-			return user;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		return null;
+		return entityManager.createQuery("from User where status =:status and email =:email", User.class)
+				.setParameter("status", UserStatus.ACTIVATED).setParameter("email", email).getSingleResult();
 	}
 
 	@Override
 	public User getActiveUserByPhone(String phone) {
-		try {
-			User user = entityManager.createQuery("from User where status =:status and phone =:phone", User.class)
-					.setParameter("status", UserStatus.ACTIVATED).setParameter("phone", phone).getSingleResult();
-
-			return user;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		return null;
+		return entityManager.createQuery("from User where status =:status and phone =:phone", User.class)
+				.setParameter("status", UserStatus.ACTIVATED).setParameter("phone", phone).getSingleResult();
 	}
 
 	@Override
 	public User getActiveUserBySub(String sub) {
-		User user = entityManager.createQuery("from User where status =:status and sub =:sub", User.class).setParameter("sub", sub)
-				.setParameter("status", UserStatus.ACTIVATED).getSingleResult();
+		return entityManager.createQuery("from User where status =:status and sub =:sub", User.class)
+				.setParameter("sub", sub).getSingleResult();
+	}
 
-		return user;
+//	=====================================================
+
+	@Override
+	public boolean isEmailUnique(String email) {
+		List<User> users = entityManager
+				.createQuery("from User where status <> :statusDelete and email =:email and email <> ''", User.class)
+				.setParameter("statusDelete", UserStatus.DELETED).setParameter("email", email).getResultList();
+
+		if (users.size() == 0) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean isPhoneUnique(String phone) {
+		List<User> users = entityManager
+				.createQuery("from User where status <> :statusDelete and phone =:phone and phone <> ''", User.class)
+				.setParameter("statusDelete", UserStatus.DELETED).setParameter("phone", phone).getResultList();
+
+		if (users.size() == 0) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean isUsernameUnique(String username) {
+		List<User> users = entityManager
+				.createQuery("from User where status <> :statusDelete and username =:username and username <> ''",
+						User.class)
+				.setParameter("statusDelete", UserStatus.DELETED).setParameter("username", username).getResultList();
+
+		if (users.size() == 0) {
+			return true;
+		}
+
+		return false;
 	}
 
 //	=====================================================
@@ -106,70 +128,5 @@ public class UserDaoImpl implements UserDao {
 		User user = entityManager.find(User.class, id);
 		entityManager.remove(user);
 	}
-
-//	=====================================================
-
-	@Override
-	public boolean isEmailUnique(String email) {
-		try {
-
-			/*
-			 * if no error, means active user with the given email existed -> return false
-			 * 
-			 * We don't check email unique for users who are NOT ACTIVE
-			 */
-			entityManager.createQuery("from User where status <> :statusDelete and email =:email and email <> ''", User.class)
-					.setParameter("statusDelete", UserStatus.DELETED).setParameter("email", email).getSingleResult();
-
-			return false;
-
-		} catch (Exception ex) {
-//			email is available
-			return true;
-		}
-	}
-
-	@Override
-	public boolean isPhoneUnique(String phone) {
-		try {
-
-			/*
-			 * if no error, means active user with the given phone existed -> return false
-			 * 
-			 * We don't check phone unique for users who are NOT ACTIVE
-			 */
-			entityManager.createQuery("from User where status <> :statusDelete and phone =:phone and phone <> ''", User.class)
-					.setParameter("statusDelete", UserStatus.DELETED).setParameter("phone", phone).getSingleResult();
-
-			return false;
-
-		} catch (Exception ex) {
-//			phone is available
-			return true;
-		}
-	}
-
-	@Override
-	public boolean isUsernameUnique(String username) {
-		try {
-
-			/*
-			 * if no error, means active user with the given username existed -> return false
-			 * 
-			 * We don't check username unique for users who are NOT ACTIVE
-			 */
-			entityManager.createQuery("from User where status <> :statusDelete and username =:username and username <> ''", User.class)
-					.setParameter("statusDelete", UserStatus.DELETED)
-					.setParameter("username", username).getSingleResult();
-
-			return false;
-
-		} catch (Exception ex) {
-//			phone is available
-			return true;
-		}
-	}
-
-
 
 }

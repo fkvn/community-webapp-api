@@ -43,9 +43,9 @@ public class CompanyController {
 		UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();
 
-		if (!company.getAdministrator().getId().equals(userDetails.getId())) {
-			throw new AccessForbidden();
-		}
+//		if (!company.getAdministrator().getId().equals(userDetails.getId())) {
+//			throw new AccessForbidden();
+//		}
 	}
 	
 	@GetMapping("/{id}")

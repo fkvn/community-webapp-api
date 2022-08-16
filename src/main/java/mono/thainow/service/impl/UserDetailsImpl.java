@@ -49,7 +49,7 @@ public class UserDetailsImpl implements UserDetails {
 		this.username = user.getUsername();
 		this.password = user.getPassword();
 		this.sub = user.getSub();
-		this.profileUrl = user.getProfileUrl();
+//		this.profileUrl = user.getProfileUrl();
 		this.role = user.getRole();
 		this.status = user.getStatus();
 		this.authorities = authorities;

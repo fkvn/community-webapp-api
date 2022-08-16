@@ -10,15 +10,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.GoogleSignInRequest;
-import mono.thainow.rest.request.SignInRequest;
+import mono.thainow.rest.request.GoogleAuthRequest;
 import mono.thainow.rest.request.TokenRequest;
+import mono.thainow.rest.request.UserSigninRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.service.AuthService;
+import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.TwilioService;
 import mono.thainow.service.UserService;
@@ -29,8 +32,8 @@ public class AuthServiceImpl implements AuthService {
 	@Autowired
 	private UserService userService;
 
-//	@Autowired
-//	private CompanyService companyService;
+	@Autowired
+	private ProfileService profileService;
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -44,6 +47,9 @@ public class AuthServiceImpl implements AuthService {
 	@Autowired
 	StorageService storageService;
 
+//	======================================================================
+	
+	
 	@Override
 	public void sendVerificationToken(TokenRequest tokenRequest) {
 
@@ -72,69 +78,43 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public boolean signUp(UserSignupRequest signUpRequest) {
-
-		User user = userService.getUserFromSignUpRequest(signUpRequest);
-
+	public Long userSignup(UserSignupRequest signUpRequest) {
+		
 //		check Type of verification
 		boolean isVerified = Optional.ofNullable(signUpRequest.isVerified()).orElse(false);
 
 //		verification is required for users
 		Assert.isTrue(isVerified, "Users must be verified to register!");
+		
+//		retrieve user information
+		User user = userService.getUserFromSignupRequest(signUpRequest);
 
 //		persist user info into database 
 		user = userService.saveUser(user);
-
-		/*
-		 * 1. Validate company information if user registered as BUSINESS 2. Add company
-		 * into business 3. Revert user if company registered failed
-		 */
-//		if (user.getRole() == UserRole.BUSINESS) {
-//
-////			add company
-//			Company company = companyService.getCompanyFromRequest(signUpRequest.getCompany());
-//			
-////			bind business profile url with company logo url
-//			company.setLogoUrl(user.getProfileUrl());
-//			
-////			persist company
-//			company = companyService.saveCompany(company);
-//			
-//			
-////			bind business location with company location
-//			user.setLocation(company.getLocation());
-//			user = userService.saveUser(user);
-//			
-////			update company and business relationship
-//			String administratorRole = Optional.ofNullable(signUpRequest.getAdministratorRole()).orElse("");
-//			
-////			company - user
-//			BusinessUser businessUser = (BusinessUser) user;
-//			company.setAdministratorRole(administratorRole);
-//			company.setAdministrator(businessUser);
-//			company = companyService.saveCompany(company);
-//			
-////			user - company
-//			businessUser.getCompanies().add(company);
-//			businessUser = (BusinessUser) userService.saveUser(businessUser);
-
-//		}
-
-		return true;
+		
+//		create a account profile with new user (default profilePicture)
+		Profile profile = profileService.createProfile(user, null);
+		
+//		update user profile list
+		user.getProfiles().add(profile);
+		
+//		update user
+		user = userService.saveUser(user);
+		
+		return user.getId();
 	}
 
 	@Override
-	public JwtResponse signin(SignInRequest signinRequest) {
-
-		String channel = Optional.ofNullable(signinRequest.getChannel()).orElse("");
+	public JwtResponse signinWithThaiNow(UserSigninRequest userSigninRequest) {
+		
+		String channel = Optional.ofNullable(userSigninRequest.getChannel()).orElse("");
 
 //		only verify by email and phone
 		Assert.isTrue(channel.equals("email") || channel.equals("phone"),
 				"Only Email and Phone are supported at the moment!");
 
 //		password verification
-		Optional<String> password = Optional.ofNullable(signinRequest.getPassword());
-		Assert.isTrue(!password.isEmpty(), "Password can't be blank!");
+		String password = Optional.ofNullable(userSigninRequest.getPassword()).orElse("").trim();
 
 		String username = "";
 
@@ -142,26 +122,26 @@ public class AuthServiceImpl implements AuthService {
 
 		case "email": {
 
-			Optional<String> email = Optional.ofNullable(signinRequest.getEmail());
+			String email = Optional.ofNullable(userSigninRequest.getEmail()).orElse("").trim();
 
 //			email is required
-			Assert.isTrue(email != null && !email.isEmpty(), "Email is required for the login process!");
+			Assert.isTrue(!email.isEmpty(), "Email is required!");
 
 //			update username
-			username = "email-login," + email.get();
+			username = "email-login," + email;
 
 		}
 			break;
 
 		case "phone": {
 
-			Optional<String> phone = Optional.ofNullable(signinRequest.getPhone());
+			String phone = Optional.ofNullable(userSigninRequest.getPhone()).orElse("").trim();
 
 //			phone number is required
-			Assert.isTrue(phone != null && !phone.isEmpty(), "Phone number is required for the login process!");
+			Assert.isTrue(!phone.isEmpty(), "Phone number is required!");
 
 //			update username
-			username = "phone-login," + phone.get();
+			username = "phone-login," + phone;
 
 		}
 			break;
@@ -169,15 +149,70 @@ public class AuthServiceImpl implements AuthService {
 		default:
 			break;
 		}
+		
+		return signedJWTAuth(username, password);
 
+	}
+
+	@Override
+	public JwtResponse signinWithGoogle(GoogleAuthRequest googleAuthRequest) {
+		
+		String email = Optional.ofNullable(googleAuthRequest.getEmail().trim()).orElse("");
+		
+		User user = null;
+
+//		email is not unique -> current user
+		if (!userService.isEmailUnique(email)) {
+			user = userService.getActiveUserByEmail(email);
+		}
+
+//		when can't retrieve current user -> new user
+		if (user == null) {
+			
+			user = new User();
+			user.setPassword(userService.encodePassword(googleAuthRequest.getSub()));
+			
+//			persit user
+			user = userService.saveUser(user);
+		}
+		
+//		update user
+		user = userService.updateUserFromGoogleAuthRequest(user, googleAuthRequest);
+		
+		
+//		user profile
+		String profileUrl = Optional.ofNullable(googleAuthRequest.getPicture()).orElse("").trim();
+
+//		new profile storage
+		Storage profilePicture = new Storage();
+		profilePicture.setUrl(profileUrl);
+		profilePicture = storageService.saveStorage(profilePicture);
+		
+//		create a account profile with new user
+		Profile profile = profileService.createProfile(user, profilePicture);
+		
+//		update user profile list
+		user.getProfiles().add(profile);
+		
+//		update user
+		user = userService.saveUser(user);
+		
+		String username = "email-login," + user.getEmail();
+		String password = user.getPassword();
+		
+		return signedJWTAuth(username, password);
+		
+	}
+
+	@Override
+	public JwtResponse signedJWTAuth(String username, String password) {
+		
 		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(username, password.get()));
+				.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		String jwt = jwtUtils.generateJwtToken(authentication);
-
-//		JwtResponse jwtClaims = new JwtResponse(jwt);
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
@@ -186,34 +221,6 @@ public class AuthServiceImpl implements AuthService {
 //				.collect(Collectors.toList());
 
 		return jwtClaims;
-
-	}
-
-	@Override
-	public JwtResponse googleSignin(GoogleSignInRequest googleSigninRequest) {
-		
-//		get user
-		User user = userService.getUserFromGoogleSignInRequest(googleSigninRequest);
-		
-//		persit user
-		user = userService.saveUser(user);
-		
-//		validate process
-		String username = "email-login," + user.getEmail();
-		
-		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(username, user.getPassword()));
-		
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		String jwt = jwtUtils.generateJwtToken(authentication);
-
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		
-		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
-
-		return jwtClaims;
-		
 	}
 
 }

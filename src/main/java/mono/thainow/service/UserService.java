@@ -1,55 +1,35 @@
 package mono.thainow.service;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-
-import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
-import mono.thainow.domain.user.UserRole;
-import mono.thainow.rest.request.GoogleSignInRequest;
+import mono.thainow.rest.request.GoogleAuthRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 
 public interface UserService {
-	
-	List<User> getAllUsers();
-	
-	User getByUserId(Long id);
-	User getActiveUserByUsername(String username);
-	User getActiveUserByEmail(String email);
-	User getActiveUserByPhone(String phone);
-	User getActiveUserBySub(String sub);
-	
-	Long updatePartialUser(Long id, Map<String, Object> userInfo);
-	
-	Storage uploadProfilePicture(User user, @RequestParam("file") MultipartFile file);
-	
-	User saveUser(User user);
-	
-	void deleteUser(Long id);
-	
-	void removeUser(Long id);
-	
-//	========= business requirement service =================
-	
-	String validateUsername(String username);
-	
-	String validateUserPhone(String phone);
-	
-	boolean isUserEmailUnique(String email);
-	
-	String validateUserEmail(String email);
-	
-	String validateAndEncodeUserPassword(String password);
 
-	User initializeUserByRole(UserRole role);
-	
-	User getUserFromSignUpRequest(UserSignupRequest signUpRequest);
-	
-	User getUserFromGoogleSignInRequest(GoogleSignInRequest googleSignInRequest);
-	
-	User addBusinessCompanyFromSignUpRequest(User user, UserSignupRequest signUpRequest);
-	
+	List<User> getAllUsers();
+
+	User getByUserId(Long id);
+
+	User getActiveUserByEmail(String email);
+
+	User getActiveUserByPhone(String phone);
+
+	User getActiveUserBySub(String sub);
+
+	boolean isUsernameUnique(String username);
+
+	boolean isEmailUnique(String email);
+
+	boolean isPhoneUnique(String phone);
+
+	String encodePassword(String password);
+
+	User getUserFromSignupRequest(UserSignupRequest signUpRequest);
+
+	User updateUserFromGoogleAuthRequest(User user, GoogleAuthRequest googleAuthRequest);
+
+	User saveUser(User user);
+
 }

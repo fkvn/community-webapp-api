@@ -16,9 +16,11 @@ public class UserSignupRequest {
 	private String password = "";
 	
 	private String email = "";
+	
 	private boolean isEmailVerified = false;
 
 	private String phone = "";
+	
 	private boolean isPhoneVerified = false;
 
 }

@@ -65,7 +65,8 @@ public class UserController {
 	public List<Company> getCompanies(@PathVariable Long id) {
 		validateUserAccess(id);
 		User user = userService.getByUserId(id);
-		return user.getCompanies();
+//		return user.getCompanies();
+		return null;
 	}
 
 	@PostMapping("/{id}/profile")
@@ -75,36 +76,11 @@ public class UserController {
 		
 		User user = userService.getByUserId(id);
 
-		Storage profile = userService.uploadProfilePicture(user, file);
+//		Storage profile = userService.uploadProfilePicture(user, file);
 
-		return profile;
-	}
-
-	@PatchMapping("/{id}")
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Long updatePartialUser(@PathVariable Long id, @RequestBody Map<String, Object> userInfo) {
-		validateUserAccess(id);
-		return userService.updatePartialUser(id, userInfo);
-	}
-
-	@DeleteMapping("/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteUser(@PathVariable Long id) {
-		validateUserAccess(id);
-		userService.deleteUser(id);
-	}
-
-	@GetMapping("/page/{pageNo}")
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Map<String, Object> getUserPaginated(@PathVariable Long pageNo, @RequestBody Map<String, Object> pageInfo) {
+//		return profile;
 		return null;
 	}
 
-	@DeleteMapping("/remove/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void removeUser(@PathVariable Long id) {
-		validateUserAccess(id);
-		userService.removeUser(id);
-	}
 
 }

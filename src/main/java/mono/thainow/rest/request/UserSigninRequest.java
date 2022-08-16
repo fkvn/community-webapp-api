@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SignInRequest {
+public class UserSigninRequest {
 	
 	private String channel;
 	

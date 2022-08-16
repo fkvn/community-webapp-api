@@ -1,5 +1,6 @@
 package mono.thainow.rest.controller;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -8,7 +9,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import mono.thainow.rest.request.GoogleSignInRequest;
-import mono.thainow.rest.request.SignInRequest;
+import mono.thainow.rest.request.GoogleAuthRequest;
 import mono.thainow.rest.request.TokenRequest;
+import mono.thainow.rest.request.UserSigninRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.MessageResponse;
@@ -61,44 +61,37 @@ public class AuthController {
 
 		return new MessageResponse("Token was verified successfully!");
 	}
-
-	@PostMapping("/signin")
-	public JwtResponse authenticateUser(@Valid @RequestBody SignInRequest signinRequest) {
-
-		return authService.signin(signinRequest);
-	}
 	
-	@PostMapping("/signin/google")
-	public JwtResponse authenticateGoogleUser(@Valid @RequestBody GoogleSignInRequest signinRequest) {
-		return authService.googleSignin(signinRequest);
+	@PostMapping("/google")
+	public JwtResponse authenticateGoogleUser(@Valid @RequestBody GoogleAuthRequest signinRequest) {
+		return authService.signinWithGoogle(signinRequest);
 	}
 
-	@PostMapping("/signup")
-	public MessageResponse registerUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
-
-		Assert.isTrue(authService.signUp(signUpRequest), "Registration Failed!");
-
-		return new MessageResponse("User registered successfully!");
+	@PostMapping("/users/signin")
+	public JwtResponse authenticateUser(@Valid @RequestBody UserSigninRequest signinRequest) {
+		return authService.signinWithThaiNow(signinRequest);
 	}
 
-	@PostMapping("/users/validateUsername")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateUsername(@RequestParam String username) {
-		userService.validateUsername(username.trim());
+	@PostMapping("/users/signup")
+	public Long registerUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
+		Long userId = authService.userSignup(signUpRequest);
+		return userId;
 	}
 
-	@PostMapping("/users/validatePhone")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateUserPhone(@RequestBody Map<String, Object> userInfo) {
-		String phone = Optional.ofNullable((String) userInfo.get("phone")).orElse("").trim();
-		userService.validateUserPhone(phone);
+	@PostMapping("/users/username/unique")
+	public Map<String, Boolean> isUsernameUnique(@RequestParam String username) {
+		System.out.println(userService.isUsernameUnique(username));
+		return Collections.singletonMap("unique", userService.isUsernameUnique(username));
 	}
 
-	@PostMapping("/users/validateEmail")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateUserEmail(@RequestBody Map<String, Object> userInfo) {
-		String email = Optional.ofNullable((String) userInfo.get("email")).orElse("").trim();
-		userService.validateUserEmail(email);
+	@PostMapping("/users/phone/unique")
+	public Map<String, Boolean> isPhoneUnique(@RequestParam String phone) {
+		return Collections.singletonMap("unique", userService.isPhoneUnique(phone));
+	}
+
+	@PostMapping("/users/email/unique")
+	public Map<String, Boolean> validateUserEmail(@RequestParam String email) {
+		return Collections.singletonMap("unique", userService.isEmailUnique(email));
 	}
 
 	@PostMapping("/companies/validatePhone")

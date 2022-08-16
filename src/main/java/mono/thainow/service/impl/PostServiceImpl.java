@@ -237,7 +237,7 @@ public class PostServiceImpl implements PostService {
 			CompanyStatus[] invalidCompanies = { CompanyStatus.PENDING };
 
 			if (Arrays.asList(invalidCompanies).contains(companyStatus)) {
-				companyInfo.put("registeredBy", post.getCompany().getAdministratorRole());
+//				companyInfo.put("registeredBy", post.getCompany().getAdministratorRole());
 			}
 
 			author.put("companyInfo", companyInfo);

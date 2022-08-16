@@ -1,6 +1,7 @@
 package mono.thainow.rest.controllerAdvice;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
 
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.core.Ordered;
@@ -72,8 +73,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return null;
 //	}
 
-	@ExceptionHandler({ IllegalArgumentException.class, InvalidDataAccessApiUsageException.class })
+	@ExceptionHandler({ IllegalArgumentException.class, InvalidDataAccessApiUsageException.class, ConstraintViolationException.class })
 	protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
+		
 		ex.printStackTrace();
 
 		ApiError apiError = new ApiError();
@@ -138,7 +140,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ex.printStackTrace();
 
 		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		apiError.setStatus(HttpStatus.NOT_FOUND);
 		try {
 			apiError.setError(ex.getCause().getLocalizedMessage());
 		} catch (Exception e) {
