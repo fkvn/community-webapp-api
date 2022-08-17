@@ -10,10 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import mono.thainow.domain.profile.Profile;
-import mono.thainow.domain.storage.Storage;
+import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.GoogleAuthRequest;
+import mono.thainow.rest.request.GoogleSigninRequest;
+import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.TokenRequest;
 import mono.thainow.rest.request.UserSigninRequest;
 import mono.thainow.rest.request.UserSignupRequest;
@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public Long userSignup(UserSignupRequest signUpRequest) {
+	public Long signupWithThaiNow(UserSignupRequest signUpRequest) {
 		
 //		check Type of verification
 		boolean isVerified = Optional.ofNullable(signUpRequest.isVerified()).orElse(false);
@@ -92,14 +92,8 @@ public class AuthServiceImpl implements AuthService {
 //		persist user info into database 
 		user = userService.saveUser(user);
 		
-//		create a account profile with new user (default profilePicture)
-		Profile profile = profileService.createProfile(user, null);
-		
-//		update user profile list
-		user.getProfiles().add(profile);
-		
-//		update user
-		user = userService.saveUser(user);
+//		create a account profile with new user
+		profileService.createProfile(user);
 		
 		return user.getId();
 	}
@@ -155,55 +149,43 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public JwtResponse signinWithGoogle(GoogleAuthRequest googleAuthRequest) {
+	public JwtResponse signinWithGoogle(GoogleSigninRequest googleSigninRequest) {
 		
-		String email = Optional.ofNullable(googleAuthRequest.getEmail().trim()).orElse("");
-		
-		User user = null;
-
-//		email is not unique -> current user
-		if (!userService.isEmailUnique(email)) {
-			user = userService.getActiveUserByEmail(email);
-		}
-
-//		when can't retrieve current user -> new user
-		if (user == null) {
-			
-			user = new User();
-			user.setPassword(userService.encodePassword(googleAuthRequest.getSub()));
-			
-//			persit user
-			user = userService.saveUser(user);
-		}
-		
-//		update user
-		user = userService.updateUserFromGoogleAuthRequest(user, googleAuthRequest);
-		
-		
-//		user profile
-		String profileUrl = Optional.ofNullable(googleAuthRequest.getPicture()).orElse("").trim();
-
-//		new profile storage
-		Storage profilePicture = new Storage();
-		profilePicture.setUrl(profileUrl);
-		profilePicture = storageService.saveStorage(profilePicture);
-		
-//		create a account profile with new user
-		Profile profile = profileService.createProfile(user, profilePicture);
-		
-//		update user profile list
-		user.getProfiles().add(profile);
-		
-//		update user
-		user = userService.saveUser(user);
-		
-		String username = "email-login," + user.getEmail();
-		String password = user.getPassword();
+		String email = Optional.ofNullable(googleSigninRequest.getEmail().trim()).orElse("");
+		String password = Optional.ofNullable(googleSigninRequest.getSub().trim()).orElse("");
+	
+//		internal custom username - used for sign in only, not user's username
+		String username = "email-login," + email;
 		
 		return signedJWTAuth(username, password);
 		
 	}
 
+	
+	@Override
+	public JwtResponse signupWithGoogle(GoogleSignupRequest googleSignupRequest) {
+		
+		String email = Optional.ofNullable(googleSignupRequest.getEmail().trim()).orElse("");
+		
+//		email is unique -> new user -> sign up
+		if (userService.isEmailUnique(email)) {
+			User user =  userService.getUserFromGoogleSignupRequest( googleSignupRequest);
+			
+//			persit user
+			user = userService.saveUser(user);
+			
+//			create a account profile with new user
+			profileService.createProfile(user);
+		}
+		
+//		return to sign in
+		GoogleSigninRequest signinRequest = new GoogleSigninRequest();
+		signinRequest.setEmail(googleSignupRequest.getEmail());
+		signinRequest.setSub(googleSignupRequest.getSub());
+		
+		return signinWithGoogle(signinRequest);
+	}
+	
 	@Override
 	public JwtResponse signedJWTAuth(String username, String password) {
 		
@@ -215,7 +197,12 @@ public class AuthServiceImpl implements AuthService {
 		String jwt = jwtUtils.generateJwtToken(authentication);
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		
+		User account = userService.getActiveUserByEmail(userDetails.getEmail());
+		UserProfile profile = profileService.getUserProfile(account);
+		
 		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
+		jwtClaims.setProfile(profile);
 
 //		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 //				.collect(Collectors.toList());

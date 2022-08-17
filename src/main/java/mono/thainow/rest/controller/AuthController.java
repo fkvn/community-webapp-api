@@ -2,22 +2,20 @@ package mono.thainow.rest.controller;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import mono.thainow.rest.request.GoogleAuthRequest;
+import mono.thainow.rest.request.GoogleSigninRequest;
+import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.TokenRequest;
 import mono.thainow.rest.request.UserSigninRequest;
 import mono.thainow.rest.request.UserSignupRequest;
@@ -25,7 +23,6 @@ import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.MessageResponse;
 import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.service.AuthService;
-import mono.thainow.service.CompanyService;
 import mono.thainow.service.UserService;
 
 // 30 secs
@@ -39,9 +36,6 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private CompanyService companyService;
 
 	@Autowired
 	PasswordEncoder encoder;
@@ -62,19 +56,24 @@ public class AuthController {
 		return new MessageResponse("Token was verified successfully!");
 	}
 	
-	@PostMapping("/google")
-	public JwtResponse authenticateGoogleUser(@Valid @RequestBody GoogleAuthRequest signinRequest) {
+	@PostMapping("/google/signin")
+	public JwtResponse signinGoogleUser(@Valid @RequestBody GoogleSigninRequest signinRequest) {
 		return authService.signinWithGoogle(signinRequest);
+	}
+	
+	@PostMapping("/google/signup")
+	public JwtResponse signupGoogleUser(@Valid @RequestBody GoogleSignupRequest signupRequest) {
+		return authService.signupWithGoogle(signupRequest);
 	}
 
 	@PostMapping("/users/signin")
-	public JwtResponse authenticateUser(@Valid @RequestBody UserSigninRequest signinRequest) {
+	public JwtResponse signinUser(@Valid @RequestBody UserSigninRequest signinRequest) {
 		return authService.signinWithThaiNow(signinRequest);
 	}
 
 	@PostMapping("/users/signup")
-	public Long registerUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
-		Long userId = authService.userSignup(signUpRequest);
+	public Long signupUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
+		Long userId = authService.signupWithThaiNow(signUpRequest);
 		return userId;
 	}
 
@@ -92,19 +91,5 @@ public class AuthController {
 	@PostMapping("/users/email/unique")
 	public Map<String, Boolean> validateUserEmail(@RequestParam String email) {
 		return Collections.singletonMap("unique", userService.isEmailUnique(email));
-	}
-
-	@PostMapping("/companies/validatePhone")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateCompanyPhone(@RequestBody Map<String, Object> companyInfo) {
-		String phone = Optional.ofNullable((String) companyInfo.get("phone")).orElse("").trim();
-		companyService.validateCompanyPhone(phone);
-	}
-
-	@PostMapping("/companies/validateEmail")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void validateCompanyEmail(@RequestBody Map<String, Object> companyInfo) {
-		String email = Optional.ofNullable((String) companyInfo.get("email")).orElse("").trim();
-		companyService.validateCompanyEmail(email);
 	}
 }

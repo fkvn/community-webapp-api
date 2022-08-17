@@ -1,6 +1,7 @@
 package mono.thainow.service;
 
-import mono.thainow.rest.request.GoogleAuthRequest;
+import mono.thainow.rest.request.GoogleSigninRequest;
+import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.TokenRequest;
 import mono.thainow.rest.request.UserSigninRequest;
 import mono.thainow.rest.request.UserSignupRequest;
@@ -13,13 +14,14 @@ public interface AuthService {
 	
 	void checkVerificationToken(TokenResponse tokenResponse);
 	
-	Long userSignup(UserSignupRequest signUpRequest);
-	
-	
-	JwtResponse signedJWTAuth(String username, String password);
-	
-	JwtResponse signinWithGoogle(GoogleAuthRequest googleAuthRequest);
+	Long signupWithThaiNow(UserSignupRequest signUpRequest);
 	
 	JwtResponse signinWithThaiNow(UserSigninRequest userSigninRequest);
+	
+	JwtResponse signupWithGoogle(GoogleSignupRequest googleAuthRequest);
+	
+	JwtResponse signinWithGoogle(GoogleSigninRequest googleSigninRequest);
+	
+	JwtResponse signedJWTAuth(String username, String password);
 
 }

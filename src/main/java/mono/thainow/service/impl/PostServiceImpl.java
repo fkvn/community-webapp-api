@@ -1,6 +1,5 @@
 package mono.thainow.service.impl;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +74,7 @@ public class PostServiceImpl implements PostService {
 		Post post = initializePostByType(PostType.valueOf(postRequest.getType()));
 
 //		post author
-		post.setAuthor(user);
+//		post.setAuthor(user);
 
 //		post title
 		String title = Optional.ofNullable(postRequest.getTitle()).orElse("");
@@ -203,15 +202,15 @@ public class PostServiceImpl implements PostService {
 //		author name
 		String authorName = "";
 
-//		business user
-		if (post.isCompanyPost()) {
-			authorName = post.getCompany().getName();
-		}
-//		classic user
-		else {
-			User user = post.getAuthor();
-//			authorName = user.getDisplayName();
-		}
+////		business user
+//		if (post.isCompanyPost()) {
+//			authorName = post.getCompany().getName();
+//		}
+////		classic user
+//		else {
+//			User user = post.getAuthor();
+////			authorName = user.getDisplayName();
+//		}
 
 		return authorName;
 	}
@@ -220,25 +219,25 @@ public class PostServiceImpl implements PostService {
 	public Map<String, Object> getPostAuthorInfo(Post post) {
 
 		Map<String, Object> author = new HashMap<>();
-		author.put("id", post.getAuthor().getId());
-		author.put("name", getPostAuthorName(post));
-		author.put("emailVerified", post.getAuthor().isEmailVerified());
-		author.put("phoneVerified", post.getAuthor().isPhoneVerified());
+//		author.put("id", post.getAuthor().getId());
+//		author.put("name", getPostAuthorName(post));
+//		author.put("emailVerified", post.getAuthor().isEmailVerified());
+//		author.put("phoneVerified", post.getAuthor().isPhoneVerified());
 
 //		companyInfo for business post
 		if (post.isCompanyPost()) {
 
 			Map<String, Object> companyInfo = new HashMap<>();
 
-			CompanyStatus companyStatus = post.getCompany().getStatus();
-			companyInfo.put("companyId", post.getCompany().getId());
-			companyInfo.put("companyStatus", post.getCompany().getStatus());
+//			CompanyStatus companyStatus = post.getCompany().getStatus();
+//			companyInfo.put("companyId", post.getCompany().getId());
+//			companyInfo.put("companyStatus", post.getCompany().getStatus());
 
 			CompanyStatus[] invalidCompanies = { CompanyStatus.PENDING };
 
-			if (Arrays.asList(invalidCompanies).contains(companyStatus)) {
-//				companyInfo.put("registeredBy", post.getCompany().getAdministratorRole());
-			}
+//			if (Arrays.asList(invalidCompanies).contains(companyStatus)) {
+////				companyInfo.put("registeredBy", post.getCompany().getAdministratorRole());
+//			}
 
 			author.put("companyInfo", companyInfo);
 		}

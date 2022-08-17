@@ -3,7 +3,7 @@ package mono.thainow.service;
 import java.util.List;
 
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.GoogleAuthRequest;
+import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 
 public interface UserService {
@@ -24,11 +24,11 @@ public interface UserService {
 
 	boolean isPhoneUnique(String phone);
 
-	String encodePassword(String password);
+	String encodePassword(String password, boolean validate);
 
 	User getUserFromSignupRequest(UserSignupRequest signUpRequest);
 
-	User updateUserFromGoogleAuthRequest(User user, GoogleAuthRequest googleAuthRequest);
+	User getUserFromGoogleSignupRequest(GoogleSignupRequest googleSignupRequest);
 
 	User saveUser(User user);
 

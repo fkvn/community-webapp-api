@@ -1,6 +1,5 @@
 package mono.thainow.domain.profile;
 
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
@@ -22,13 +21,16 @@ public class UserProfile extends Profile {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	public UserProfile(User user) {
-		this.setUsername(user.getUsername());
-		this.setUserId(user.getId());
+		setProfileInfo(user);
 	}
-	
-	@Column(name = "USER_ID")
-	private Long userId;
+
+	public void setProfileInfo(User user) {
+		this.setAccount(user);
+		this.setUsername(user.getUsername());
+		this.setPicture(user.getPicture());
+		this.setStatus(ProfileStatus.valueOf(user.getStatus().toString()));
+	}
 
 }

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GoogleAuthRequest {
+public class GoogleSignupRequest {
 	
 	private String sub;
 	

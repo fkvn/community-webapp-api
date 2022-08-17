@@ -85,18 +85,18 @@ public class Post implements Serializable {
 	private Location location;
 	
 	// post owner - author
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "AUTHOR_ID")
-	@JsonIgnore
-	private User author;
+//	@ManyToOne(fetch = FetchType.LAZY)
+//	@JoinColumn(name = "AUTHOR_ID")
+//	@JsonIgnore
+//	private User author;
 	
 	@Column(name = "IS_COMPANY_POST")
 	private boolean isCompanyPost = false;
 	
 	// Company post
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "COMPANY_ID")
-	private Company company;
+//	@ManyToOne(fetch = FetchType.LAZY)
+//	@JoinColumn(name = "COMPANY_ID")
+//	private Company company;
 
 	@PositiveOrZero
 	@Column(name = "POST_AVG_RATING")

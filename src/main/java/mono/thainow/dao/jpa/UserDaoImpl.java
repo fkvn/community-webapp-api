@@ -69,7 +69,7 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public User getActiveUserBySub(String sub) {
 		return entityManager.createQuery("from User where status =:status and sub =:sub", User.class)
-				.setParameter("sub", sub).getSingleResult();
+				.setParameter("status", UserStatus.ACTIVATED).setParameter("sub", sub).getSingleResult();
 	}
 
 //	=====================================================

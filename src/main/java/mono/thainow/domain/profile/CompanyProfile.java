@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.company.CompanyStatus;
+import mono.thainow.domain.user.User;
 
 @Getter
 @Setter
@@ -16,17 +18,38 @@ import mono.thainow.domain.company.Company;
 @RequiredArgsConstructor
 @Entity
 @DiscriminatorValue("COMPANY_PROFILE")
-public class CompanyProfile extends Profile {/**
+public class CompanyProfile extends Profile {
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	public CompanyProfile(Company company) {
-		this.setUsername(company.getName());
+
+	public CompanyProfile(User owner, Company company) {
+		this.setAccount(owner);
+		setProfileInfo(company);
 	}
-	
-	
+
 	@Column(name = "COMPANY_ID")
 	private Long companyId;
+
+	public void setProfileInfo(Company company) {
+		this.setCompanyId(company.getId());
+		this.setUsername(company.getName());
+		this.setPicture(company.getLogo());
+		setProfileStatus(company.getStatus());
+	}
+
+	public void setProfileStatus(CompanyStatus status) {
+		switch (status) {
+		case REGISTERED:
+			this.setStatus(ProfileStatus.ACTIVATED);
+			break;
+		case PENDING:
+			this.setStatus(ProfileStatus.PENDING);
+			break;
+		default:
+			this.setStatus(ProfileStatus.DELETED);
+		}
+	}
 
 }

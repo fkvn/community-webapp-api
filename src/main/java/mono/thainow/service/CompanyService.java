@@ -32,9 +32,5 @@ public interface CompanyService {
 	
 	List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit);
 	
-	String validateCompanyPhone(String phone);
-	
-	String validateCompanyEmail(String email);
-	
 	Company saveCompany(Company company);
 }

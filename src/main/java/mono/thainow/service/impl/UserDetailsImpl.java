@@ -32,6 +32,7 @@ public class UserDetailsImpl implements UserDetails {
 	private static final long serialVersionUID = 1L;
 	private Long id;
 	private String username;
+	private String email;
 	private Storage profileUrl;
 	private UserRole role;
 	private UserStatus status;
@@ -49,6 +50,7 @@ public class UserDetailsImpl implements UserDetails {
 		this.username = user.getUsername();
 		this.password = user.getPassword();
 		this.sub = user.getSub();
+		this.email = user.getEmail();
 //		this.profileUrl = user.getProfileUrl();
 		this.role = user.getRole();
 		this.status = user.getStatus();
@@ -90,7 +92,6 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		
 		return this.getStatus() == UserStatus.ACTIVATED;
 	}
 	

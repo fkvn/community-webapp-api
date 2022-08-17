@@ -1,10 +1,10 @@
 package mono.thainow.rest.response;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.service.impl.UserDetailsImpl;
 
 @Getter
@@ -13,8 +13,9 @@ public class JwtResponse {
 
 	private String access_token;
 	private String type = "Bearer";
+	private UserProfile profile = new UserProfile();
 
-	private Map<String, Object> user = new HashMap<>();
+//	private Map<String, Object> user = new HashMap<>();
 //	private List<Company> companies = new ArrayList<>();
 
 	public JwtResponse(String accessToken) {
@@ -23,17 +24,18 @@ public class JwtResponse {
 
 	public JwtResponse(String accessToken, UserDetailsImpl userDetails) {
 		this.access_token = accessToken;
-		this.user = getUserInfo(userDetails);
+//		this.user = getUserInfo(userDetails);
 //		this.companies = userDetails.getCompanies();
 	}
 
+	@SuppressWarnings("unused")
 	private Map<String, Object> getUserInfo(UserDetailsImpl userDetails) {
-		Map<String, Object> userInfo = new HashMap<>();
-
-		userInfo.put("id", userDetails.getId());
-		userInfo.put("username", userDetails.getUsername());
-		userInfo.put("profileUrl", userDetails.getProfileUrl());
-		userInfo.put("role", userDetails.getRole());
+//		Map<String, Object> userInfo = new HashMap<>();
+//		
+//		userInfo.put("id", userDetails.getId());
+//		userInfo.put("username", userDetails.getUsername());
+//		userInfo.put("profileUrl", userDetails.getProfileUrl());
+//		userInfo.put("role", userDetails.getRole());
 //		userInfo.put("firstname", userDetails.getFirstname());
 //		userInfo.put("lastname", userDetails.getLastname());
 //		userInfo.put("email", userDetails.getEmail());
@@ -44,7 +46,7 @@ public class JwtResponse {
 //		userInfo.put("isPhonePublic", userDetails.isPhonePublic());
 //		userInfo.put("location", userDetails.getLocation());
 
-		return userInfo;
+		return null;
 	}
 
 }

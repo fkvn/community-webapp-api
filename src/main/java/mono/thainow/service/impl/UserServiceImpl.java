@@ -13,10 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import mono.thainow.dao.UserDao;
+import mono.thainow.domain.storage.Storage;
+import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
-import mono.thainow.rest.request.GoogleAuthRequest;
+import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.UserSignupRequest;
+import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
 
@@ -31,6 +34,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private PasswordEncoder encoder;
 
+	@Autowired
+	private StorageService storageService;
 
 //	=============================================================
 
@@ -130,7 +135,12 @@ public class UserServiceImpl implements UserService {
 
 //		set password 
 		String password = Optional.ofNullable(signupRequest.getPassword()).orElse("").trim();
-		user.setPassword(encodePassword(password));
+		user.setPassword(encodePassword(password, true));
+
+//		user profile
+		StorageDefault storageDefault = new StorageDefault();
+		Storage picture = storageService.getStorage(storageDefault.getUserProfileDefault());
+		user.setPicture(picture);
 
 //		set status
 		user.setStatus(UserStatus.ACTIVATED);
@@ -139,43 +149,63 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User updateUserFromGoogleAuthRequest(User user, GoogleAuthRequest googleAuthRequest) {
-
-		String email = Optional.ofNullable(googleAuthRequest.getEmail().trim()).orElse("");
+	public User getUserFromGoogleSignupRequest(GoogleSignupRequest googleSignupRequest) {
 		
+		User user = new User();
+		
+		String password = Optional.ofNullable(googleSignupRequest.getSub().trim()).orElse("");
+		user.setPassword(encodePassword(password, false));
+
 //		user email
+		String email = Optional.ofNullable(googleSignupRequest.getEmail().trim()).orElse("");
+		Assert.isTrue(!email.isEmpty(), "Invalid Email Address!");
 		user.setEmail(email);
 
 //		firstname
-		String firstname = Optional.ofNullable(googleAuthRequest.getGiven_name()).orElse("").trim();
+		String firstname = Optional.ofNullable(googleSignupRequest.getGiven_name()).orElse("").trim();
 		user.setFirstName(firstname);
 
 //		lastname
-		String lastname = Optional.ofNullable(googleAuthRequest.getFamily_name()).orElse("").trim();
+		String lastname = Optional.ofNullable(googleSignupRequest.getFamily_name()).orElse("").trim();
 		user.setLastName(lastname);
 
 //		username
-		String username = Optional.ofNullable(googleAuthRequest.getName()).orElse("").trim();
+		String username = Optional.ofNullable(googleSignupRequest.getName()).orElse("").trim();
 		user.setUsername(username);
 
 //		if email verified
-		boolean isEmailVerified = Optional.ofNullable(googleAuthRequest.isEmail_verified()).orElse(false);
+		boolean isEmailVerified = Optional.ofNullable(googleSignupRequest.isEmail_verified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
-		
+
+//		user profile
+		String pictureUrl = Optional.ofNullable(googleSignupRequest.getPicture()).orElse("").trim();
+
+		Storage picture = new Storage();
+		picture.setUrl(pictureUrl);
+		picture = storageService.saveStorage(picture);
+
+		user.setPicture(picture);
+
 //		set provider
 		user.setProvider("GOOGLE");
+		
+//		set status
+		user.setStatus(UserStatus.ACTIVATED);
 
 		return user;
 	}
 
 	@Override
-	public String encodePassword(String password) {
+	public String encodePassword(String password, boolean validate) {
 
-		String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-		Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
-		Matcher matcher = pattern.matcher(password);
+		if (validate) {
 
-		Assert.isTrue(matcher.matches(), "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
+			String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
+			Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+			Matcher matcher = pattern.matcher(password);
+
+			Assert.isTrue(matcher.matches(), "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
+		}
 
 		return encoder.encode(password);
 	}

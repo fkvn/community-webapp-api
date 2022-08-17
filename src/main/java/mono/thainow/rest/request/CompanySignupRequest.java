@@ -6,8 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CompanySignupRequest {
-
-	private Long administratorId;
 	
 	private String name;
 

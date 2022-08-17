@@ -14,7 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -24,14 +23,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.validator.constraints.URL;
-import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -40,7 +35,6 @@ import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.domain.user.User;
 import mono.thainow.view.View;
 
 @Entity
@@ -81,6 +75,10 @@ public class Company implements Serializable {
 	@Column(name = "COMPANY_INDUSTRY")
 	@JsonView(View.Company.Basic.class)
 	private String industry;
+	
+	@OneToOne
+	@JsonView(View.Company.Basic.class)
+	private Storage logo;
 
 	@Column(name = "IS_COMPANY_INFORMAL")
 	@JsonView(View.Company.Basic.class)

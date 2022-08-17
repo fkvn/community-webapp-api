@@ -29,9 +29,7 @@ public class StorageDefault {
 			155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
 			176, 177, 178, 179 };
 	
-	private Long otherIndustryProfileDefault = (long) 180;
-	
-	private Long companyProfileDefault = (long) 183;
+	private Long companyProfileDefault = (long) 180;
 	
 	private Long userProfileDefault = (long) 181;
 

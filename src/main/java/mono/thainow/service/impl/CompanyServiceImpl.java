@@ -14,16 +14,12 @@ import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
-import mono.thainow.domain.user.User;
-import mono.thainow.domain.user.UserRole;
 import mono.thainow.repository.CompanyRepository;
 import mono.thainow.rest.request.CompanySignupRequest;
 import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
-import mono.thainow.service.UserService;
-import mono.thainow.util.PhoneUtil;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
@@ -36,9 +32,6 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Autowired
 	private CompanyRepository companyRepo;
-
-	@Autowired
-	private UserService userService;
 
 	@Autowired
 	private LocationService locationService;
@@ -122,53 +115,9 @@ public class CompanyServiceImpl implements CompanyService {
 
 		company = saveCompany(company);
 
-//		update administrator
-//		User user = company.getAdministrator();
-//		user.getCompanies().add(company);
-//		user.setRole(UserRole.BUSINESS);
-//		user = userService.saveUser(user);
-
 		return company;
 	}
 
-//	@Override
-//	public Company createCompanyWithAdministrator(Company company, BusinessUser user, String administratorRole) {
-//
-////		the administrator has to be BUSINESS Role
-//		Assert.isTrue(user.getRole() == UserRole.BUSINESS && user != null, "Invalid Company Administrator!");
-//
-////		Company Location at the moment is the same with the user - 4/16/22
-//		company.setAddress(user.getLocation());
-//
-////		validate company
-//		company = validateIfCompnayExist(company);
-//
-////		Assert that company doesn't have any business account attached
-//		Assert.isTrue(company.getAdministrator() == null, "Company has been registered by another administrator!");
-//
-////		Company email at the moment is the same with the user - 4/16/22
-//		company.setEmail(user.getEmail());
-//		company.setEmailVerified(user.isEmailVerified());
-//
-////		Company phone at the moment is the same with the user - 4/16/22
-//		company.setPhone(user.getPhone());
-//		company.setPhoneVerified(user.isPhoneVerified());
-//
-////		update administrator
-//		company.setAdministrator(user);
-//
-////		update administrator
-//		company.setAdministratorRole(administratorRole);
-//
-////		company status as Pending WHEN start 
-//		company.setStatus(CompanyStatus.PENDING);
-//
-////		Merge into database with updated information 
-//		company = companyDao.saveCompany(company);
-
-//		return company;
-//	}
-//
 	@Override
 	public Company validateIfCompnayExist(Company company) {
 
@@ -189,58 +138,14 @@ public class CompanyServiceImpl implements CompanyService {
 //		return company;
 	}
 
-//	@Override
-//	public Company validateCompanyWithUserById(Long companyId, BusinessUser user) {
-//
-////		assert that company is not missing
-//		Assert.isTrue(companyId != null, "Invalid Company ID!");
-//
-////		get company
-//		Company company = getCompanyById(companyId);
-//
-////		assert that the company belongs to the author
-//		Assert.isTrue(user.getCompanies().contains(company), "Invalid Company!");
-//
-//		return company;
-//	}
-
 	@Override
 	public List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit) {
 		return elasticSearchDao.searchCompanyByNameOnly(keywords, fetchAll, fetchLimit);
 	}
 
 	@Override
-	public String validateCompanyPhone(String phone) {
-//		validate phone unique
-		boolean isPhoneUnique = companyDao.isPhoneUnique(phone);
-
-		Assert.isTrue(isPhoneUnique, "Phone already existed!");
-
-//		validate phone number
-		PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-
-		return phone;
-	}
-
-	@Override
-	public String validateCompanyEmail(String email) {
-//		validate email unique
-		boolean isEmailUnique = companyDao.isEmailUnique(email);
-
-		Assert.isTrue(isEmailUnique, "Email already existed!");
-
-		return email;
-	}
-
-	@Override
 	public Company getCompanyFromRequest(CompanySignupRequest companyRequest) {
 		Company company = new Company();
-
-//		administrator register
-		Long administratorId = Optional.ofNullable(companyRequest.getAdministratorId()).orElse(null);
-		User administrator = userService.getByUserId(administratorId);
-		Assert.isTrue(administrator != null, "Invalid Administrator Credential!");
-//		company.setAdministrator(administrator);
 
 //		Informal company is a company not having physical address 
 		boolean isInformal = Optional.ofNullable(companyRequest.isInformal()).orElse(false);
@@ -263,7 +168,7 @@ public class CompanyServiceImpl implements CompanyService {
 			profileId = storageDefault.getCompanyProfileDefault();
 		}
 		Storage profile = storageService.getStorage(profileId);
-//		company.setLogoUrl(profile);
+		company.setLogo(profile);
 
 //		company email 
 		String email = Optional.ofNullable(companyRequest.getEmail()).orElse("").trim();
@@ -273,7 +178,7 @@ public class CompanyServiceImpl implements CompanyService {
 		String phone = Optional.ofNullable(companyRequest.getPhone()).orElse("").trim();
 //		required for informal company
 		if (isInformal) {
-			Assert.isTrue(!phone.isEmpty(), "Company phone is required for an informal company");
+			Assert.isTrue(!phone.isEmpty(), "Company phone is required!");
 		}
 		company.setPhone(phone);
 
