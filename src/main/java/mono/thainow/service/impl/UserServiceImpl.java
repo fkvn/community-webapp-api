@@ -17,6 +17,8 @@ import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
+import mono.thainow.rest.request.AppleSignupRequest;
+import mono.thainow.rest.request.FacebookSignupRequest;
 import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 import mono.thainow.service.StorageService;
@@ -179,9 +181,19 @@ public class UserServiceImpl implements UserService {
 
 //		user profile
 		String pictureUrl = Optional.ofNullable(googleSignupRequest.getPicture()).orElse("").trim();
+		Storage picture = null;
 
-		Storage picture = new Storage();
-		picture.setUrl(pictureUrl);
+		if (pictureUrl.equals("")) {
+//			add default picture
+			StorageDefault storageDefault = new StorageDefault();
+			picture = storageService.getStorage(storageDefault.getUserProfileDefault());
+		}
+		else {
+			picture = new Storage();
+			picture.setUrl(pictureUrl);
+		}
+		
+//		persist picture
 		picture = storageService.saveStorage(picture);
 
 		user.setPicture(picture);
@@ -195,6 +207,89 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
+	@Override
+	public User getUserFromAppleSignupRequest(AppleSignupRequest appleSignupRequest) {
+		User user = new User();
+		
+		String password = Optional.ofNullable(appleSignupRequest.getSub().trim()).orElse("");
+		user.setPassword(encodePassword(password, false));
+
+//		user email
+		String email = Optional.ofNullable(appleSignupRequest.getEmail().trim()).orElse("");
+		Assert.isTrue(!email.isEmpty(), "Invalid Email Address!");
+		user.setEmail(email);
+
+//		username
+		String username = Optional.ofNullable(appleSignupRequest.getName()).orElse("").trim();
+		user.setUsername(username);
+
+//		if email verified
+		boolean isEmailVerified = Optional.ofNullable(appleSignupRequest.isEmail_verified()).orElse(false);
+		user.setEmailVerified(isEmailVerified);
+
+//		user profile
+		StorageDefault storageDefault = new StorageDefault();
+		Storage picture = storageService.getStorage(storageDefault.getUserProfileDefault());
+		user.setPicture(picture);
+
+//		set provider
+		user.setProvider("APPLE");
+		
+//		set status
+		user.setStatus(UserStatus.ACTIVATED);
+
+		return user;
+	}
+	
+	@Override
+	public User getUserFromFacebookSignupRequest(FacebookSignupRequest facebookSignupRequest) {
+		
+		User user = new User();
+		
+		String password = Optional.ofNullable(facebookSignupRequest.getId().trim()).orElse("");
+		user.setPassword(encodePassword(password, false));
+
+//		user email
+		String email = Optional.ofNullable(facebookSignupRequest.getEmail().trim()).orElse("");
+		Assert.isTrue(!email.isEmpty(), "Invalid Email Address!");
+		user.setEmail(email);
+
+//		username
+		String username = Optional.ofNullable(facebookSignupRequest.getName()).orElse("").trim();
+		user.setUsername(username);
+
+//		if email verified
+		boolean isEmailVerified = Optional.ofNullable(facebookSignupRequest.isEmail_verified()).orElse(false);
+		user.setEmailVerified(isEmailVerified);
+
+//		user profile
+		String pictureUrl = Optional.ofNullable(facebookSignupRequest.getPicture()).orElse("").trim();
+		Storage picture = null;
+
+		if (pictureUrl.equals("")) {
+//			add default picture
+			StorageDefault storageDefault = new StorageDefault();
+			picture = storageService.getStorage(storageDefault.getUserProfileDefault());
+		}
+		else {
+			picture = new Storage();
+			picture.setUrl(pictureUrl);
+		}
+		
+//		persist picture
+		picture = storageService.saveStorage(picture);
+
+		user.setPicture(picture);
+
+//		set provider
+		user.setProvider("FACEBOOK");
+		
+//		set status
+		user.setStatus(UserStatus.ACTIVATED);
+
+		return user;
+	}
+	
 	@Override
 	public String encodePassword(String password, boolean validate) {
 
@@ -226,5 +321,9 @@ public class UserServiceImpl implements UserService {
 		PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
 		return userDao.isPhoneUnique(phone);
 	}
+
+
+
+
 
 }

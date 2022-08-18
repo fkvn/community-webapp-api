@@ -1,5 +1,9 @@
 package mono.thainow.service;
 
+import mono.thainow.rest.request.AppleSigninRequest;
+import mono.thainow.rest.request.AppleSignupRequest;
+import mono.thainow.rest.request.FacebookSigninRequest;
+import mono.thainow.rest.request.FacebookSignupRequest;
 import mono.thainow.rest.request.GoogleSigninRequest;
 import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.TokenRequest;
@@ -18,9 +22,17 @@ public interface AuthService {
 	
 	JwtResponse signinWithThaiNow(UserSigninRequest userSigninRequest);
 	
-	JwtResponse signupWithGoogle(GoogleSignupRequest googleAuthRequest);
+	JwtResponse signupWithGoogle(GoogleSignupRequest googleSignupRequest);
 	
 	JwtResponse signinWithGoogle(GoogleSigninRequest googleSigninRequest);
+	
+	JwtResponse signupWithApple(AppleSignupRequest appleSignupRequest);
+	
+	JwtResponse signinWithApple(AppleSigninRequest appleSigninRequest);
+	
+	JwtResponse signupWithFacebook(FacebookSignupRequest facebookSignupRequest);
+	
+	JwtResponse signinWithFacebook(FacebookSigninRequest facebookSigninRequest);
 	
 	JwtResponse signedJWTAuth(String username, String password);
 

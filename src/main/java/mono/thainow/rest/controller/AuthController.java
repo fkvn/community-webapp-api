@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import mono.thainow.rest.request.AppleSigninRequest;
+import mono.thainow.rest.request.AppleSignupRequest;
+import mono.thainow.rest.request.FacebookSigninRequest;
+import mono.thainow.rest.request.FacebookSignupRequest;
 import mono.thainow.rest.request.GoogleSigninRequest;
 import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.TokenRequest;
@@ -65,6 +69,26 @@ public class AuthController {
 	public JwtResponse signupGoogleUser(@Valid @RequestBody GoogleSignupRequest signupRequest) {
 		return authService.signupWithGoogle(signupRequest);
 	}
+	
+	@PostMapping("/apple/signin")
+	public JwtResponse signinAppleUser(@Valid @RequestBody AppleSigninRequest signinRequest) {
+		return authService.signinWithApple(signinRequest);
+	}
+	
+	@PostMapping("/apple/signup")
+	public JwtResponse signupAppleUser(@Valid @RequestBody AppleSignupRequest signupRequest) {
+		return authService.signupWithApple(signupRequest);
+	}
+	
+	@PostMapping("/facebook/signin")
+	public JwtResponse signinFacebookUser(@Valid @RequestBody FacebookSigninRequest signinRequest) {
+		return authService.signinWithFacebook(signinRequest);
+	}
+	
+	@PostMapping("/facebook/signup")
+	public JwtResponse signupFacebookUser(@Valid @RequestBody FacebookSignupRequest signupRequest) {
+		return authService.signupWithFacebook(signupRequest);
+	}
 
 	@PostMapping("/users/signin")
 	public JwtResponse signinUser(@Valid @RequestBody UserSigninRequest signinRequest) {
@@ -79,7 +103,6 @@ public class AuthController {
 
 	@PostMapping("/users/username/unique")
 	public Map<String, Boolean> isUsernameUnique(@RequestParam String username) {
-		System.out.println(userService.isUsernameUnique(username));
 		return Collections.singletonMap("unique", userService.isUsernameUnique(username));
 	}
 

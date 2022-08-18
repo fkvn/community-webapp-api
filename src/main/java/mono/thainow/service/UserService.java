@@ -3,6 +3,8 @@ package mono.thainow.service;
 import java.util.List;
 
 import mono.thainow.domain.user.User;
+import mono.thainow.rest.request.AppleSignupRequest;
+import mono.thainow.rest.request.FacebookSignupRequest;
 import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.UserSignupRequest;
 
@@ -29,7 +31,13 @@ public interface UserService {
 	User getUserFromSignupRequest(UserSignupRequest signUpRequest);
 
 	User getUserFromGoogleSignupRequest(GoogleSignupRequest googleSignupRequest);
+	
+	User getUserFromAppleSignupRequest(AppleSignupRequest appleSignupRequest);
 
 	User saveUser(User user);
+
+	User getUserFromFacebookSignupRequest(FacebookSignupRequest facebookSignupRequest);
+
+	
 
 }
