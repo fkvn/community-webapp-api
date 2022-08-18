@@ -46,7 +46,8 @@ public class ProfileController {
 	private UserDetailsImpl getAuthorizedUser() {
 		return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	}
-	
+
+//	validate access
 	private void validateUserAccess(Long id) {
 
 		UserDetailsImpl userDetails = getAuthorizedUser();
@@ -54,31 +55,6 @@ public class ProfileController {
 		if (!id.equals(userDetails.getId())) {
 			throw new AccessForbidden();
 		}
-	}
-	
-	@GetMapping("/{id}")
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Map<String, Object> getProfile(@PathVariable Long id) {
-		Map<String, Object> res = new HashMap<>();
-		
-		Profile profile = profileService.getProfile(id);
-		
-		Assert.isTrue(profile != null, "No record found");
-		
-		validateUserAccess(profile.getAccount().getId());
-		
-		res.put("basicInfo", profile);
-		
-		if (profile.getDecriminatorValue().equals("USER_PROFILE") ) {
-			res.put("detailInfo", profile.getAccount());
-		}
-		
-		if (profile.getDecriminatorValue().equals("COMPANY_PROFILE") ) {
-			Company company =  companyService.getCompanyById(((CompanyProfile) profile).getCompanyId());
-			res.put("detailInfo", company);
-		}
-		
-		return res;
 	}
 
 	@PostMapping("/companies")
@@ -88,6 +64,31 @@ public class ProfileController {
 		Company company = companyService.createCompany(companyRequest);
 
 		return profileService.createProfile(account, company);
+	}
+
+	@GetMapping("/{id}")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public Map<String, Object> getProfile(@PathVariable Long id) {
+		Map<String, Object> res = new HashMap<>();
+
+		Profile profile = profileService.getProfile(id);
+
+		Assert.isTrue(profile != null, "No record found");
+
+		validateUserAccess(profile.getAccount().getId());
+
+		res.put("basicInfo", profile);
+
+		if (profile.getDecriminatorValue().equals("USER_PROFILE")) {
+			res.put("detailInfo", profile.getAccount());
+		}
+
+		if (profile.getDecriminatorValue().equals("COMPANY_PROFILE")) {
+			Company company = companyService.getCompanyById(((CompanyProfile) profile).getCompanyId());
+			res.put("detailInfo", company);
+		}
+
+		return res;
 	}
 
 }
