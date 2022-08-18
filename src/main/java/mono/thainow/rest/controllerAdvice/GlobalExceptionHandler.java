@@ -177,7 +177,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
-	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class, AccessForbidden.class  })
+	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class  })
 	protected ResponseEntity<Object> handleAuthenticationApiException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 
@@ -249,7 +249,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
-	@ExceptionHandler({ AccessDeniedException.class })
+	@ExceptionHandler({ AccessDeniedException.class, AccessForbidden.class })
 	protected ResponseEntity<Object> handleAccessDeniedException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 

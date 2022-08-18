@@ -28,8 +28,18 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
+	public Profile getProfile(Long id) {
+		return profileDao.getProfiles(id);
+	}
+	
+	@Override
 	public UserProfile getUserProfile(User user) {
 		return profileDao.getUserProfile(user);
+	}
+
+	@Override
+	public CompanyProfile getCompanyProfile(User account, Long companyId) {
+		return profileDao.getCompanyProfile(account, companyId);
 	}
 
 	@Override
@@ -69,5 +79,11 @@ public class ProfileServiceImpl implements ProfileService {
 
 		return saveProfile(profile);
 	}
+
+	
+
+
+
+
 
 }

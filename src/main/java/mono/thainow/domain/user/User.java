@@ -2,9 +2,7 @@ package mono.thainow.domain.user;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,7 +25,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -75,26 +72,6 @@ public class User implements Serializable {
 	@OneToOne
 	@JsonView(View.UserView.Public.class)
 	private Storage picture;
-
-	@Transient
-	@JsonView(View.UserView.Public.class)
-	public Map<String, Object> getContactInformation() {
-		Map<String, Object> contactInformation = new HashMap<>();
-
-		if (isEmailPublic) {
-			contactInformation.put("email", email);
-		}
-
-		if (isPhonePublic) {
-			contactInformation.put("phone", phone);
-		}
-
-		if (isLocationPublic) {
-			contactInformation.put("location", location);
-		}
-
-		return contactInformation;
-	}
 
 	// private property
 
