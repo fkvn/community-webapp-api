@@ -9,14 +9,18 @@ import mono.thainow.domain.user.User;
 
 public interface ProfileDao {
 	
+	List<Profile> getProfiles(User account);
+	
+	List<Profile> getAllProfiles(User account);
+	
 	Profile getProfiles(Long id);
 	
-	UserProfile getUserProfile(User user);
+	UserProfile getUserProfile(Long id);
 	
-	CompanyProfile getCompanyProfile(User account, Long companyId);
+	CompanyProfile getCompanyProfile(Long companyId);
 
 	Profile saveProfile(Profile profile);
 
-	List<Profile> getProfiles(User account);
+	UserProfile getUserProfile(User user);
 
 }

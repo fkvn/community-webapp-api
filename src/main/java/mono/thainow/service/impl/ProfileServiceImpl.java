@@ -10,6 +10,7 @@ import mono.thainow.dao.ProfileDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.profile.ProfileStatus;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 import mono.thainow.service.ProfileService;
@@ -26,10 +27,20 @@ public class ProfileServiceImpl implements ProfileService {
 	public List<Profile> getProfiles(User account) {
 		return profileDao.getProfiles(account);
 	}
+	
+	@Override
+	public List<Profile> getAllProfiles(User account) {
+		return profileDao.getAllProfiles(account);
+	}
 
 	@Override
 	public Profile getProfile(Long id) {
 		return profileDao.getProfiles(id);
+	}
+	
+	@Override
+	public UserProfile getUserProfile(Long id) {
+		return profileDao.getUserProfile(id);
 	}
 	
 	@Override
@@ -38,8 +49,8 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public CompanyProfile getCompanyProfile(User account, Long companyId) {
-		return profileDao.getCompanyProfile(account, companyId);
+	public CompanyProfile getCompanyProfile(Long companyId) {
+		return profileDao.getCompanyProfile(companyId);
 	}
 
 	@Override
@@ -81,8 +92,11 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	
-
-
+	@Override
+	public Profile remove(Profile profile) {
+		profile.setStatus(ProfileStatus.DELETED);
+		return saveProfile(profile);
+	}
 
 
 

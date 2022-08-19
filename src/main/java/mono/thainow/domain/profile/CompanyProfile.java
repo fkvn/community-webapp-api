@@ -4,6 +4,8 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -29,6 +31,7 @@ public class CompanyProfile extends Profile {
 		setProfileInfo(company);
 	}
 
+	@JsonIgnore
 	@Column(name = "COMPANY_ID")
 	private Long companyId;
 

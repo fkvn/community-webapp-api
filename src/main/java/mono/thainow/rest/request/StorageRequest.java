@@ -12,14 +12,14 @@ import lombok.Setter;
 public class StorageRequest {
 	
 
-	private String name = "";
+	private String name = null;
 	
 
-	private String type = "";
+	private String type = null;
 	
 	@NotEmpty
 	private String url;
 	
-	private Long size = (long) 0;
+	private Long size = null;
 	
 }

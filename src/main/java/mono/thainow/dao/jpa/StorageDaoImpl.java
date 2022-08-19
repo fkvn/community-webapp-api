@@ -59,4 +59,17 @@ public class StorageDaoImpl implements StorageDao {
 		}
 	}
 
+	
+	@Override
+	public Storage getStorageFromUrl(String url) {
+		try {
+			Storage storage = entityManager.createQuery("from Storage where url =:url ", Storage.class)
+					.setParameter("url", url).getSingleResult();
+
+			return storage;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
 }

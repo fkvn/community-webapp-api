@@ -12,16 +12,22 @@ public interface ProfileService {
 	
 	List<Profile> getProfiles(User account);
 	
+	List<Profile> getAllProfiles(User account);
+	
 	Profile getProfile(Long id);
 	
-	CompanyProfile getCompanyProfile(User account, Long companyId);
+	CompanyProfile getCompanyProfile(Long companyId);
 	
-	UserProfile getUserProfile(User account);
+	UserProfile getUserProfile(Long id);
+	
+	UserProfile getUserProfile(User user);
 	
 	Profile createProfile(User user);
 	
 	Profile createProfile(User user, Company company);
 	
 	Profile saveProfile(Profile profile);
+
+	Profile remove(Profile profile);
 		
 }

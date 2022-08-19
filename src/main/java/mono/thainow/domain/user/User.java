@@ -1,8 +1,10 @@
 package mono.thainow.domain.user;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,15 +18,17 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.URL;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -58,7 +62,6 @@ public class User implements Serializable {
 	@JsonView(View.UserView.Public.class)
 	private Long id;
 
-	@NotEmpty
 	@Column(name = "USER_USERNAME")
 	@JsonView(View.UserView.Public.class)
 	private String username = "";
@@ -88,6 +91,15 @@ public class User implements Serializable {
 	@Column(name = "USER_LASTNAME")
 	@JsonView(View.UserView.Private.class)
 	private String lastName = "";
+	
+	@Lob
+	@Column(name = "USER_DESCRIPTION")
+	@JsonView(View.UserView.Private.class)
+	private String description;
+	
+	@Column(name = "IS_USER_DESCRIPTION_PUBLIC")
+	@JsonView(View.UserView.Private.class)
+	private boolean isDescriptionPublic = false;
 
 	@Email(message = "Email is not valid")
 	@JsonView(View.UserView.Private.class)
@@ -95,7 +107,6 @@ public class User implements Serializable {
 	private String email;
 
 	@Column(name = "IS_USER_EMAIL_PUBLIC")
-	@JsonProperty(value = "isEmailPublic")
 	@JsonView(View.UserView.Private.class)
 	private boolean isEmailPublic = false;
 
@@ -104,7 +115,6 @@ public class User implements Serializable {
 	private String phone;
 
 	@Column(name = "IS_USER_PHONE_PUBLIC")
-	@JsonProperty(value = "isPhonePublic")
 	@JsonView(View.UserView.Private.class)
 	private boolean isPhonePublic = false;
 
@@ -115,8 +125,19 @@ public class User implements Serializable {
 
 	@Column(name = "IS_USER_LOCATION_PUBLIC")
 	@JsonView(View.UserView.Private.class)
-	@JsonProperty(value = "isLocationPublic")
 	private boolean isLocationPublic = false;
+	
+	@Column(name = "USER_WEBSITE")
+	@JsonView(View.UserView.Private.class)
+	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Website url must be a valid URL")
+	private String website;
+	
+	@Column(name = "IS_USER_WEBSITE_PUBLIC")
+	@JsonView(View.UserView.Private.class)
+	private boolean isWebsitePublic = false;
+	
+	@OneToMany
+	private List<Storage> coverPictures = new ArrayList<>();
 
 	// Write ONLY property
 

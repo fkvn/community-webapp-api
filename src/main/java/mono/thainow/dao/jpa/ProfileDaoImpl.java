@@ -36,25 +36,39 @@ public class ProfileDaoImpl implements ProfileDao {
 	}
 
 	@Override
-	public Profile getProfiles(Long id) {
-		return entityManager.find(Profile.class, id);
+	public List<Profile> getAllProfiles(User account) {
+		return entityManager.createQuery("from Profile where account =: user", Profile.class)
+				.setParameter("user", account).getResultList();
 	}
 
 	@Override
-	public CompanyProfile getCompanyProfile(User account, Long companyId) {
-		List<ProfileStatus> validStatus = new ArrayList<>();
-		validStatus.add(ProfileStatus.ACTIVATED);
-		validStatus.add(ProfileStatus.PENDING);
+	public Profile getProfiles(Long id) {
+		return entityManager.createQuery("from Profile where status = :status", Profile.class)
+				.setParameter("status", ProfileStatus.ACTIVATED).getSingleResult();
+	}
 
-		return entityManager.createQuery(
-				"from CompanyProfile where account =: user and profile_type =: type and status = :status and companyId = :companyId",
-				CompanyProfile.class).setParameter("user", account).setParameter("type", "COMPANY_PROFILE")
-				.setParameter("status", ProfileStatus.ACTIVATED).setParameter("companyId", companyId).getSingleResult();
+	@Override
+	public CompanyProfile getCompanyProfile(Long id) {
+
+		return entityManager
+				.createQuery("from CompanyProfile where id = :id and profile_type =: type and status = :status",
+						CompanyProfile.class)
+				.setParameter("id", id).setParameter("type", "COMPANY_PROFILE")
+				.setParameter("status", ProfileStatus.ACTIVATED).getSingleResult();
+	}
+
+	@Override
+	public UserProfile getUserProfile(Long id) {
+
+		return entityManager
+				.createQuery("from UserProfile where id = :id and profile_type =: type and status = :status",
+						UserProfile.class)
+				.setParameter("id", id).setParameter("type", "USER_PROFILE")
+				.setParameter("status", ProfileStatus.ACTIVATED).getSingleResult();
 	}
 
 	@Override
 	public UserProfile getUserProfile(User user) {
-
 		return entityManager
 				.createQuery("from UserProfile where account =: user and profile_type =: type and status = :status",
 						UserProfile.class)

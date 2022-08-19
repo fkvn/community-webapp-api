@@ -25,6 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.twilio.exception.ApiException;
 
 import mono.thainow.exception.AccessForbidden;
+import mono.thainow.exception.BadRequest;
 import mono.thainow.util.ApiError;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -73,9 +74,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return null;
 //	}
 
-	@ExceptionHandler({ IllegalArgumentException.class, InvalidDataAccessApiUsageException.class, ConstraintViolationException.class })
+	@ExceptionHandler({ IllegalArgumentException.class, InvalidDataAccessApiUsageException.class,
+			ConstraintViolationException.class })
 	protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
-		
+
 		ex.printStackTrace();
 
 		ApiError apiError = new ApiError();
@@ -153,6 +155,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
+	@ExceptionHandler({ ClassCastException.class, BadRequest.class })
+	protected ResponseEntity<Object> handleBadRequestException(Exception ex, WebRequest request) {
+		ex.printStackTrace();
+
+		ApiError apiError = new ApiError();
+		apiError.setStatus(HttpStatus.BAD_REQUEST);
+		try {
+			apiError.setError(ex.getCause().getLocalizedMessage());
+		} catch (Exception e) {
+			apiError.setError(ex.getLocalizedMessage());
+		}
+
+		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+		apiError.setMessage("Invalid Request Type!");
+
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+	}
+
 	@ExceptionHandler({ ApiException.class })
 	protected ResponseEntity<Object> handleTwilioApiException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
@@ -177,7 +197,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
-	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class  })
+	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class })
 	protected ResponseEntity<Object> handleAuthenticationApiException(Exception ex, WebRequest request) {
 		ex.printStackTrace();
 
@@ -194,7 +214,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-	
+
 	@ExceptionHandler({ FileSizeLimitExceededException.class, MaxUploadSizeExceededException.class, })
 	protected ResponseEntity<Object> handleSizeExceededException(Exception ex, WebRequest request) {
 		ex.printStackTrace();

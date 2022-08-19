@@ -1,7 +1,9 @@
 package mono.thainow.domain.company;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +15,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
@@ -22,7 +25,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.validator.constraints.URL;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -104,9 +106,21 @@ public class Company implements Serializable {
 	private String phone;
 
 	@Column(name = "COMPANY_WEBSITE")
-	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Company website must be a valid URL")
+//	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Company website must be a valid URL")
 	@JsonView(View.Company.Basic.class)
 	private String website;
+	
+	@Column(name = "IS_COMPANY_EMAIL_PUBLIC")
+	@JsonView(View.Company.Basic.class)
+	private boolean isEmailPublic = false;
+	
+	@Column(name = "IS_COMPANY_PHONE_PUBLIC")
+	@JsonView(View.Company.Basic.class)
+	private boolean isPhonePublic = false;
+	
+	@Column(name = "IS_COMPANY_WEBSITE_PUBLIC")
+	@JsonView(View.Company.Basic.class)
+	private boolean isWebsitePublic = false;
 
 	// Detail property
 
@@ -120,6 +134,10 @@ public class Company implements Serializable {
 	@Column(name = "COMPANY_DESCRIPTION")
 	@JsonView(View.Company.Detail.class)
 	private String description;
+	
+	@Column(name = "IS_COMPANY_DESCRIPTION_PUBLIC")
+	@JsonView(View.Company.Detail.class)
+	private boolean isDescriptionPublic = false;
 
 	@Column(name = "COMPANY_FOUNDED")
 	@JsonView(View.Company.Detail.class)
@@ -132,6 +150,13 @@ public class Company implements Serializable {
 	@Column(name = "COMPANY_SIZE")
 	@JsonView(View.Company.Detail.class)
 	private String size;
+	
+	@Column(name = "IS_COMPANY_SIZE_PUBLIC")
+	@JsonView(View.Company.Detail.class)
+	private boolean isSizePublic = false;
+	
+	@OneToMany
+	private List<Storage> coverPictures = new ArrayList<>();
 
 	// Write ONLY property
 

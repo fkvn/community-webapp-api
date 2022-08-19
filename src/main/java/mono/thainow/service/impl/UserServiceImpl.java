@@ -20,10 +20,14 @@ import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.AppleSignupRequest;
 import mono.thainow.rest.request.FacebookSignupRequest;
 import mono.thainow.rest.request.GoogleSignupRequest;
+import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.request.UserSignupRequest;
+import mono.thainow.rest.request.UserUpdateInfoRequest;
+import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
 import mono.thainow.util.PhoneUtil;
+import mono.thainow.util.Util;
 
 @Service
 @Primary
@@ -38,6 +42,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private StorageService storageService;
+
+	@Autowired
+	private LocationService locationService;
 
 //	=============================================================
 
@@ -110,7 +117,7 @@ public class UserServiceImpl implements UserService {
 
 //		set email
 		if (!email.equals("")) {
-			Assert.isTrue((new EmailValidator().isValid(email, null)), "Email is not valid");
+			Assert.isTrue(Util.isValidEmail(email), "Email is not valid");
 			Assert.isTrue(isEmailUnique(email), "Email has already been taken.");
 		}
 		user.setEmail(email);
@@ -152,9 +159,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User getUserFromGoogleSignupRequest(GoogleSignupRequest googleSignupRequest) {
-		
+
 		User user = new User();
-		
+
 		String password = Optional.ofNullable(googleSignupRequest.getSub().trim()).orElse("");
 		user.setPassword(encodePassword(password, false));
 
@@ -187,12 +194,11 @@ public class UserServiceImpl implements UserService {
 //			add default picture
 			StorageDefault storageDefault = new StorageDefault();
 			picture = storageService.getStorage(storageDefault.getUserProfileDefault());
-		}
-		else {
+		} else {
 			picture = new Storage();
 			picture.setUrl(pictureUrl);
 		}
-		
+
 //		persist picture
 		picture = storageService.saveStorage(picture);
 
@@ -200,7 +206,7 @@ public class UserServiceImpl implements UserService {
 
 //		set provider
 		user.setProvider("GOOGLE");
-		
+
 //		set status
 		user.setStatus(UserStatus.ACTIVATED);
 
@@ -210,7 +216,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUserFromAppleSignupRequest(AppleSignupRequest appleSignupRequest) {
 		User user = new User();
-		
+
 		String password = Optional.ofNullable(appleSignupRequest.getSub().trim()).orElse("");
 		user.setPassword(encodePassword(password, false));
 
@@ -234,18 +240,18 @@ public class UserServiceImpl implements UserService {
 
 //		set provider
 		user.setProvider("APPLE");
-		
+
 //		set status
 		user.setStatus(UserStatus.ACTIVATED);
 
 		return user;
 	}
-	
+
 	@Override
 	public User getUserFromFacebookSignupRequest(FacebookSignupRequest facebookSignupRequest) {
-		
+
 		User user = new User();
-		
+
 		String password = Optional.ofNullable(facebookSignupRequest.getId().trim()).orElse("");
 		user.setPassword(encodePassword(password, false));
 
@@ -270,12 +276,11 @@ public class UserServiceImpl implements UserService {
 //			add default picture
 			StorageDefault storageDefault = new StorageDefault();
 			picture = storageService.getStorage(storageDefault.getUserProfileDefault());
-		}
-		else {
+		} else {
 			picture = new Storage();
 			picture.setUrl(pictureUrl);
 		}
-		
+
 //		persist picture
 		picture = storageService.saveStorage(picture);
 
@@ -283,13 +288,13 @@ public class UserServiceImpl implements UserService {
 
 //		set provider
 		user.setProvider("FACEBOOK");
-		
+
 //		set status
 		user.setStatus(UserStatus.ACTIVATED);
 
 		return user;
 	}
-	
+
 	@Override
 	public String encodePassword(String password, boolean validate) {
 
@@ -322,8 +327,133 @@ public class UserServiceImpl implements UserService {
 		return userDao.isPhoneUnique(phone);
 	}
 
+	@Override
+	public void remove(User account) {
+		account.setStatus(UserStatus.DELETED);
+		saveUser(account);
+	}
 
+	@Override
+	public User getUserFromUpdateInfoRequest(User user, UserUpdateInfoRequest userUpdateInfoRequest) {
 
+//		username
+		String username = Optional.ofNullable(userUpdateInfoRequest.getUsername()).orElse(null);
+		if (username != null) {
+			Assert.isTrue(!username.isEmpty(), "Preferred Name can't be empty!");
+			user.setUsername(username);
+		}
 
+//		first name
+		String firstname = Optional.ofNullable(userUpdateInfoRequest.getFirstname()).orElse(null);
+		if (firstname != null) {
+			user.setFirstName(firstname);
+		}
+
+//		last name
+		String lastname = Optional.ofNullable(userUpdateInfoRequest.getLastname()).orElse(null);
+		if (lastname != null) {
+			user.setLastName(lastname);
+		}
+
+//		new cover pictures
+		List<StorageRequest> coverPictureRequests = Optional.ofNullable(userUpdateInfoRequest.getCoverPictures())
+				.orElse(null);
+		List<Storage> coverPictures = storageService.getStoragesFromStorageRequests(coverPictureRequests);
+		if (coverPictures != null) {
+			user.setCoverPictures(coverPictures);
+		}
+
+//		location
+		String placeid = Optional.ofNullable(userUpdateInfoRequest.getPlaceid()).orElse(null);
+		String address = Optional.ofNullable(userUpdateInfoRequest.getAddress()).orElse(null);
+		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
+				"Invalid Location");
+		if (placeid != null && address != null) {
+			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
+			user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		}
+
+//		public location
+		Boolean isLocationPublic = Optional.ofNullable(userUpdateInfoRequest.getIsLocationPublic()).orElse(null);
+		if (isLocationPublic != null) {
+			user.setLocationPublic(isLocationPublic);
+		}
+
+//		email
+		String email = Optional.ofNullable(userUpdateInfoRequest.getEmail()).orElse(null);
+		if (email != null && !email.equals(user.getEmail())) {
+			if (!email.isEmpty()) {
+				Assert.isTrue(Util.isValidEmail(email), "Email is not valid");
+				Assert.isTrue(isEmailUnique(email), "Email has already been taken.");
+			}
+			user.setEmail(email);
+		}
+
+//		phone
+		String phone = Optional.ofNullable(userUpdateInfoRequest.getPhone()).orElse(null);
+		if (phone != null && !phone.equals(user.getPhone())) {
+			if (!phone.isEmpty()) {
+				PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
+				Assert.isTrue(isPhoneUnique(phone), "Phone has already been taken.");
+			}
+			user.setPhone(phone);
+		}
+
+		Assert.isTrue(!user.getEmail().isEmpty() || !user.getPhone().isEmpty(),
+				"Please provide at least email or phone. Both can't be empty!");
+
+//		public email
+		Boolean isEmailPublic = Optional.ofNullable(userUpdateInfoRequest.getIsEmailPublic()).orElse(null);
+		if (isEmailPublic != null) {
+			user.setEmailPublic(isEmailPublic);
+		}
+		
+//		verify email
+		Boolean isEmailVerified = Optional.ofNullable(userUpdateInfoRequest.getIsEmailVerified()).orElse(null);
+		if (isEmailVerified != null) {
+			user.setEmailVerified(isEmailVerified);
+		}
+
+//		public phone
+		Boolean isPhonePublic = Optional.ofNullable(userUpdateInfoRequest.getIsPhonePublic()).orElse(null);
+		if (isPhonePublic != null) {
+			user.setPhonePublic(isPhonePublic);
+		}
+		
+//		verify phone
+		Boolean isPhoneVerified = Optional.ofNullable(userUpdateInfoRequest.getIsPhoneVerified()).orElse(null);
+		if (isPhoneVerified != null) {
+			user.setPhoneVerified(isPhoneVerified);
+		}
+
+//		description
+		String description = Optional.ofNullable(userUpdateInfoRequest.getDescription()).orElse(null);
+		if (description != null) {
+			user.setDescription(description);
+		}
+
+//		public description
+		Boolean isDescriptionPublic = Optional.ofNullable(userUpdateInfoRequest.getIsDescriptionPublic()).orElse(null);
+		if (isDescriptionPublic != null) {
+			user.setDescriptionPublic(isDescriptionPublic);
+		}
+
+//		website
+		String website = Optional.ofNullable(userUpdateInfoRequest.getWebsite()).orElse(null);
+		if (website != null) {
+			if(!website.isEmpty()) {
+				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
+			}
+			user.setWebsite(website);
+		}
+
+//		public website
+		Boolean isWebsitePublic = Optional.ofNullable(userUpdateInfoRequest.getIsWebsitePublic()).orElse(null);
+		if (isWebsitePublic != null) {
+			user.setWebsitePublic(isWebsitePublic);
+		}
+
+		return user;
+	}
 
 }

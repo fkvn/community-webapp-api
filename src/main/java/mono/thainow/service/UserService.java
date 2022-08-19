@@ -7,6 +7,7 @@ import mono.thainow.rest.request.AppleSignupRequest;
 import mono.thainow.rest.request.FacebookSignupRequest;
 import mono.thainow.rest.request.GoogleSignupRequest;
 import mono.thainow.rest.request.UserSignupRequest;
+import mono.thainow.rest.request.UserUpdateInfoRequest;
 
 public interface UserService {
 
@@ -37,6 +38,10 @@ public interface UserService {
 	User saveUser(User user);
 
 	User getUserFromFacebookSignupRequest(FacebookSignupRequest facebookSignupRequest);
+
+	void remove(User account);
+
+	User getUserFromUpdateInfoRequest(User user, UserUpdateInfoRequest userUpdateInfoRequest);
 
 	
 

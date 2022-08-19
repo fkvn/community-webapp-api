@@ -1,6 +1,7 @@
 package mono.thainow.service;
 
 import java.io.File;
+import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,11 +21,15 @@ public interface StorageService {
 	
 	String uploadFile(File file, String fileName, String fileType);
 	
-	Storage getStoragefromStorageRequest(StorageRequest storageRequest);
-	
 	Storage saveStorage(Storage storage);
 	
 	Storage getStorage(Long id);
 	
 	Storage getStorage(String fileName);
+
+	Storage getStorageFromUrl(String url);
+
+	Storage getStorageFromStorageRequest(StorageRequest req);
+	
+	List<Storage> getStoragesFromStorageRequests(List<StorageRequest> reqs);
 }

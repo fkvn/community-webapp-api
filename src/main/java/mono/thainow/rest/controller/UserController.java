@@ -70,17 +70,4 @@ public class UserController {
 		return null;
 	}
 
-	@PostMapping("/{id}/profile")
-	@ResponseStatus(HttpStatus.CREATED)
-	public Storage uploadProfile(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
-		validateUserAccess(id);
-
-//		User user = userService.getByUserId(id);
-
-//		Storage profile = userService.uploadProfilePicture(user, file);
-
-//		return profile;
-		return null;
-	}
-
 }

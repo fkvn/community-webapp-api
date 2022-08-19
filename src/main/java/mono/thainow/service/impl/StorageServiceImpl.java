@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +40,10 @@ public class StorageServiceImpl implements StorageService {
 		String TEMP_URL = uploadFile(file, fileName, multipartFile.getContentType());
 
 		file.delete();
-		
+
 //		return full storage object
 		StorageResponse storageResponse = new StorageResponse();
-		
+
 		storageResponse.setName(fileName);
 		storageResponse.setType(multipartFile.getContentType());
 		storageResponse.setUrl(TEMP_URL);
@@ -54,7 +56,7 @@ public class StorageServiceImpl implements StorageService {
 	public String getFileName(MultipartFile file) {
 
 		String fileName = file.getOriginalFilename(); // to get original file name
-		
+
 		// generate a unique file name
 		fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
 
@@ -101,18 +103,6 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public Storage getStoragefromStorageRequest(StorageRequest storageRequest) {
-		Storage profile = new Storage(); 
-		
-		profile.setName(storageRequest.getName());
-		profile.setType(storageRequest.getType());
-		profile.setUrl(storageRequest.getUrl());
-		profile.setSize(storageRequest.getSize());
-				
-		return profile;
-	}
-
-	@Override
 	public Storage getStorage(Long id) {
 		return storageDao.getStorage(id);
 	}
@@ -120,6 +110,53 @@ public class StorageServiceImpl implements StorageService {
 	@Override
 	public Storage getStorage(String fileName) {
 		return storageDao.getStorage(fileName);
+	}
+
+	@Override
+	public Storage getStorageFromUrl(String url) {
+		return storageDao.getStorageFromUrl(url);
+	}
+
+	@Override
+	public Storage getStorageFromStorageRequest(StorageRequest req) {
+		Storage storage = new Storage();
+
+		storage.setName(req.getName());
+		storage.setType(req.getType());
+		storage.setUrl(req.getUrl());
+		storage.setSize(req.getSize());
+
+		return storage;
+	}
+
+	@Override
+	public List<Storage> getStoragesFromStorageRequests(List<StorageRequest> reqs) {
+
+		List<Storage> coverPictures = new ArrayList<>();
+
+		if (reqs != null && reqs.size() > 0) {
+
+			reqs.forEach(req -> {
+//				check if the image is already existed
+				Storage picture = getStorageFromUrl(req.getUrl());
+
+//				not existed
+				if (picture == null) {
+					picture = getStorageFromStorageRequest(req);
+					picture = saveStorage(picture);
+				}
+
+//				add to new list
+				coverPictures.add(picture);
+			});
+		}
+
+		if (coverPictures.size() == 0) {
+			return null;
+		}
+
+		return coverPictures;
+
 	}
 
 }

@@ -36,10 +36,10 @@ public class LocationServiceImpl implements LocationService {
 	public Location getLocationFromPlaceidAndAddress(String placeid, String address) {
 
 //		placeid - MUST NOT Empty and NOT Null
-		Assert.isTrue(placeid!= null && !placeid.trim().isEmpty(), "Invalid Placeid!");
+		Assert.isTrue(placeid != null && !placeid.trim().isEmpty(), "Invalid Placeid!");
 
 //		address - MUST NOT Empty and NOT Null
-		Assert.isTrue(address!= null && !address.trim().isEmpty(), "Invalid Address!");
+		Assert.isTrue(address != null && !address.trim().isEmpty(), "Invalid Address!");
 
 //		search location
 		Location location = locationDao.getLocationByEitherPlaceidOrAddress(placeid, address);

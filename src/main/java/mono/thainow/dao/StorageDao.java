@@ -15,6 +15,8 @@ public interface StorageDao {
 	public Storage saveStorage(Storage file);
 
 	public void removeStorage(long id);
+
+	public Storage getStorageFromUrl(String url);
 	
 	
 }
