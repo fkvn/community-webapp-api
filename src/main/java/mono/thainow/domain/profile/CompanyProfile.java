@@ -50,6 +50,8 @@ public class CompanyProfile extends Profile {
 		case PENDING:
 			this.setStatus(ProfileStatus.PENDING);
 			break;
+		case DEACTIVATED:
+			this.setStatus(ProfileStatus.DEACTIVATED);
 		default:
 			this.setStatus(ProfileStatus.DELETED);
 		}

@@ -13,7 +13,9 @@ import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.ProfileStatus;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
+import mono.thainow.service.CompanyService;
 import mono.thainow.service.ProfileService;
+import mono.thainow.service.UserService;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -21,6 +23,12 @@ public class ProfileServiceImpl implements ProfileService {
 	@Autowired
 	private ProfileDao profileDao;
 
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private CompanyService companyService;
+	
 //	==================================================
 
 	@Override
@@ -48,6 +56,28 @@ public class ProfileServiceImpl implements ProfileService {
 		return profileDao.getUserProfile(user);
 	}
 
+	@Override
+	public void removeUserProfile(UserProfile profile) {
+		
+//		disable profiles
+		List<Profile> profiles = getAllProfiles(profile.getAccount());
+		
+		profiles.forEach(prof -> {
+
+//			disable company
+			if (prof.getDecriminatorValue().equals("COMPANY_PROFILE")) {			
+				companyService.remove(companyService.getCompanyById(((CompanyProfile) prof).getCompanyId()));
+			}
+
+//			disable profile
+			remove(prof);
+		});
+
+//		disable account
+		userService.remove(profile.getAccount());
+		
+	}
+	
 	@Override
 	public CompanyProfile getCompanyProfile(Long companyId) {
 		return profileDao.getCompanyProfile(companyId);
@@ -91,7 +121,6 @@ public class ProfileServiceImpl implements ProfileService {
 		return saveProfile(profile);
 	}
 
-	
 	@Override
 	public Profile remove(Profile profile) {
 		profile.setStatus(ProfileStatus.DELETED);

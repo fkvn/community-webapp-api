@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@PreAuthorize("hasAnyAuthority('BUSINESS')")
+@PreAuthorize("hasAnyAuthority('ROLE_BUSINESS')")
 public @interface BusinessAuthorization {
 
 }

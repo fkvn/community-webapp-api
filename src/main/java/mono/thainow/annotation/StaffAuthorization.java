@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@PreAuthorize("hasAnyAuthority('STAFF')")
+@PreAuthorize("hasAnyAuthority('ROLE_STAFF')")
 public @interface StaffAuthorization {
 
 }

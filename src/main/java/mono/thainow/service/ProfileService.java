@@ -29,5 +29,7 @@ public interface ProfileService {
 	Profile saveProfile(Profile profile);
 
 	Profile remove(Profile profile);
+
+	void removeUserProfile(UserProfile profile);
 		
 }

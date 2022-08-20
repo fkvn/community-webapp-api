@@ -1,7 +1,6 @@
 package mono.thainow.rest.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -19,15 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import mono.thainow.domain.profile.CompanyProfile;
-import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.request.UserUpdateInfoRequest;
-import mono.thainow.service.CompanyService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
@@ -43,9 +39,6 @@ public class UserProfileController {
 
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private CompanyService companyService;
 
 	@Autowired
 	private StorageService storageService;
@@ -111,22 +104,8 @@ public class UserProfileController {
 	public void removeUserProfile(@PathVariable Long id) {
 
 		UserProfile profile = getProfile(id);
-
-//		disable profiles
-		List<Profile> profiles = profileService.getAllProfiles(profile.getAccount());
-		profiles.forEach(prof -> {
-
-//			disable company
-			if (prof.getDecriminatorValue().equals("COMPANY_PROFILE")) {
-				companyService.remove(companyService.getCompanyById(((CompanyProfile) prof).getCompanyId()));
-			}
-
-//			disable profile
-			profileService.remove(prof);
-		});
-
-//		disable account
-		userService.remove(profile.getAccount());
+		
+		profileService.removeUserProfile(profile);
 
 	}
 	

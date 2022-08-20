@@ -30,6 +30,7 @@ public class ProfileDaoImpl implements ProfileDao {
 		List<ProfileStatus> validStatus = new ArrayList<>();
 		validStatus.add(ProfileStatus.ACTIVATED);
 		validStatus.add(ProfileStatus.PENDING);
+		validStatus.add(ProfileStatus.DEACTIVATED);
 
 		return entityManager.createQuery("from Profile where account =: user and status IN (:status)", Profile.class)
 				.setParameter("user", account).setParameter("status", validStatus).getResultList();
