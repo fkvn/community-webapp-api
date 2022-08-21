@@ -28,7 +28,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.URL;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,149 +48,144 @@ import mono.thainow.view.View;
 @ToString
 @EqualsAndHashCode
 @Entity
+@JsonView(View.Basic.class)
 public class User implements Serializable {
 	/**
 	* 
 	*/
 	private static final long serialVersionUID = 1L;
 
-	// public property
+//	Basic Information
 
 	@Id
 	@GeneratedValue
-	@JsonView(View.UserView.Public.class)
 	private Long id;
 
 	@Column(name = "USER_USERNAME")
-	@JsonView(View.UserView.Public.class)
 	private String username = "";
 
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "USER_CREATED_ON")
-	@JsonView(View.UserView.Public.class)
 	private Date createdOn = new Date();
 	
 	@OneToOne
-	@JsonView(View.UserView.Public.class)
 	private Storage picture;
-
-	// private property
-
+	
 	@UpdateTimestamp
-	@JsonView(View.UserView.Private.class)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "USER_UPDATED_ON")
 	private Date updatedOn = new Date();
 
-	@Column(name = "USER_FIRSTNAME")
-	@JsonView(View.UserView.Private.class)
-	private String firstName = "";
-
-	@Column(name = "USER_LASTNAME")
-	@JsonView(View.UserView.Private.class)
-	private String lastName = "";
+	@OneToMany
+	private List<Storage> coverPictures = new ArrayList<>();
+	
+	@ManyToOne
+	@JoinColumn(name = "LOCATION_ID")
+	private Location location;
+	
+	@NotNull(message = "User status can't be null!")
+	@Enumerated(EnumType.STRING)
+	@Column(name = "USER_STATUS")
+	private UserStatus status = UserStatus.DEACTIVATED;
+	
+//  Detail Information
 	
 	@Lob
 	@Column(name = "USER_DESCRIPTION")
-	@JsonView(View.UserView.Private.class)
+	@JsonView(View.Detail.class)
 	private String description;
 	
-	@Column(name = "IS_USER_DESCRIPTION_PUBLIC")
-	@JsonView(View.UserView.Private.class)
-	private boolean isDescriptionPublic = false;
-
 	@Email(message = "Email is not valid")
-	@JsonView(View.UserView.Private.class)
 	@Column(name = "USER_EMAIL")
+	@JsonView(View.Detail.class)
 	private String email;
-
-	@Column(name = "IS_USER_EMAIL_PUBLIC")
-	@JsonView(View.UserView.Private.class)
-	private boolean isEmailPublic = false;
-
+	
 	@Column(name = "USER_PHONE")
-	@JsonView(View.UserView.Private.class)
+	@JsonView(View.Detail.class)
 	private String phone;
-
-	@Column(name = "IS_USER_PHONE_PUBLIC")
-	@JsonView(View.UserView.Private.class)
-	private boolean isPhonePublic = false;
-
-	@ManyToOne
-	@JoinColumn(name = "LOCATION_ID")
-	@JsonView(View.UserView.Private.class)
-	private Location location;
-
-	@Column(name = "IS_USER_LOCATION_PUBLIC")
-	@JsonView(View.UserView.Private.class)
-	private boolean isLocationPublic = false;
 	
 	@Column(name = "USER_WEBSITE")
-	@JsonView(View.UserView.Private.class)
-	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Website url must be a valid URL")
+//	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Website url must be a valid URL")
+	@JsonView(View.Detail.class)
 	private String website;
+
+	@Column(name = "USER_FIRSTNAME")
+	@JsonView(View.Detail.class)
+	private String firstName = "";
+
+	@Column(name = "USER_LASTNAME")
+	@JsonView(View.Detail.class)
+	private String lastName = "";
+	
+	@Column(name = "IS_USER_DESCRIPTION_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean descriptionPublic = false;
+
+	@Column(name = "IS_USER_EMAIL_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean emailPublic = false;
+
+	@Column(name = "IS_USER_PHONE_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean phonePublic = false;
+
+	@Column(name = "IS_USER_LOCATION_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean locationPublic = false;
 	
 	@Column(name = "IS_USER_WEBSITE_PUBLIC")
-	@JsonView(View.UserView.Private.class)
-	private boolean isWebsitePublic = false;
-	
-	@OneToMany
-	private List<Storage> coverPictures = new ArrayList<>();
+	@JsonView(View.Detail.class)
+	private boolean websitePublic = false;
 
-	// Write ONLY property
-
-	@NotNull
-	@Column(name = "USER_SUB")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String sub;
+//	Full Detail Information
 
 	@NotNull
 	@Column(name = "USER_ISSUER")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String provider = "THAINOW";
+	
+	@NotNull
+	@Column(name = "USER_SUB")
+	@JsonView(View.FullDetail.class)
+	private String sub;
 
 	@NotNull
 	@Column(name = "USER_ROLE")
 	@Enumerated(EnumType.STRING)
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private UserRole role = UserRole.CLASSIC;
 
+	@Column(name = "USER_FULLNAME")
+	@JsonView(View.FullDetail.class)
+	private String fullName = firstName + lastName;
+
+	@Column(name = "IS_USER_EMAIL_VERIFIED")
+	@JsonView(View.FullDetail.class)
+	private boolean isEmailVerified = false;
+
+	@Column(name = "IS_USER_PHONE_VERIFIED")
+	@JsonView(View.FullDetail.class)
+	private boolean isPhoneVerified = false;
+
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
+	@Column(name = "USER_PRIVILEGES", nullable = false)
+	@JsonView(View.FullDetail.class)
+	private Set<UserPrivilege> privileges = new HashSet<>();
+	
+//	Write ONLY information
+	
 	@NotNull(message = "User password can't be null")
 	@Column(name = "USER_PASSWORD")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 
-	@Column(name = "USER_FULLNAME")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String fullName = firstName + lastName;
-
-	@Column(name = "IS_USER_EMAIL_VERIFIED")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private boolean isEmailVerified = false;
-
-	@Column(name = "IS_USER_PHONE_VERIFIED")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private boolean isPhoneVerified = false;
-
-	@ElementCollection(fetch = FetchType.EAGER)
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
-	@Column(name = "USER_PRIVILEGES", nullable = false)
-	private Set<UserPrivilege> privileges = new HashSet<>();
-
-	@NotNull(message = "User status can't be null!")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	@Enumerated(EnumType.STRING)
-	@Column(name = "USER_STATUS")
-	private UserStatus status = UserStatus.DEACTIVATED;
-
-	// Config
+//	Configuration Setting
 
 	@PrePersist
 	private void validateUser() {
 		this.setSub(UUID.randomUUID().toString());
-
 		if (this.fullName.equals("")) {
 			this.setFullName(this.firstName + " " + this.lastName);
 		}

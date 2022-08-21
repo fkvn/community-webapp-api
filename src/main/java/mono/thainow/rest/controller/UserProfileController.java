@@ -1,13 +1,9 @@
 package mono.thainow.rest.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
+import mono.thainow.annotation.AuthorizedAccess;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
@@ -28,10 +27,12 @@ import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
 import mono.thainow.service.impl.UserDetailsImpl;
+import mono.thainow.util.AuthUtil;
+import mono.thainow.view.View;
 
 @RestController
 //@PreAuthorize("hasAnyAuthority('USER_MANAGE')")
-@RequestMapping("/api/profiles/users/{id}")
+@RequestMapping("/api/profiles/users/{profileId}")
 public class UserProfileController {
 
 	@Autowired
@@ -42,93 +43,101 @@ public class UserProfileController {
 
 	@Autowired
 	private StorageService storageService;
-	
-//	user binded the access_token
-	private UserDetailsImpl getAuthorizedUser() {
-		return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	}
 
 //	validate access and return profile
-	private UserProfile getProfile(Long id) {
+	private UserProfile getValidUserProfile(Long profileId, boolean authorizedOnly) {
 
-		UserProfile profile = profileService.getUserProfile(id);
-		
-		UserDetailsImpl userDetails = getAuthorizedUser();
+		UserProfile profile = profileService.getValidUserProfile(profileId);
 
-		if (!profile.getAccount().getId().equals(userDetails.getId())) {
-			throw new AccessForbidden();
+		if (authorizedOnly) {
+			UserDetailsImpl userDetails = AuthUtil.getAuthorizedUser();
+
+			if (!profile.getAccount().getId().equals(userDetails.getId())) {
+				throw new AccessForbidden();
+			}
 		}
-		
+
 		return profile;
 	}
-	
+
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Map<String, Object> getUserProfile(@PathVariable Long id) {
-		Map<String, Object> res = new HashMap<>();
+	@JsonView(View.Detail.class)
+	public UserProfile getUserProfile(@PathVariable Long profileId) {
 
-		UserProfile profile = getProfile(id);
+		UserProfile profile = getValidUserProfile(profileId, false);
 
-		res.put("basicInfo", profile);
-		res.put("detailInfo", profile.getAccount());
+//		anonymousUser -> public request
+		if (AuthUtil.getAuthorizedUser() == null) {
 
-		return res;
+			User user = profile.getAccount();
+
+			if (!user.isEmailPublic())
+				user.setEmail(null);
+			if (!user.isPhonePublic())
+				user.setPhone(null);
+			if (!user.isDescriptionPublic())
+				user.setDescription(null);
+			if (!user.isWebsitePublic())
+				user.setWebsite(null);
+
+			profile.setAccount(user);
+
+		}
+
+		return profile;
 	}
 
 	@PatchMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Map<String, Object> updateUserProfile(@PathVariable Long id,
+	@JsonView(View.Detail.class)
+	@AuthorizedAccess
+	public UserProfile updateUserProfile(@PathVariable Long profileId,
 			@Valid @RequestBody UserUpdateInfoRequest userUpdateInfoRequest) {
-		Map<String, Object> res = new HashMap<>();
+//		Map<String, Object> res = new HashMap<>();
 
-		UserProfile profile = getProfile(id);
+		UserProfile profile = getValidUserProfile(profileId, true);
 
 //		update user
 		User account = profile.getAccount();
 		account = userService.getUserFromUpdateInfoRequest(account, userUpdateInfoRequest);
 		account = userService.saveUser(account);
 
-//		update Profile
-		profile.setProfileInfo(account);
-		profile = (UserProfile) profileService.saveProfile(profile);
-
-//		return values
-		res.put("basicInfo", profile);
-		res.put("detailInfo", profile.getAccount());
-
-		return res;
+		return profile;
 	}
-	
+
 	@DeleteMapping
 	@ResponseStatus(HttpStatus.OK)
-	public void removeUserProfile(@PathVariable Long id) {
+	@AuthorizedAccess
+	public void removeUserProfile(@PathVariable Long profileId) {
 
-		UserProfile profile = getProfile(id);
-		
-		profileService.removeUserProfile(profile);
+		UserProfile profile = getValidUserProfile(profileId, true);
+
+		profileService.removeProfile(profile);
 
 	}
-	
+
 	@PostMapping("/picture")
 	@ResponseStatus(HttpStatus.CREATED)
+	@AuthorizedAccess
 	public Storage uploadProfile(@PathVariable Long id, @Valid @RequestBody StorageRequest newPicture) {
-		
+
 //		get profile
-		UserProfile profile = getProfile(id);
-		
+		UserProfile profile = getValidUserProfile(id, true);
+
 //		get storage
 		Storage picture = storageService.getStorageFromStorageRequest(newPicture);
 		picture = storageService.saveStorage(picture);
-		
+
 //		update account
 		User account = profile.getAccount();
 		account.setPicture(picture);
 		account = userService.saveUser(account);
-		
+
 //		update profile
-		profile.setProfileInfo(account);
+		profile.setAccount(account);
 		profile = (UserProfile) profileService.saveProfile(profile);
-		
+
 		return picture;
 	}
 

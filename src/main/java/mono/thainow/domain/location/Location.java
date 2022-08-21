@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
@@ -23,7 +24,6 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.EqualsAndHashCode;
@@ -46,96 +46,89 @@ import mono.thainow.view.View;
 		@Index(name = "location_fullAddress_UNIQUE", columnList = "LOCATION_FULL_ADDRESS", unique = true),
 		@Index(name = "location_lat_UNIQUE", columnList = "LOCATION_LAT", unique = true),
 		@Index(name = "location_lng_UNIQUE", columnList = "LOCATION_LNG", unique = true) })
+@JsonView(View.Basic.class)
 public class Location implements Serializable {
 	/**
 	* 
 	*/
 	private static final long serialVersionUID = 1L;
 
-	// public property
+//	Basic Information
 	
 	@Id
 	@GeneratedValue
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private Long id;
 
 	@Column(name = "LOCATION_PLACEID")
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private String placeid;
 
 	@Column(name = "LOCATION_FORMATTED_ADDRESS")
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private String description;
 	
 	@Column(name = "LOCATION_CITY")
 	@NotEmpty(message = "Location city can't be empty")
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private String locality = "";
 	
 	@Column(name = "LOCATION_STATE")
 	@NotEmpty(message = "Location state can't be empty")
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private String state = "";
 	
 	@Column(name = "LOCATION_ZIPCODE")
 	@Size(min = 0, max = 5)
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private String zipcode = "";
 	
 	@Column(name = "LOCATION_LAT")
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private double lat;
 
 	@Column(name = "LOCATION_LNG")
-	@JsonView({View.Company.Basic.class, View.UserView.Public.class})
 	private double lng;
 	
-	// Private Property
+//  Full Detail Property
 	
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "LOCATION_CREATED_ON")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private Date createdOn = new Date();
 
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "LOCATION_UPDATED_ON")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private Date updatedOn = new Date();
 	
 	@Column(name = "LOCATION_ADDRESS1")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String address1 = "";
 
 	@Column(name = "LOCATION_ADDRESS2")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String address2 = "";
 
 	@Column(name = "LOCATION_NEIGHBERHOOD")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String neighberhood = "";
 
 	@Column(name = "LOCATION_COUNTY")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String county = "";
 
 	@Column(name = "LOCATION_COUNTRY")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String country = "USA";
 
 	@Column(name = "LOCATION_FULL_ADDRESS")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String fullAddress;
 
 	@Column(name = "LOCATION_TYPE")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@JsonView(View.FullDetail.class)
 	private String type;
 	
-	// Request Only	
+//  Request ONLY	
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "location")
+	@OneToMany(mappedBy = "location", fetch = FetchType.LAZY)
 	private List<User> users = new ArrayList<>();
 	
 	@Transient
@@ -145,7 +138,7 @@ public class Location implements Serializable {
 		return this.fullAddress;
 	}
 	
-	// Config
+//	Configuration Setting
 	
 	@PrePersist
 	public void validateLocation() {

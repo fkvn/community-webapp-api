@@ -13,14 +13,14 @@ public interface ProfileDao {
 	
 	List<Profile> getAllProfiles(User account);
 	
-	Profile getProfiles(Long id);
+	UserProfile getValidUserProfile(Long id);
 	
-	UserProfile getUserProfile(Long id);
-	
-	CompanyProfile getCompanyProfile(Long companyId);
+	CompanyProfile getValidCompanyProfile(Long profileId);
 
 	Profile saveProfile(Profile profile);
 
-	UserProfile getUserProfile(User user);
+	UserProfile getValidUserProfile(User user);
+
+	List<CompanyProfile> getValidCompanyProfiles(User account);
 
 }

@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.AppleSigninRequest;
@@ -29,6 +31,7 @@ import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.TwilioService;
 import mono.thainow.service.UserService;
+import mono.thainow.view.View;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -204,7 +207,7 @@ public class AuthServiceImpl implements AuthService {
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
 		User account = userService.getActiveUserByEmail(userDetails.getEmail());
-		UserProfile profile = profileService.getUserProfile(account);
+		UserProfile profile = profileService.getValidUserProfile(account);
 
 		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
 		jwtClaims.setProfile(profile);

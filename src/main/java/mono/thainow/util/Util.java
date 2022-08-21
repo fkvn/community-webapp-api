@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Util {
 
+
 	public static Integer getIntegerNumeric(String strNum) {
 		if (strNum == null) {
 			return null;

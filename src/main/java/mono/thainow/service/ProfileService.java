@@ -10,26 +10,26 @@ import mono.thainow.domain.user.User;
 
 public interface ProfileService {
 	
-	List<Profile> getProfiles(User account);
-	
 	List<Profile> getAllProfiles(User account);
 	
-	Profile getProfile(Long id);
+	List<Profile> getProfiles(User account);
 	
-	CompanyProfile getCompanyProfile(Long companyId);
-	
-	UserProfile getUserProfile(Long id);
-	
-	UserProfile getUserProfile(User user);
+	List<CompanyProfile> getValidCompanyProfiles(User account);
 	
 	Profile createProfile(User user);
 	
 	Profile createProfile(User user, Company company);
 	
 	Profile saveProfile(Profile profile);
+	
+	void removeProfile(CompanyProfile companyProfile);
 
-	Profile remove(Profile profile);
-
-	void removeUserProfile(UserProfile profile);
+	void removeProfile(UserProfile profile);
+	
+	UserProfile getValidUserProfile(Long profileId);
+	
+	UserProfile getValidUserProfile(User user);
+	
+	CompanyProfile getValidCompanyProfile(Long profileId);
 		
 }

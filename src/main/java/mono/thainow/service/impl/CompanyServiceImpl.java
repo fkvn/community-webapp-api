@@ -132,7 +132,7 @@ public class CompanyServiceImpl implements CompanyService {
 
 //		Informal company is a company not having physical address 
 		boolean isInformal = Optional.ofNullable(companyRequest.isInformal()).orElse(false);
-		company.setInformal(isInformal);
+		company.setInformalCompany(isInformal);
 
 //		company name 
 		String name = Optional.ofNullable(companyRequest.getName()).orElse("").trim();

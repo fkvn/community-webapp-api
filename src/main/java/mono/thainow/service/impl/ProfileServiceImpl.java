@@ -10,7 +10,6 @@ import mono.thainow.dao.ProfileDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.domain.profile.ProfileStatus;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 import mono.thainow.service.CompanyService;
@@ -25,62 +24,56 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private CompanyService companyService;
-	
+
 //	==================================================
 
-	@Override
-	public List<Profile> getProfiles(User account) {
-		return profileDao.getProfiles(account);
-	}
-	
 	@Override
 	public List<Profile> getAllProfiles(User account) {
 		return profileDao.getAllProfiles(account);
 	}
 
 	@Override
-	public Profile getProfile(Long id) {
-		return profileDao.getProfiles(id);
-	}
-	
-	@Override
-	public UserProfile getUserProfile(Long id) {
-		return profileDao.getUserProfile(id);
-	}
-	
-	@Override
-	public UserProfile getUserProfile(User user) {
-		return profileDao.getUserProfile(user);
+	public List<Profile> getProfiles(User account) {
+		return profileDao.getProfiles(account);
 	}
 
 	@Override
-	public void removeUserProfile(UserProfile profile) {
-		
-//		disable profiles
-		List<Profile> profiles = getAllProfiles(profile.getAccount());
-		
-		profiles.forEach(prof -> {
+	public List<CompanyProfile> getValidCompanyProfiles(User account) {
+		return profileDao.getValidCompanyProfiles(account);
+	}
 
-//			disable company
-			if (prof.getDecriminatorValue().equals("COMPANY_PROFILE")) {			
-				companyService.remove(companyService.getCompanyById(((CompanyProfile) prof).getCompanyId()));
-			}
+	@Override
+	public UserProfile getValidUserProfile(Long id) {
+		return profileDao.getValidUserProfile(id);
+	}
 
-//			disable profile
-			remove(prof);
-		});
+	@Override
+	public UserProfile getValidUserProfile(User user) {
+		return profileDao.getValidUserProfile(user);
+	}
+
+	@Override
+	public void removeProfile(UserProfile profile) {
 
 //		disable account
 		userService.remove(profile.getAccount());
-		
+
+//		disable profiles
+		List<CompanyProfile> profiles = getValidCompanyProfiles(profile.getAccount());
+
+		profiles.forEach(prof -> {
+
+//			disable profile
+			removeProfile(prof);
+		});
 	}
-	
+
 	@Override
-	public CompanyProfile getCompanyProfile(Long companyId) {
-		return profileDao.getCompanyProfile(companyId);
+	public CompanyProfile getValidCompanyProfile(Long profileId) {
+		return profileDao.getValidCompanyProfile(profileId);
 	}
 
 	@Override
@@ -92,7 +85,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public Profile createProfile(User user) {
 
 		try {
-			profileDao.getUserProfile(user);
+			profileDao.getValidUserProfile(user);
 
 //			if no error -> already existed -> one account only can have 1 user profile
 			Assert.isTrue(false, "One account only can have 1 USER_PROFILE!");
@@ -112,8 +105,8 @@ public class ProfileServiceImpl implements ProfileService {
 	public Profile createProfile(User owner, Company company) {
 
 //		profile limitation
-		List<Profile> profiles = getProfiles(owner);
-		Assert.isTrue(profiles.size() < 6, "Exceed Profile Limitation (Max 5 business profiles for each account)!");
+		List<CompanyProfile> profiles = getValidCompanyProfiles(owner);
+		Assert.isTrue(profiles.size() < 5, "Exceed Profile Limitation (Max 5 business profiles for each account)!");
 
 //		create a business profile with new company
 		CompanyProfile profile = new CompanyProfile(owner, company);
@@ -122,11 +115,8 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public Profile remove(Profile profile) {
-		profile.setStatus(ProfileStatus.DELETED);
-		return saveProfile(profile);
+	public void removeProfile(CompanyProfile companyProfile) {
+		companyService.remove(companyProfile.getCompany());
 	}
-
-
 
 }

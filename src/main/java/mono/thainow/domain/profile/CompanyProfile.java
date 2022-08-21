@@ -1,8 +1,8 @@
 package mono.thainow.domain.profile;
 
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.company.Company;
-import mono.thainow.domain.company.CompanyStatus;
+import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 
 @Getter
@@ -25,36 +25,54 @@ public class CompanyProfile extends Profile {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	@OneToOne
+	@JsonIgnore
+//	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//	@JsonIdentityReference(alwaysAsId = true)
+	private Company company;
 
 	public CompanyProfile(User owner, Company company) {
 		this.setAccount(owner);
-		setProfileInfo(company);
+		this.company = company;
 	}
 
-	@JsonIgnore
-	@Column(name = "COMPANY_ID")
-	private Long companyId;
-
-	public void setProfileInfo(Company company) {
-		this.setCompanyId(company.getId());
-		this.setUsername(company.getName());
-		this.setPicture(company.getLogo());
-		setProfileStatus(company.getStatus());
+	@Override
+	public String getUsername() {
+		return this.company.getName();
 	}
 
-	public void setProfileStatus(CompanyStatus status) {
-		switch (status) {
+	@Override
+	public ProfileStatus getStatus() {
+		switch (this.company.getStatus()) {
 		case REGISTERED:
-			this.setStatus(ProfileStatus.ACTIVATED);
-			break;
+			return ProfileStatus.ACTIVATED;
 		case PENDING:
-			this.setStatus(ProfileStatus.PENDING);
-			break;
+			return ProfileStatus.PENDING;
 		case DEACTIVATED:
-			this.setStatus(ProfileStatus.DEACTIVATED);
+			return ProfileStatus.DEACTIVATED;
 		default:
-			this.setStatus(ProfileStatus.DELETED);
+			return ProfileStatus.DELETED;
 		}
+	}
+
+	@Override
+	public Storage getPicture() {
+		return this.company.getLogo();
+	}
+
+	@Override
+	public Object getDetailInfo() {
+		
+		Company company = this.getCompany();
+		
+		if (!company.isEmailPublic()) company.setEmail(null);
+		if (!company.isPhonePublic()) company.setPhone(null);
+		if (!company.isDescriptionPublic()) company.setDescription(null);
+		if (!company.isWebsitePublic()) company.setWebsite(null);
+		if (!company.isSizePublic()) company.setSize(null);
+		
+		return company;
 	}
 
 }

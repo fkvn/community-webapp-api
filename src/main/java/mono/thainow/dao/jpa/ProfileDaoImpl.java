@@ -10,11 +10,12 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import mono.thainow.dao.ProfileDao;
+import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.domain.profile.ProfileStatus;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserStatus;
 
 @Repository
 public class ProfileDaoImpl implements ProfileDao {
@@ -27,13 +28,23 @@ public class ProfileDaoImpl implements ProfileDao {
 	@Override
 	public List<Profile> getProfiles(User account) {
 
-		List<ProfileStatus> validStatus = new ArrayList<>();
-		validStatus.add(ProfileStatus.ACTIVATED);
-		validStatus.add(ProfileStatus.PENDING);
-		validStatus.add(ProfileStatus.DEACTIVATED);
+		List<Profile> profiles = new ArrayList<>();
 
-		return entityManager.createQuery("from Profile where account =: user and status IN (:status)", Profile.class)
-				.setParameter("user", account).setParameter("status", validStatus).getResultList();
+		profiles.add(getValidUserProfile(account));
+		profiles.addAll(getValidCompanyProfiles(account));
+
+		return profiles;
+
+	}
+
+	@Override
+	public List<CompanyProfile> getValidCompanyProfiles(User account) {
+
+		return entityManager
+				.createQuery("from CompanyProfile where account =: user and company.status != :status",
+						CompanyProfile.class)
+				.setParameter("user", account).setParameter("status", CompanyStatus.REJECTED).getResultList();
+
 	}
 
 	@Override
@@ -43,38 +54,28 @@ public class ProfileDaoImpl implements ProfileDao {
 	}
 
 	@Override
-	public Profile getProfiles(Long id) {
-		return entityManager.createQuery("from Profile where status = :status", Profile.class)
-				.setParameter("status", ProfileStatus.ACTIVATED).getSingleResult();
+	public UserProfile getValidUserProfile(Long profileId) {
+
+		return entityManager
+				.createQuery("from UserProfile where id = :id and account.status = :status", UserProfile.class)
+				.setParameter("id", profileId).setParameter("status", UserStatus.ACTIVATED).getSingleResult();
 	}
 
 	@Override
-	public CompanyProfile getCompanyProfile(Long id) {
+	public UserProfile getValidUserProfile(User user) {
+		return entityManager
+				.createQuery("from UserProfile where account =: user and account.status = :status", UserProfile.class)
+				.setParameter("user", user).setParameter("status", UserStatus.ACTIVATED).getSingleResult();
+	}
+
+	@Override
+	public CompanyProfile getValidCompanyProfile(Long profileId) {
 
 		return entityManager
-				.createQuery("from CompanyProfile where id = :id and profile_type =: type and status = :status",
+				.createQuery("from CompanyProfile where id = :id and profile_type =: type and company.status = :status",
 						CompanyProfile.class)
-				.setParameter("id", id).setParameter("type", "COMPANY_PROFILE")
-				.setParameter("status", ProfileStatus.ACTIVATED).getSingleResult();
-	}
-
-	@Override
-	public UserProfile getUserProfile(Long id) {
-
-		return entityManager
-				.createQuery("from UserProfile where id = :id and profile_type =: type and status = :status",
-						UserProfile.class)
-				.setParameter("id", id).setParameter("type", "USER_PROFILE")
-				.setParameter("status", ProfileStatus.ACTIVATED).getSingleResult();
-	}
-
-	@Override
-	public UserProfile getUserProfile(User user) {
-		return entityManager
-				.createQuery("from UserProfile where account =: user and profile_type =: type and status = :status",
-						UserProfile.class)
-				.setParameter("user", user).setParameter("type", "USER_PROFILE")
-				.setParameter("status", ProfileStatus.ACTIVATED).getSingleResult();
+				.setParameter("id", profileId).setParameter("type", "COMPANY_PROFILE")
+				.setParameter("status", CompanyStatus.REGISTERED).getSingleResult();
 	}
 
 	@Override

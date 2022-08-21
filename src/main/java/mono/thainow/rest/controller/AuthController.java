@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import mono.thainow.rest.request.AppleSigninRequest;
 import mono.thainow.rest.request.AppleSignupRequest;
 import mono.thainow.rest.request.FacebookSigninRequest;
@@ -28,6 +30,7 @@ import mono.thainow.rest.response.MessageResponse;
 import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.UserService;
+import mono.thainow.view.View;
 
 // 30 secs
 @CrossOrigin(origins = "*", maxAge = 36000)
@@ -60,37 +63,9 @@ public class AuthController {
 		return new MessageResponse("Token was verified successfully!");
 	}
 	
-	@PostMapping("/google/signin")
-	public JwtResponse signinGoogleUser(@Valid @RequestBody GoogleSigninRequest signinRequest) {
-		return authService.signinWithGoogle(signinRequest);
-	}
-	
-	@PostMapping("/google/signup")
-	public JwtResponse signupGoogleUser(@Valid @RequestBody GoogleSignupRequest signupRequest) {
-		return authService.signupWithGoogle(signupRequest);
-	}
-	
-	@PostMapping("/apple/signin")
-	public JwtResponse signinAppleUser(@Valid @RequestBody AppleSigninRequest signinRequest) {
-		return authService.signinWithApple(signinRequest);
-	}
-	
-	@PostMapping("/apple/signup")
-	public JwtResponse signupAppleUser(@Valid @RequestBody AppleSignupRequest signupRequest) {
-		return authService.signupWithApple(signupRequest);
-	}
-	
-	@PostMapping("/facebook/signin")
-	public JwtResponse signinFacebookUser(@Valid @RequestBody FacebookSigninRequest signinRequest) {
-		return authService.signinWithFacebook(signinRequest);
-	}
-	
-	@PostMapping("/facebook/signup")
-	public JwtResponse signupFacebookUser(@Valid @RequestBody FacebookSignupRequest signupRequest) {
-		return authService.signupWithFacebook(signupRequest);
-	}
 
 	@PostMapping("/users/signin")
+	@JsonView(View.Basic.class)
 	public JwtResponse signinUser(@Valid @RequestBody UserSigninRequest signinRequest) {
 		return authService.signinWithThaiNow(signinRequest);
 	}
@@ -99,6 +74,42 @@ public class AuthController {
 	public Long signupUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
 		Long userId = authService.signupWithThaiNow(signUpRequest);
 		return userId;
+	}
+	
+	@PostMapping("/google/signin")
+	@JsonView(View.Basic.class)
+	public JwtResponse signinGoogleUser(@Valid @RequestBody GoogleSigninRequest signinRequest) {
+		return authService.signinWithGoogle(signinRequest);
+	}
+	
+	@PostMapping("/google/signup")
+	@JsonView(View.Basic.class)
+	public JwtResponse signupGoogleUser(@Valid @RequestBody GoogleSignupRequest signupRequest) {
+		return authService.signupWithGoogle(signupRequest);
+	}
+	
+	@PostMapping("/apple/signin")
+	@JsonView(View.Basic.class)
+	public JwtResponse signinAppleUser(@Valid @RequestBody AppleSigninRequest signinRequest) {
+		return authService.signinWithApple(signinRequest);
+	}
+	
+	@PostMapping("/apple/signup")
+	@JsonView(View.Basic.class)
+	public JwtResponse signupAppleUser(@Valid @RequestBody AppleSignupRequest signupRequest) {
+		return authService.signupWithApple(signupRequest);
+	}
+	
+	@PostMapping("/facebook/signin")
+	@JsonView(View.Basic.class)
+	public JwtResponse signinFacebookUser(@Valid @RequestBody FacebookSigninRequest signinRequest) {
+		return authService.signinWithFacebook(signinRequest);
+	}
+	
+	@PostMapping("/facebook/signup")
+	@JsonView(View.Basic.class)
+	public JwtResponse signupFacebookUser(@Valid @RequestBody FacebookSignupRequest signupRequest) {
+		return authService.signupWithFacebook(signupRequest);
 	}
 
 	@PostMapping("/users/username/unique")

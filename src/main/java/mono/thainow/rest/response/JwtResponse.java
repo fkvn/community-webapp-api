@@ -2,13 +2,17 @@ package mono.thainow.rest.response;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import lombok.Getter;
 import lombok.Setter;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.service.impl.UserDetailsImpl;
+import mono.thainow.view.View;
 
 @Getter
 @Setter
+@JsonView(View.Basic.class)
 public class JwtResponse {
 
 	private String access_token;

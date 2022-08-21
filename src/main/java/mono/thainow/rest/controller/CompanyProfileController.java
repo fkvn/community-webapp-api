@@ -1,14 +1,9 @@
 package mono.thainow.rest.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
+import mono.thainow.annotation.AuthorizedAccess;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
@@ -34,9 +32,10 @@ import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
 import mono.thainow.service.impl.UserDetailsImpl;
+import mono.thainow.util.AuthUtil;
+import mono.thainow.view.View;
 
 @RestController
-//@PreAuthorize("hasAnyAuthority('USER_MANAGE')")
 @RequestMapping("/api/profiles/companies")
 public class CompanyProfileController {
 
@@ -51,142 +50,120 @@ public class CompanyProfileController {
 
 	@Autowired
 	private StorageService storageService;
-	
-//	user binded the access_token
-	private UserDetailsImpl getAuthorizedUser() {
-		return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	}
 
-	private CompanyProfile getProfile(Long id) {
+	private CompanyProfile getValidCompanyProfile(Long profileId, boolean authorizedOnly) {
 
-		CompanyProfile profile = profileService.getCompanyProfile(id);
-		
-		UserDetailsImpl userDetails = getAuthorizedUser();
+		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
 
-		if (!profile.getAccount().getId().equals(userDetails.getId())) {
-			throw new AccessForbidden();
+		if (authorizedOnly) {
+			UserDetailsImpl userDetails = AuthUtil.getAuthorizedUser();
+
+			if (!profile.getAccount().getId().equals(userDetails.getId())) {
+				throw new AccessForbidden();
+			}
 		}
-		
+
 		return profile;
 	}
-	
+
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+	@AuthorizedAccess
+	@JsonView(View.Detail.class)
 	public Profile addCompanyProfile(@Valid @RequestBody CompanySignupRequest companyRequest) {
-		User account = userService.getActiveUserBySub(getAuthorizedUser().getSub());
+
+		Company company = companyService.createCompany(companyRequest);
+
+		User account = userService.getByUserId(AuthUtil.getAuthorizedUser().getId());
 		account.setRole(UserRole.BUSINESS);
 		account = userService.saveUser(account);
-		
-		Company company = companyService.createCompany(companyRequest);
 
 		return profileService.createProfile(account, company);
 	}
-	
-	@GetMapping("/{id}")
+
+	@GetMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Map<String, Object> getCompanyProfile(@PathVariable Long id) {
-		Map<String, Object> res = new HashMap<>();
+	@JsonView(View.Detail.class)
+	public CompanyProfile getCompanyProfile(@PathVariable Long profileId) {
 
-		CompanyProfile profile = getProfile(id);
+		CompanyProfile profile = getValidCompanyProfile(profileId, false);
 
-		Company company = companyService.getCompanyById(profile.getCompanyId());
+//		anonymousUser -> public request
+		if (AuthUtil.getAuthorizedUser() == null) {
 
-		res.put("basicInfo", profile);
-		res.put("detailInfo", company);
+			Company company = profile.getCompany();
 
-		return res;
+			if (!company.isEmailPublic())
+				company.setEmail(null);
+			if (!company.isPhonePublic())
+				company.setPhone(null);
+			if (!company.isDescriptionPublic())
+				company.setDescription(null);
+			if (!company.isWebsitePublic())
+				company.setWebsite(null);
+			if (!company.isSizePublic())
+				company.setSize(null);
+
+			profile.setCompany(company);
+
+		}
+
+		return profile;
 	}
-	
-	@PatchMapping("/{id}")
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	public Map<String, Object> updateCompanyProfile(@PathVariable Long id,
-			@Valid @RequestBody CompanyUpdateInfoRequest companyUpdateInfoRequest) {
-		Map<String, Object> res = new HashMap<>();
 
-		CompanyProfile profile = getProfile(id);
+	@PatchMapping("/{profileId}")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@AuthorizedAccess
+	public CompanyProfile updateCompanyProfile(@PathVariable Long profileId,
+			@Valid @RequestBody CompanyUpdateInfoRequest companyUpdateInfoRequest) {
+
+		CompanyProfile profile = getValidCompanyProfile(profileId, true);
 
 //		update company
-		Company company = companyService.getCompanyById(profile.getCompanyId());
+		Company company = profile.getCompany();
 		company = companyService.getCompanyFromUpdateInfoRequest(company, companyUpdateInfoRequest);
 		company = companyService.saveCompany(company);
 
-//		update Profile
-		profile.setProfileInfo(company);
-		profile = (CompanyProfile) profileService.saveProfile(profile);
-
-//		return values
-		res.put("basicInfo", profile);
-		res.put("detailInfo", company);
-
-		return res;
-	}
-	
-	@DeleteMapping("/user/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public void removeUserProfile(@PathVariable Long id) {
-
-		CompanyProfile profile = getProfile(id);
-
-//		disable profiles
-		List<Profile> profiles = profileService.getAllProfiles(profile.getAccount());
-		profiles.forEach(prof -> {
-
-//			disable company
-			if (prof.getDecriminatorValue().equals("COMPANY_PROFILE")) {
-				companyService.remove(companyService.getCompanyById(((CompanyProfile) prof).getCompanyId()));
-			}
-
-//			disable profile
-			profileService.remove(prof);
-		});
-
-//		disable account
-		userService.remove(profile.getAccount());
-
+		return profile;
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.OK)
-	public void removeCompanyProfile(@PathVariable Long id) {
+	@AuthorizedAccess
+	public void removeCompanyProfile(@PathVariable Long profileId) {
 
-		CompanyProfile profile = getProfile(id);
-		
+		CompanyProfile profile = getValidCompanyProfile(profileId, true);
+
 //		disable company
-		companyService.remove(companyService.getCompanyById(profile.getCompanyId()));
-		
-//		disable profile
-		profile = (CompanyProfile) profileService.remove(profile);
-		
-//		no company profiles relates to the account
-		if (profileService.getProfiles(profile.getAccount()).size() == 1) {
+		profileService.removeProfile(profile);
+
+//		if no company profiles relates to the account
+		if (profileService.getValidCompanyProfiles(profile.getAccount()).size() == 0) {
 //			update role
 			profile.getAccount().setRole(UserRole.CLASSIC);
 			userService.saveUser(profile.getAccount());
 		}
-		
+
 	}
 
-	@PostMapping("/{id}/picture")
+	@PostMapping("/{profileId}/picture")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Storage uploadProfile(@PathVariable Long id, @Valid @RequestBody StorageRequest newPicture) {
-		
+	@AuthorizedAccess
+	public Storage uploadProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
+
 //		get profile
-		CompanyProfile profile = getProfile(id);
-		
+		CompanyProfile profile = getValidCompanyProfile(profileId, true);
+
 //		get storage
-		Storage picture = storageService.getStorageFromStorageRequest(newPicture);
-		picture = storageService.saveStorage(picture);
-		
+		Storage logo = storageService.getStorageFromStorageRequest(newPicture);
+		logo = storageService.saveStorage(logo);
+
 //		update account
-		Company company = companyService.getCompanyById(profile.getCompanyId());
-		company.setLogo(picture);
+		Company company = profile.getCompany();
+		company.setLogo(logo);
 		company = companyService.saveCompany(company);
-		
-//		update profile
-		profile.setProfileInfo(company);
-		profile = (CompanyProfile) profileService.saveProfile(profile);
-		
-		return picture;
+
+		return logo;
 	}
 
 }

@@ -16,16 +16,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.annotation.JsonView;
-
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.CompanySignupRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.impl.UserDetailsImpl;
-import mono.thainow.view.View;
 
 @RestController
 //@PreAuthorize("hasAnyAuthority('COMPANY_MANAGE')")
@@ -49,7 +45,6 @@ public class CompanyController {
 	}
 	
 	@GetMapping("/{id}")
-	@JsonView(View.Company.Basic.class)
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	public Company getCompany(@PathVariable Long id) {
 		validateCompanyAccess(id);

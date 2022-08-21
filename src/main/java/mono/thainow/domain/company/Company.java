@@ -27,7 +27,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.EqualsAndHashCode;
@@ -47,6 +46,7 @@ import mono.thainow.view.View;
 @EqualsAndHashCode
 @Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = false) })
 @Indexed
+@JsonView(View.Basic.class)
 public class Company implements Serializable {
 
 	/**
@@ -54,118 +54,113 @@ public class Company implements Serializable {
 	*/
 	private static final long serialVersionUID = 1L;
 
-	// Basic property
+//	Basic Information
 
 	@Id
 	@GeneratedValue
-	@JsonView(View.Company.Basic.class)
 	private Long id;
-
-	@CreationTimestamp
-	@Column(name = "COMPANY_CREATED_ON")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@JsonView(View.Company.Basic.class)
-	private Date createdOn = new Date();
 
 	@NotEmpty
 	@Column(name = "COMPANY_NAME")
-	@JsonView(View.Company.Basic.class)
 	@FullTextField
 	private String name;
 
 	@NotEmpty
 	@Column(name = "COMPANY_INDUSTRY")
-	@JsonView(View.Company.Basic.class)
 	private String industry;
-	
-	@OneToOne
-	@JsonView(View.Company.Basic.class)
-	private Storage logo;
 
-	@Column(name = "IS_COMPANY_INFORMAL")
-	@JsonView(View.Company.Basic.class)
-	private boolean isInformal = false;
+	@OneToOne
+	private Storage logo;
 
 	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")
-	@JsonView(View.Company.Basic.class)
 	private Location location;
 
 	@NotNull
 	@Enumerated(EnumType.STRING)
 	@Column(name = "COMPANY_STATUS")
-	@JsonView(View.Company.Basic.class)
 	private CompanyStatus status = CompanyStatus.UNREGISTERED;
-
-	@Column(name = "COMPANY_EMAIL")
-	@JsonView(View.Company.Basic.class)
-	private String email;
-
-	@Column(name = "COMPANY_PHONE")
-	@JsonView(View.Company.Basic.class)
-	private String phone;
-
-	@Column(name = "COMPANY_WEBSITE")
-//	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Company website must be a valid URL")
-	@JsonView(View.Company.Basic.class)
-	private String website;
-	
-	@Column(name = "IS_COMPANY_EMAIL_PUBLIC")
-	@JsonView(View.Company.Basic.class)
-	private boolean isEmailPublic = false;
-	
-	@Column(name = "IS_COMPANY_PHONE_PUBLIC")
-	@JsonView(View.Company.Basic.class)
-	private boolean isPhonePublic = false;
-	
-	@Column(name = "IS_COMPANY_WEBSITE_PUBLIC")
-	@JsonView(View.Company.Basic.class)
-	private boolean isWebsitePublic = false;
-
-	// Detail property
 
 	@UpdateTimestamp
 	@Column(name = "COMPANY_UPDATED_ON")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@JsonView(View.Company.Detail.class)
 	private Date updatedOn = new Date();
+
+	@OneToMany
+	private List<Storage> coverPictures = new ArrayList<>();
+	
+//	Public Detail Information
 	
 	@Lob
 	@Column(name = "COMPANY_DESCRIPTION")
-	@JsonView(View.Company.Detail.class)
+	@JsonView(View.Detail.class)
 	private String description;
 	
-	@Column(name = "IS_COMPANY_DESCRIPTION_PUBLIC")
-	@JsonView(View.Company.Detail.class)
-	private boolean isDescriptionPublic = false;
-
+	@Column(name = "COMPANY_EMAIL")
+	@JsonView(View.Detail.class)
+	private String email;
+	
+	@Column(name = "COMPANY_PHONE")
+	@JsonView(View.Detail.class)
+	private String phone;
+	
+	@Column(name = "COMPANY_WEBSITE")
+//	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Company website must be a valid URL")
+	@JsonView(View.Detail.class)
+	private String website;
+	
 	@Column(name = "COMPANY_FOUNDED")
-	@JsonView(View.Company.Detail.class)
+	@JsonView(View.Detail.class)
 	private String founded;
 
 	@Column(name = "COMPANY_REVENUE")
-	@JsonView(View.Company.Detail.class)
+	@JsonView(View.Detail.class)
 	private String revenue;
 
 	@Column(name = "COMPANY_SIZE")
-	@JsonView(View.Company.Detail.class)
+	@JsonView(View.Detail.class)
 	private String size;
 	
-	@Column(name = "IS_COMPANY_SIZE_PUBLIC")
-	@JsonView(View.Company.Detail.class)
-	private boolean isSizePublic = false;
+//	Private Detail Information
 	
-	@OneToMany
-	private List<Storage> coverPictures = new ArrayList<>();
+	@Column(name = "IS_COMPANY_DESCRIPTION_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean descriptionPublic = true;
+	
+	@Column(name = "IS_COMPANY_EMAIL_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean emailPublic = true;
 
-	// Write ONLY property
+	@Column(name = "IS_COMPANY_PHONE_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean phonePublic = true;
+
+	@Column(name = "IS_COMPANY_WEBSITE_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean websitePublic = true;
+	
+	@Column(name = "IS_COMPANY_SIZE_PUBLIC")
+	@JsonView(View.Detail.class)
+	private boolean sizePublic = true;
+	
+//	Full Detail Information
+	
+	@CreationTimestamp
+	@Column(name = "COMPANY_CREATED_ON")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonView(View.FullDetail.class)
+	private Date createdOn = new Date();
+	
+	@Column(name = "IS_COMPANY_INFORMAL")
+	@JsonView(View.FullDetail.class)
+	private boolean informalCompany = false;
 
 	@Column(name = "IS_COMPANY_EMAIL_VERIFIED")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private boolean isEmailVerified = false;
-
+	@JsonView(View.FullDetail.class)
+	private boolean emailVerified = false;
+	
 	@Column(name = "IS_COMPANY_PHONE_VERIFIED")
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private boolean isPhoneVerified = false;
-
+	@JsonView(View.FullDetail.class)
+	private boolean phoneVerified = false;
+	
 }
