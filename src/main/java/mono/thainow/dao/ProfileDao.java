@@ -22,5 +22,9 @@ public interface ProfileDao {
 	UserProfile getValidUserProfile(User user);
 
 	List<CompanyProfile> getValidCompanyProfiles(User account);
+	
+	void deleteProfile(Long profileId);
+
+	Profile getProfile(Long profileId);
 
 }

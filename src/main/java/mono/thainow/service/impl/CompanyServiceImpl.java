@@ -220,14 +220,12 @@ public class CompanyServiceImpl implements CompanyService {
 		return null;
 	}
 
-	
 	@Override
 	public void remove(Company company) {
 		company.setStatus(CompanyStatus.REJECTED);
 		saveCompany(company);
 	}
 
-	
 	@Override
 	public Company getCompanyFromUpdateInfoRequest(Company company,
 			@Valid CompanyUpdateInfoRequest companyUpdateInfoRequest) {

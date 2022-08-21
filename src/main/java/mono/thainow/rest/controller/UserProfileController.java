@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthorizedAccess;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.storage.Storage;
@@ -107,7 +108,7 @@ public class UserProfileController {
 	}
 
 	@DeleteMapping
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthorizedAccess
 	public void removeUserProfile(@PathVariable Long profileId) {
 
@@ -141,4 +142,29 @@ public class UserProfileController {
 		return picture;
 	}
 
+	@PatchMapping("/activate")
+	@ResponseStatus(HttpStatus.OK)
+	@AdminAndSAdminAccess
+	public UserProfile activateCompanyProfile(@PathVariable Long profileId) {
+
+		UserProfile profile = (UserProfile) profileService.getProfile(profileId);
+
+		profile = profileService.activateProfile(profile);
+
+		return profile;
+
+	}
+
+	@PatchMapping("/block")
+	@ResponseStatus(HttpStatus.OK)
+	@AdminAndSAdminAccess
+	public UserProfile blockCompanyProfule(@PathVariable Long profileId) {
+
+		UserProfile profile = (UserProfile) profileService.getProfile(profileId);
+
+		profile = profileService.blockProfile(profile);
+
+		return profile;
+
+	}
 }

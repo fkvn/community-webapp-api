@@ -72,16 +72,26 @@ public class ProfileDaoImpl implements ProfileDao {
 	public CompanyProfile getValidCompanyProfile(Long profileId) {
 
 		return entityManager
-				.createQuery("from CompanyProfile where id = :id and profile_type =: type and company.status = :status",
-						CompanyProfile.class)
-				.setParameter("id", profileId).setParameter("type", "COMPANY_PROFILE")
-				.setParameter("status", CompanyStatus.REGISTERED).getSingleResult();
+				.createQuery("from CompanyProfile where id = :id and company.status = :status", CompanyProfile.class)
+				.setParameter("id", profileId).setParameter("status", CompanyStatus.PENDING).getSingleResult();
+	}
+
+	@Override
+	public Profile getProfile(Long profileId) {
+		return entityManager.find(Profile.class, profileId);
 	}
 
 	@Override
 	@Transactional
 	public Profile saveProfile(Profile profile) {
 		return entityManager.merge(profile);
+	}
+
+	@Override
+	@Transactional
+	public void deleteProfile(Long profileId) {
+		Profile profile = entityManager.find(Profile.class, profileId);
+		entityManager.remove(profile);
 	}
 
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthorizedAccess;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.profile.CompanyProfile;
@@ -128,13 +129,13 @@ public class CompanyProfileController {
 	}
 
 	@DeleteMapping("/{profileId}")
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthorizedAccess
 	public void removeCompanyProfile(@PathVariable Long profileId) {
 
 		CompanyProfile profile = getValidCompanyProfile(profileId, true);
 
-//		disable company
+//		disable company profile 
 		profileService.removeProfile(profile);
 
 //		if no company profiles relates to the account
@@ -149,7 +150,7 @@ public class CompanyProfileController {
 	@PostMapping("/{profileId}/picture")
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthorizedAccess
-	public Storage uploadProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
+	public Storage uploadCompanyProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
 
 //		get profile
 		CompanyProfile profile = getValidCompanyProfile(profileId, true);
@@ -165,5 +166,30 @@ public class CompanyProfileController {
 
 		return logo;
 	}
+	
+	@PatchMapping("/{profileId}/activate")
+	@ResponseStatus(HttpStatus.OK)
+	@AdminAndSAdminAccess
+	public CompanyProfile activateCompanyProfile(@PathVariable Long profileId) {
+		
+		CompanyProfile profile = (CompanyProfile) profileService.getProfile(profileId);
+		
+		profile = profileService.activateProfile(profile);
+		
+		return profile;
+		
+	}
 
+	@PatchMapping("/{profileId}/block")
+	@ResponseStatus(HttpStatus.OK)
+	@AdminAndSAdminAccess
+	public CompanyProfile blockCompanyProfile(@PathVariable Long profileId) {
+		
+		CompanyProfile profile = (CompanyProfile) profileService.getProfile(profileId);
+		
+		profile = profileService.blockProfile(profile);
+		
+		return profile;
+		
+	}
 }

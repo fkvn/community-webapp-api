@@ -8,10 +8,12 @@ import org.springframework.util.Assert;
 
 import mono.thainow.dao.ProfileDao;
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserStatus;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.UserService;
@@ -58,10 +60,10 @@ public class ProfileServiceImpl implements ProfileService {
 	@Override
 	public void removeProfile(UserProfile profile) {
 
-//		disable account
+//		remove account
 		userService.remove(profile.getAccount());
 
-//		disable profiles
+//		remove / delete company profiles
 		List<CompanyProfile> profiles = getValidCompanyProfiles(profile.getAccount());
 
 		profiles.forEach(prof -> {
@@ -69,6 +71,9 @@ public class ProfileServiceImpl implements ProfileService {
 //			disable profile
 			removeProfile(prof);
 		});
+
+//		delete user profile
+		profileDao.deleteProfile(profile.getId());
 	}
 
 	@Override
@@ -77,12 +82,17 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
+	public Profile getProfile(Long profileId) {
+		return profileDao.getProfile(profileId);
+	}
+
+	@Override
 	public Profile saveProfile(Profile profile) {
 		return profileDao.saveProfile(profile);
 	}
 
 	@Override
-	public Profile createProfile(User user) {
+	public UserProfile createProfile(User user) {
 
 		try {
 			profileDao.getValidUserProfile(user);
@@ -97,12 +107,12 @@ public class ProfileServiceImpl implements ProfileService {
 //			create a account profile with new user
 			UserProfile profile = new UserProfile(user);
 
-			return saveProfile(profile);
+			return (UserProfile) saveProfile(profile);
 		}
 	}
 
 	@Override
-	public Profile createProfile(User owner, Company company) {
+	public CompanyProfile createProfile(User owner, Company company) {
 
 //		profile limitation
 		List<CompanyProfile> profiles = getValidCompanyProfiles(owner);
@@ -111,12 +121,58 @@ public class ProfileServiceImpl implements ProfileService {
 //		create a business profile with new company
 		CompanyProfile profile = new CompanyProfile(owner, company);
 
-		return saveProfile(profile);
+		return (CompanyProfile) saveProfile(profile);
 	}
 
 	@Override
 	public void removeProfile(CompanyProfile companyProfile) {
+
+//		remove company
 		companyService.remove(companyProfile.getCompany());
+
+//		delete profile (hard delete)
+		profileDao.deleteProfile(companyProfile.getId());
+	}
+
+	@Override
+	public CompanyProfile blockProfile(CompanyProfile profile) {
+
+//		block company
+		profile.getCompany().setStatus(CompanyStatus.DEACTIVATED);
+		companyService.saveCompany(profile.getCompany());
+
+		return profile;
+	}
+
+	@Override
+	public UserProfile blockProfile(UserProfile profile) {
+
+//		block user
+		profile.getAccount().setStatus(UserStatus.DEACTIVATED);
+		userService.saveUser(profile.getAccount());
+
+		return profile;
+
+	}
+
+	@Override
+	public CompanyProfile activateProfile(CompanyProfile profile) {
+
+//		activate company
+		profile.getCompany().setStatus(CompanyStatus.REGISTERED);
+		companyService.saveCompany(profile.getCompany());
+
+		return profile;
+	}
+
+	@Override
+	public UserProfile activateProfile(UserProfile profile) {
+
+//		activate user
+		profile.getAccount().setStatus(UserStatus.ACTIVATED);
+		userService.saveUser(profile.getAccount());
+
+		return profile;
 	}
 
 }
