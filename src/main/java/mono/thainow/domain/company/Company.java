@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
@@ -47,6 +48,7 @@ import mono.thainow.view.View;
 @Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = false) })
 @Indexed
 @JsonView(View.Basic.class)
+@Audited( withModifiedFlag = true )
 public class Company implements Serializable {
 
 	/**

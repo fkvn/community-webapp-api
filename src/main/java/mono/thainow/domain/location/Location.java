@@ -19,6 +19,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.Transient;
 import org.springframework.util.Assert;
 
@@ -47,6 +48,7 @@ import mono.thainow.view.View;
 		@Index(name = "location_lat_UNIQUE", columnList = "LOCATION_LAT", unique = true),
 		@Index(name = "location_lng_UNIQUE", columnList = "LOCATION_LNG", unique = true) })
 @JsonView(View.Basic.class)
+@Audited( withModifiedFlag = true )
 public class Location implements Serializable {
 	/**
 	* 

@@ -10,6 +10,7 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -27,6 +28,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @Entity
+@Audited( withModifiedFlag = true )
 public class Storage implements Serializable {/**
 	 * 
 	 */
