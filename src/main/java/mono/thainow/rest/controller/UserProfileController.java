@@ -155,7 +155,7 @@ public class UserProfileController {
 
 	}
 
-	@PatchMapping("/block")
+	@PatchMapping("/disable")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
 	public UserProfile blockCompanyProfule(@PathVariable Long profileId) {

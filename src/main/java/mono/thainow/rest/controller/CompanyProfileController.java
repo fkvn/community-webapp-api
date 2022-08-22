@@ -180,7 +180,7 @@ public class CompanyProfileController {
 		
 	}
 
-	@PatchMapping("/{profileId}/block")
+	@PatchMapping("/{profileId}/disable")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
 	public CompanyProfile blockCompanyProfile(@PathVariable Long profileId) {
