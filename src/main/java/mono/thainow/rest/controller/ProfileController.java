@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import mono.thainow.annotation.AuthorizedAccess;
+import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.UserService;
@@ -30,10 +30,10 @@ public class ProfileController {
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@AuthorizedAccess
+	@AuthenticatedAccess
 	@JsonView(View.Basic.class)
 	public List<Profile> getProfiles() {
-		return profileService.getProfiles(userService.getByUserId(AuthUtil.getAuthorizedUser().getId()));
+		return profileService.getProfiles(userService.getByUserId(AuthUtil.getAuthenticatedUser().getId()));
 	}
 
 }

@@ -9,7 +9,7 @@ import mono.thainow.util.AuthUtil;
 public class MyRevisionListener implements RevisionListener {
 
 	private UserDetailsImpl getUser() {
-		return  AuthUtil.getAuthorizedUser();
+		return  AuthUtil.getAuthenticatedUser();
 	}
 
 	@Override

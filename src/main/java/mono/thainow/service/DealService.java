@@ -12,4 +12,6 @@ public interface DealService {
 	Deal saveDeal(Deal deal);
 
 	Deal getDealFromUpdateRequest(Deal deal, DealRequest request);
+
+	void remove(Deal deal);
 }

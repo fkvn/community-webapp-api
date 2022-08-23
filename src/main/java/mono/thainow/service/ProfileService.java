@@ -22,7 +22,7 @@ public interface ProfileService {
 
 	void removeProfile(CompanyProfile companyProfile);
 
-	void removeProfile(UserProfile profile);
+	void removeProfile(UserProfile profile, boolean removeAccount);
 
 	UserProfile getValidUserProfile(Long profileId);
 
@@ -32,9 +32,9 @@ public interface ProfileService {
 
 	CompanyProfile activateProfile(CompanyProfile profile);
 	
-	CompanyProfile blockProfile(CompanyProfile profile);
+	CompanyProfile disableProfile(CompanyProfile profile);
 
-	UserProfile blockProfile(UserProfile profile);
+	UserProfile disableProfile(UserProfile profile);
 
 	Profile getProfile(Long profileId);
 

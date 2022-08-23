@@ -140,9 +140,14 @@ public class DealServiceImpl implements DealService {
 			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Post Status");
 			deal.setStatus(status);
 		}
-		
 
 		return deal;
+	}
+
+	@Override
+	public void remove(Deal deal) {
+		deal.setStatus(PostStatus.DELETED);
+		saveDeal(deal);
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.EqualsAndHashCode;
@@ -65,6 +67,12 @@ public abstract class Post implements Serializable {
 
 		return basicOwnerInfo;
 	};
+
+	@Transient
+	@JsonProperty("type")
+	public String getType() {
+		return this.getClass().getAnnotation(DiscriminatorValue.class).value();
+	}
 
 	public abstract String getTitle();
 

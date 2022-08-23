@@ -9,12 +9,14 @@ import org.springframework.util.Assert;
 import mono.thainow.dao.ProfileDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
+import mono.thainow.domain.post.Post;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.service.CompanyService;
+import mono.thainow.service.PostService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.UserService;
 
@@ -29,6 +31,9 @@ public class ProfileServiceImpl implements ProfileService {
 
 	@Autowired
 	private CompanyService companyService;
+
+	@Autowired
+	private PostService postService;
 
 //	==================================================
 
@@ -58,19 +63,24 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public void removeProfile(UserProfile profile) {
+	public void removeProfile(UserProfile profile, boolean removeAccount) {
 
 //		remove account
 		userService.remove(profile.getAccount());
-
-//		remove / delete company profiles
-		List<CompanyProfile> profiles = getValidCompanyProfiles(profile.getAccount());
-
-		profiles.forEach(prof -> {
-
-//			disable profile
-			removeProfile(prof);
-		});
+		
+//		remove related post
+		List<Post> posts = postService.getPosts(profile);
+		postService.removePost(posts);
+		
+		if (removeAccount) {
+	//		remove / delete company profiles
+			List<CompanyProfile> profiles = getValidCompanyProfiles(profile.getAccount());
+	
+			profiles.forEach(prof -> {
+	//			disable profile
+				removeProfile(prof);
+			});
+		}
 
 //		delete user profile
 		profileDao.deleteProfile(profile.getId());
@@ -130,12 +140,16 @@ public class ProfileServiceImpl implements ProfileService {
 //		remove company
 		companyService.remove(companyProfile.getCompany());
 
+//		remove related post
+		List<Post> posts = postService.getPosts(companyProfile);
+		postService.removePost(posts);
+
 //		delete profile (hard delete)
 		profileDao.deleteProfile(companyProfile.getId());
 	}
 
 	@Override
-	public CompanyProfile blockProfile(CompanyProfile profile) {
+	public CompanyProfile disableProfile(CompanyProfile profile) {
 
 //		block company
 		profile.getCompany().setStatus(CompanyStatus.DISABLED);
@@ -145,7 +159,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public UserProfile blockProfile(UserProfile profile) {
+	public UserProfile disableProfile(UserProfile profile) {
 
 //		block user
 		profile.getAccount().setStatus(UserStatus.DISABLED);

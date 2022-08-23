@@ -11,23 +11,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.annotation.AdminAndSAdminAccess;
-import mono.thainow.annotation.AuthorizedAccess;
+import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
-import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.request.UserRequest;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
-import mono.thainow.service.impl.UserDetailsImpl;
 import mono.thainow.util.AuthUtil;
 import mono.thainow.view.View;
 
@@ -45,31 +44,15 @@ public class UserProfileController {
 	@Autowired
 	private StorageService storageService;
 
-//	validate access and return profile
-	private UserProfile getValidUserProfile(Long profileId, boolean authorizedOnly) {
-
-		UserProfile profile = profileService.getValidUserProfile(profileId);
-
-		if (authorizedOnly) {
-			UserDetailsImpl userDetails = AuthUtil.getAuthorizedUser();
-
-			if (!profile.getAccount().getId().equals(userDetails.getId())) {
-				throw new AccessForbidden();
-			}
-		}
-
-		return profile;
-	}
-
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
 	public UserProfile getUserProfile(@PathVariable Long profileId) {
 
-		UserProfile profile = getValidUserProfile(profileId, false);
+		UserProfile profile = profileService.getValidUserProfile(profileId);
 
 //		anonymousUser -> public request
-		if (AuthUtil.getAuthorizedUser() == null) {
+		if (AuthUtil.getAuthenticatedUser() == null) {
 
 			User user = profile.getAccount();
 
@@ -92,11 +75,12 @@ public class UserProfileController {
 	@PatchMapping
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@JsonView(View.Basic.class)
-	@AuthorizedAccess
+	@AuthenticatedAccess
 	public void updateUserProfile(@PathVariable Long profileId, @Valid @RequestBody UserRequest request) {
-//		Map<String, Object> res = new HashMap<>();
 
-		UserProfile profile = getValidUserProfile(profileId, true);
+		UserProfile profile = profileService.getValidUserProfile(profileId);
+
+		AuthUtil.authorizedAccess(profile, true);
 
 //		update user
 		User account = profile.getAccount();
@@ -106,22 +90,25 @@ public class UserProfileController {
 
 	@DeleteMapping
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@AuthorizedAccess
-	public void removeUserProfile(@PathVariable Long profileId) {
+	@AuthenticatedAccess
+	public void removeUserProfile(@PathVariable Long profileId, @RequestParam(required = false) boolean removeAccount) {
 
-		UserProfile profile = getValidUserProfile(profileId, true);
+		UserProfile profile = profileService.getValidUserProfile(profileId);
 
-		profileService.removeProfile(profile);
+		AuthUtil.authorizedAccess(profile, true);
+
+		profileService.removeProfile(profile, removeAccount);
 
 	}
 
 	@PostMapping("/picture")
 	@ResponseStatus(HttpStatus.CREATED)
-	@AuthorizedAccess
-	public Storage uploadProfile(@PathVariable Long id, @Valid @RequestBody StorageRequest newPicture) {
+	@AuthenticatedAccess
+	public Storage uploadProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
 
 //		get profile
-		UserProfile profile = getValidUserProfile(id, true);
+		UserProfile profile = profileService.getValidUserProfile(profileId);
+		AuthUtil.authorizedAccess(profile, true);
 
 //		get storage
 		Storage picture = storageService.getStorageFromStorageRequest(newPicture);
@@ -152,11 +139,11 @@ public class UserProfileController {
 	@PatchMapping("/disable")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public void blockCompanyProfule(@PathVariable Long profileId) {
+	public void disableCompanyProfile(@PathVariable Long profileId) {
 
 		UserProfile profile = (UserProfile) profileService.getProfile(profileId);
 
-		profileService.blockProfile(profile);
+		profileService.disableProfile(profile);
 
 	}
 }

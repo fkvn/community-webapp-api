@@ -17,21 +17,19 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.annotation.AdminAndSAdminAccess;
-import mono.thainow.annotation.AuthorizedAccess;
+import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
-import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
-import mono.thainow.service.impl.UserDetailsImpl;
 import mono.thainow.util.AuthUtil;
 import mono.thainow.view.View;
 
@@ -51,30 +49,15 @@ public class CompanyProfileController {
 	@Autowired
 	private StorageService storageService;
 
-	private CompanyProfile getValidCompanyProfile(Long profileId, boolean authorizedOnly) {
-
-		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
-
-		if (authorizedOnly) {
-			UserDetailsImpl userDetails = AuthUtil.getAuthorizedUser();
-
-			if (!profile.getAccount().getId().equals(userDetails.getId())) {
-				throw new AccessForbidden();
-			}
-		}
-
-		return profile;
-	}
-
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	@AuthorizedAccess
+	@AuthenticatedAccess
 	@JsonView(View.Basic.class)
 	public Profile addCompanyProfile(@Valid @RequestBody CompanyRequest companyRequest) {
 
 		Company company = companyService.createCompany(companyRequest);
 
-		User account = userService.getByUserId(AuthUtil.getAuthorizedUser().getId());
+		User account = userService.getByUserId(AuthUtil.getAuthenticatedUser().getId());
 		account.setRole(UserRole.BUSINESS);
 		account = userService.saveUser(account);
 
@@ -86,10 +69,10 @@ public class CompanyProfileController {
 	@JsonView(View.Detail.class)
 	public CompanyProfile getCompanyProfile(@PathVariable Long profileId) {
 
-		CompanyProfile profile = getValidCompanyProfile(profileId, false);
+		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
 
 //		anonymousUser -> public request
-		if (AuthUtil.getAuthorizedUser() == null) {
+		if (AuthUtil.getAuthenticatedUser() == null) {
 
 			Company company = profile.getCompany();
 
@@ -113,11 +96,13 @@ public class CompanyProfileController {
 
 	@PatchMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@AuthorizedAccess
+	@AuthenticatedAccess
 	public CompanyProfile updateCompanyProfile(@PathVariable Long profileId,
 			@Valid @RequestBody CompanyRequest request) {
 
-		CompanyProfile profile = getValidCompanyProfile(profileId, true);
+		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
+		
+		AuthUtil.authorizedAccess(profile, true);
 
 //		update company
 		Company company = profile.getCompany();
@@ -129,10 +114,12 @@ public class CompanyProfileController {
 
 	@DeleteMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@AuthorizedAccess
+	@AuthenticatedAccess
 	public void removeCompanyProfile(@PathVariable Long profileId) {
 
-		CompanyProfile profile = getValidCompanyProfile(profileId, true);
+		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
+		
+		AuthUtil.authorizedAccess(profile, true);
 
 //		disable company profile 
 		profileService.removeProfile(profile);
@@ -148,11 +135,13 @@ public class CompanyProfileController {
 
 	@PostMapping("/{profileId}/picture")
 	@ResponseStatus(HttpStatus.CREATED)
-	@AuthorizedAccess
+	@AuthenticatedAccess
 	public Storage uploadCompanyProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
 
 //		get profile
-		CompanyProfile profile = getValidCompanyProfile(profileId, true);
+		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
+		
+		AuthUtil.authorizedAccess(profile, true);
 
 //		get storage
 		Storage logo = storageService.getStorageFromStorageRequest(newPicture);
@@ -165,30 +154,30 @@ public class CompanyProfileController {
 
 		return logo;
 	}
-	
+
 	@PatchMapping("/{profileId}/activate")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
 	public CompanyProfile activateCompanyProfile(@PathVariable Long profileId) {
-		
+
 		CompanyProfile profile = (CompanyProfile) profileService.getProfile(profileId);
-		
+
 		profile = profileService.activateProfile(profile);
-		
+
 		return profile;
-		
+
 	}
 
 	@PatchMapping("/{profileId}/disable")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
-	public CompanyProfile blockCompanyProfile(@PathVariable Long profileId) {
-		
+	public CompanyProfile disableCompanyProfile(@PathVariable Long profileId) {
+
 		CompanyProfile profile = (CompanyProfile) profileService.getProfile(profileId);
-		
-		profile = profileService.blockProfile(profile);
-		
+
+		profile = profileService.disableProfile(profile);
+
 		return profile;
-		
+
 	}
 }

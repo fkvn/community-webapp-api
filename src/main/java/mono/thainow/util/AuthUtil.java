@@ -2,17 +2,61 @@ package mono.thainow.util;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import mono.thainow.domain.post.Post;
+import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.user.UserRole;
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.service.impl.UserDetailsImpl;
 
 public class AuthUtil {
 
-	public static UserDetailsImpl getAuthorizedUser() {
+	public static UserDetailsImpl getAuthenticatedUser() {
 
 		if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser")) {
 			return null;
 		}
 
 		return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	}
+
+	public static boolean authorizedAccess(Profile profile, boolean throwError) {
+
+		UserDetailsImpl userDetails = getAuthenticatedUser();
+
+		boolean adminAuthorized = userDetails.getRole() != UserRole.ADMIN
+				|| userDetails.getRole() != UserRole.SUPERADMIN;
+
+		boolean validRequester = userDetails != null && profile != null
+				&& profile.getAccount().getId().equals(userDetails.getId());
+
+		boolean authorizedAccess = adminAuthorized || validRequester;
+
+		if (throwError && !authorizedAccess) {
+			throw new AccessForbidden();
+		}
+
+		return authorizedAccess;
+	}
+
+	public static boolean authorizedAccess(Profile postOwner, Post post, boolean throwError) {
+
+		UserDetailsImpl userDetails = getAuthenticatedUser();
+
+		boolean adminAuthorized = userDetails.getRole() != UserRole.ADMIN
+				|| userDetails.getRole() != UserRole.SUPERADMIN;
+
+		boolean validRequester = userDetails != null && postOwner != null
+				&& postOwner.getAccount().getId().equals(userDetails.getId());
+
+		boolean validPostOwner = validRequester && post != null && post.getOwner().getId().equals(postOwner.getId());
+
+		boolean authorizedAccess = adminAuthorized || (validRequester && validPostOwner);
+
+		if (throwError && !authorizedAccess) {
+			throw new AccessForbidden();
+		}
+
+		return authorizedAccess;
 	}
 
 }

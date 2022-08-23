@@ -12,6 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @PreAuthorize("hasAnyAuthority('ROLE_CLASSIC', 'ROLE_BUSINESS', 'ROLE_STAFF', 'ROLE_ADMIN', 'ROLE_SUPERADMIN')")
-public @interface AuthorizedAccess {
+public @interface AuthenticatedAccess {
 
 }

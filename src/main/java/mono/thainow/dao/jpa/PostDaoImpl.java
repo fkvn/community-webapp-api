@@ -14,6 +14,7 @@ import mono.thainow.dao.PostDao;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.deal.DealPost;
+import mono.thainow.domain.profile.Profile;
 import mono.thainow.repository.PostRepository;
 
 @Repository
@@ -47,7 +48,7 @@ public class PostDaoImpl implements PostDao {
 
 	@Override
 	@Transactional
-	public void removePost(long id) {
+	public void deletePost(long id) {
 		Post post = entityManager.find(Post.class, id);
 		entityManager.remove(post);
 	}
@@ -56,8 +57,14 @@ public class PostDaoImpl implements PostDao {
 	public DealPost getValidDealPost(Long postId) {
 
 		return entityManager.createQuery("from DealPost where deal.status IN (:status) and id =:id", DealPost.class)
-				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE)).setParameter("id", postId)
-				.getSingleResult();
+				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
+				.setParameter("id", postId).getSingleResult();
+	}
+
+	@Override
+	public List<Post> getPosts(Profile profile) {
+		return entityManager.createQuery("from Post where owner =: owner", Post.class).setParameter("owner", profile)
+				.getResultList();
 	}
 
 }
