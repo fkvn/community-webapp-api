@@ -1,5 +1,5 @@
 package mono.thainow.domain.profile;
 
 public enum ProfileStatus {
-	ACTIVATED, DEACTIVATED, DELETED, PENDING
+	ACTIVATED, PENDING, DISABLED, DELETED, 
 }

@@ -49,8 +49,8 @@ public class CompanyProfile extends Profile {
 			return ProfileStatus.ACTIVATED;
 		case PENDING:
 			return ProfileStatus.PENDING;
-		case DEACTIVATED:
-			return ProfileStatus.DEACTIVATED;
+		case DISABLED:
+			return ProfileStatus.DISABLED;
 		default:
 			return ProfileStatus.DELETED;
 		}

@@ -25,8 +25,7 @@ import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.exception.AccessForbidden;
-import mono.thainow.rest.request.CompanySignupRequest;
-import mono.thainow.rest.request.CompanyUpdateInfoRequest;
+import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.ProfileService;
@@ -70,8 +69,8 @@ public class CompanyProfileController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthorizedAccess
-	@JsonView(View.Detail.class)
-	public Profile addCompanyProfile(@Valid @RequestBody CompanySignupRequest companyRequest) {
+	@JsonView(View.Basic.class)
+	public Profile addCompanyProfile(@Valid @RequestBody CompanyRequest companyRequest) {
 
 		Company company = companyService.createCompany(companyRequest);
 
@@ -116,13 +115,13 @@ public class CompanyProfileController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@AuthorizedAccess
 	public CompanyProfile updateCompanyProfile(@PathVariable Long profileId,
-			@Valid @RequestBody CompanyUpdateInfoRequest companyUpdateInfoRequest) {
+			@Valid @RequestBody CompanyRequest request) {
 
 		CompanyProfile profile = getValidCompanyProfile(profileId, true);
 
 //		update company
 		Company company = profile.getCompany();
-		company = companyService.getCompanyFromUpdateInfoRequest(company, companyUpdateInfoRequest);
+		company = companyService.getCompanyFromUpdateRequest(company, request);
 		company = companyService.saveCompany(company);
 
 		return profile;

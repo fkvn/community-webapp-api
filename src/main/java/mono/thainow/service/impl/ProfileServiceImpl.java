@@ -138,7 +138,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public CompanyProfile blockProfile(CompanyProfile profile) {
 
 //		block company
-		profile.getCompany().setStatus(CompanyStatus.DEACTIVATED);
+		profile.getCompany().setStatus(CompanyStatus.DISABLED);
 		companyService.saveCompany(profile.getCompany());
 
 		return profile;
@@ -148,7 +148,7 @@ public class ProfileServiceImpl implements ProfileService {
 	public UserProfile blockProfile(UserProfile profile) {
 
 //		block user
-		profile.getAccount().setStatus(UserStatus.DEACTIVATED);
+		profile.getAccount().setStatus(UserStatus.DISABLED);
 		userService.saveUser(profile.getAccount());
 
 		return profile;

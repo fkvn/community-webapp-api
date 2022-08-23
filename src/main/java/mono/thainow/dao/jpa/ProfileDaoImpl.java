@@ -73,7 +73,7 @@ public class ProfileDaoImpl implements ProfileDao {
 
 		return entityManager
 				.createQuery("from CompanyProfile where id = :id and company.status = :status", CompanyProfile.class)
-				.setParameter("id", profileId).setParameter("status", CompanyStatus.PENDING).getSingleResult();
+				.setParameter("id", profileId).setParameter("status", CompanyStatus.REGISTERED).getSingleResult();
 	}
 
 	@Override

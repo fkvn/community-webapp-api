@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.domain.company.Company;
-import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.rest.request.CompanySignupRequest;
-import mono.thainow.rest.request.CompanyUpdateInfoRequest;
+import mono.thainow.rest.request.CompanyRequest;
 
 public interface CompanyService {
 
@@ -19,11 +17,9 @@ public interface CompanyService {
 	
 	Company getCompanyById(Long id);
 	
-	Company updateCompanyStatus(Company company, CompanyStatus newStatus);
+	Company getCompanyFromRequest(CompanyRequest companyRequest);
 	
-	Company getCompanyFromRequest(CompanySignupRequest companyRequest);
-	
-	Company createCompany(CompanySignupRequest companyRequest);
+	Company createCompany(CompanyRequest companyRequest);
 	
 	Storage uploadLogoPicture(Company company, @RequestParam("file") MultipartFile file);
 	
@@ -37,5 +33,5 @@ public interface CompanyService {
 
 	void remove(Company company);
 
-	Company getCompanyFromUpdateInfoRequest(Company company, @Valid CompanyUpdateInfoRequest companyUpdateInfoRequest);
+	Company getCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request);
 }

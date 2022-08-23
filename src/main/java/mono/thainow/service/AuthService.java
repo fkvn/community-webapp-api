@@ -1,14 +1,10 @@
 package mono.thainow.service;
 
-import mono.thainow.rest.request.AppleSigninRequest;
-import mono.thainow.rest.request.AppleSignupRequest;
-import mono.thainow.rest.request.FacebookSigninRequest;
-import mono.thainow.rest.request.FacebookSignupRequest;
-import mono.thainow.rest.request.GoogleSigninRequest;
-import mono.thainow.rest.request.GoogleSignupRequest;
+import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.FacebookRequest;
+import mono.thainow.rest.request.GoogleRequest;
 import mono.thainow.rest.request.TokenRequest;
-import mono.thainow.rest.request.UserSigninRequest;
-import mono.thainow.rest.request.UserSignupRequest;
+import mono.thainow.rest.request.UserRequest;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.TokenResponse;
 
@@ -18,21 +14,15 @@ public interface AuthService {
 	
 	void checkVerificationToken(TokenResponse tokenResponse);
 	
-	Long signupWithThaiNow(UserSignupRequest signUpRequest);
+	Long signupWithThaiNow(UserRequest signUpRequest);
 	
-	JwtResponse signinWithThaiNow(UserSigninRequest userSigninRequest);
+	JwtResponse signinWithThaiNow(UserRequest request);
 	
-	JwtResponse signupWithGoogle(GoogleSignupRequest googleSignupRequest);
+	JwtResponse accessWithGoogle(GoogleRequest request);
 	
-	JwtResponse signinWithGoogle(GoogleSigninRequest googleSigninRequest);
+	JwtResponse accessWithApple(AppleRequest request);
 	
-	JwtResponse signupWithApple(AppleSignupRequest appleSignupRequest);
-	
-	JwtResponse signinWithApple(AppleSigninRequest appleSigninRequest);
-	
-	JwtResponse signupWithFacebook(FacebookSignupRequest facebookSignupRequest);
-	
-	JwtResponse signinWithFacebook(FacebookSigninRequest facebookSigninRequest);
+	JwtResponse accessWithFacebook(FacebookRequest request);
 	
 	JwtResponse signedJWTAuth(String username, String password);
 

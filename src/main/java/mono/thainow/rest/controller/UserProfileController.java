@@ -23,7 +23,7 @@ import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.rest.request.UserUpdateInfoRequest;
+import mono.thainow.rest.request.UserRequest;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
@@ -90,21 +90,18 @@ public class UserProfileController {
 	}
 
 	@PatchMapping
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@JsonView(View.Detail.class)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@JsonView(View.Basic.class)
 	@AuthorizedAccess
-	public UserProfile updateUserProfile(@PathVariable Long profileId,
-			@Valid @RequestBody UserUpdateInfoRequest userUpdateInfoRequest) {
+	public void updateUserProfile(@PathVariable Long profileId, @Valid @RequestBody UserRequest request) {
 //		Map<String, Object> res = new HashMap<>();
 
 		UserProfile profile = getValidUserProfile(profileId, true);
 
 //		update user
 		User account = profile.getAccount();
-		account = userService.getUserFromUpdateInfoRequest(account, userUpdateInfoRequest);
+		account = userService.getUserFromUpdateRequest(account, request);
 		account = userService.saveUser(account);
-
-		return profile;
 	}
 
 	@DeleteMapping
@@ -143,28 +140,23 @@ public class UserProfileController {
 	}
 
 	@PatchMapping("/activate")
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public UserProfile activateCompanyProfile(@PathVariable Long profileId) {
+	public void activateCompanyProfile(@PathVariable Long profileId) {
 
 		UserProfile profile = (UserProfile) profileService.getProfile(profileId);
 
-		profile = profileService.activateProfile(profile);
-
-		return profile;
-
+		profileService.activateProfile(profile);
 	}
 
 	@PatchMapping("/disable")
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public UserProfile blockCompanyProfule(@PathVariable Long profileId) {
+	public void blockCompanyProfule(@PathVariable Long profileId) {
 
 		UserProfile profile = (UserProfile) profileService.getProfile(profileId);
 
-		profile = profileService.blockProfile(profile);
-
-		return profile;
+		profileService.blockProfile(profile);
 
 	}
 }

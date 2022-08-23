@@ -28,6 +28,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.EqualsAndHashCode;
@@ -60,6 +61,7 @@ public class Company implements Serializable {
 
 	@Id
 	@GeneratedValue
+	@JsonIgnore
 	private Long id;
 
 	@NotEmpty

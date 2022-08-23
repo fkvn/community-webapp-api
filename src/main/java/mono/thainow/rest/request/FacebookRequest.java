@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FacebookSignupRequest {
+public class FacebookRequest {
 
 	private String id;
 

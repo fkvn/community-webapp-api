@@ -3,11 +3,10 @@ package mono.thainow.service;
 import java.util.List;
 
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.AppleSignupRequest;
-import mono.thainow.rest.request.FacebookSignupRequest;
-import mono.thainow.rest.request.GoogleSignupRequest;
-import mono.thainow.rest.request.UserSignupRequest;
-import mono.thainow.rest.request.UserUpdateInfoRequest;
+import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.FacebookRequest;
+import mono.thainow.rest.request.GoogleRequest;
+import mono.thainow.rest.request.UserRequest;
 
 public interface UserService {
 
@@ -29,19 +28,19 @@ public interface UserService {
 
 	String encodePassword(String password, boolean validate);
 
-	User getUserFromSignupRequest(UserSignupRequest signUpRequest);
+	User getUserFromSignupRequest(UserRequest signUpRequest);
 
-	User getUserFromGoogleSignupRequest(GoogleSignupRequest googleSignupRequest);
+	User getUserFromGoogleRequest(GoogleRequest request);
 	
-	User getUserFromAppleSignupRequest(AppleSignupRequest appleSignupRequest);
+	User getUserFromAppleRequest(AppleRequest appleSignupRequest);
 
 	User saveUser(User user);
 
-	User getUserFromFacebookSignupRequest(FacebookSignupRequest facebookSignupRequest);
+	User getUserFromFacebookSignupRequest(FacebookRequest facebookSignupRequest);
 
 	void remove(User account);
 
-	User getUserFromUpdateInfoRequest(User user, UserUpdateInfoRequest userUpdateInfoRequest);
+	User getUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
 
 	
 

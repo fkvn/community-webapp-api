@@ -16,15 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import mono.thainow.rest.request.AppleSigninRequest;
-import mono.thainow.rest.request.AppleSignupRequest;
-import mono.thainow.rest.request.FacebookSigninRequest;
-import mono.thainow.rest.request.FacebookSignupRequest;
-import mono.thainow.rest.request.GoogleSigninRequest;
-import mono.thainow.rest.request.GoogleSignupRequest;
+import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.FacebookRequest;
+import mono.thainow.rest.request.GoogleRequest;
 import mono.thainow.rest.request.TokenRequest;
-import mono.thainow.rest.request.UserSigninRequest;
-import mono.thainow.rest.request.UserSignupRequest;
+import mono.thainow.rest.request.UserRequest;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.MessageResponse;
 import mono.thainow.rest.response.TokenResponse;
@@ -64,65 +60,49 @@ public class AuthController {
 	}
 	
 
-	@PostMapping("/users/signin")
+	@PostMapping("/thainow/signin")
 	@JsonView(View.Basic.class)
-	public JwtResponse signinUser(@Valid @RequestBody UserSigninRequest signinRequest) {
-		return authService.signinWithThaiNow(signinRequest);
+	public JwtResponse signinUser(@Valid @RequestBody UserRequest request) {
+		return authService.signinWithThaiNow(request);
 	}
 
-	@PostMapping("/users/signup")
-	public Long signupUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
-		Long userId = authService.signupWithThaiNow(signUpRequest);
+	@PostMapping("/thainow/signup")
+	public Long signupUser(@Valid @RequestBody UserRequest request) {
+		Long userId = authService.signupWithThaiNow(request);
 		return userId;
 	}
+
 	
-	@PostMapping("/google/signin")
+	@PostMapping("/google/access")
 	@JsonView(View.Basic.class)
-	public JwtResponse signinGoogleUser(@Valid @RequestBody GoogleSigninRequest signinRequest) {
-		return authService.signinWithGoogle(signinRequest);
+	public JwtResponse accessWithGoogle(@Valid @RequestBody GoogleRequest request) {
+		return authService.accessWithGoogle(request);
 	}
 	
-	@PostMapping("/google/signup")
+	@PostMapping("/apple/access")
 	@JsonView(View.Basic.class)
-	public JwtResponse signupGoogleUser(@Valid @RequestBody GoogleSignupRequest signupRequest) {
-		return authService.signupWithGoogle(signupRequest);
+	public JwtResponse accessWithApple(@Valid @RequestBody AppleRequest signupRequest) {
+		return authService.accessWithApple(signupRequest);
 	}
 	
-	@PostMapping("/apple/signin")
+
+	@PostMapping("/facebook/access")
 	@JsonView(View.Basic.class)
-	public JwtResponse signinAppleUser(@Valid @RequestBody AppleSigninRequest signinRequest) {
-		return authService.signinWithApple(signinRequest);
-	}
-	
-	@PostMapping("/apple/signup")
-	@JsonView(View.Basic.class)
-	public JwtResponse signupAppleUser(@Valid @RequestBody AppleSignupRequest signupRequest) {
-		return authService.signupWithApple(signupRequest);
-	}
-	
-	@PostMapping("/facebook/signin")
-	@JsonView(View.Basic.class)
-	public JwtResponse signinFacebookUser(@Valid @RequestBody FacebookSigninRequest signinRequest) {
-		return authService.signinWithFacebook(signinRequest);
-	}
-	
-	@PostMapping("/facebook/signup")
-	@JsonView(View.Basic.class)
-	public JwtResponse signupFacebookUser(@Valid @RequestBody FacebookSignupRequest signupRequest) {
-		return authService.signupWithFacebook(signupRequest);
+	public JwtResponse accessWithFacebook(@Valid @RequestBody FacebookRequest request) {
+		return authService.accessWithFacebook(request);
 	}
 
-	@PostMapping("/users/username/unique")
+	@PostMapping("/thainow/username/unique")
 	public Map<String, Boolean> isUsernameUnique(@RequestParam String username) {
 		return Collections.singletonMap("unique", userService.isUsernameUnique(username));
 	}
 
-	@PostMapping("/users/phone/unique")
+	@PostMapping("/thainow/phone/unique")
 	public Map<String, Boolean> isPhoneUnique(@RequestParam String phone) {
 		return Collections.singletonMap("unique", userService.isPhoneUnique(phone));
 	}
 
-	@PostMapping("/users/email/unique")
+	@PostMapping("/thainow/email/unique")
 	public Map<String, Boolean> validateUserEmail(@RequestParam String email) {
 		return Collections.singletonMap("unique", userService.isEmailUnique(email));
 	}

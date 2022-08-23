@@ -37,8 +37,8 @@ public class UserProfile extends Profile {
 		switch (this.getAccount().getStatus()) {
 		case ACTIVATED:
 			return ProfileStatus.ACTIVATED;
-		case DEACTIVATED:
-			return ProfileStatus.DEACTIVATED;
+		case DISABLED:
+			return ProfileStatus.DISABLED;
 		default:
 			return ProfileStatus.DELETED;
 		}

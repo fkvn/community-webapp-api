@@ -17,12 +17,11 @@ import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
-import mono.thainow.rest.request.AppleSignupRequest;
-import mono.thainow.rest.request.FacebookSignupRequest;
-import mono.thainow.rest.request.GoogleSignupRequest;
+import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.FacebookRequest;
+import mono.thainow.rest.request.GoogleRequest;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.rest.request.UserSignupRequest;
-import mono.thainow.rest.request.UserUpdateInfoRequest;
+import mono.thainow.rest.request.UserRequest;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
@@ -104,11 +103,11 @@ public class UserServiceImpl implements UserService {
 //	}
 
 	@Override
-	public User getUserFromSignupRequest(UserSignupRequest signupRequest) {
+	public User getUserFromSignupRequest(UserRequest request) {
 
 //		signup credential 
-		String email = Optional.ofNullable(signupRequest.getEmail()).orElse("").trim();
-		String phone = Optional.ofNullable(signupRequest.getPhone()).orElse("").trim();
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+		String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
 
 		Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
 				"Users must have at least email or phone number to register!");
@@ -130,20 +129,20 @@ public class UserServiceImpl implements UserService {
 		user.setPhone(phone);
 
 //		email Verified
-		boolean isEmailVerified = Optional.ofNullable(signupRequest.isEmailVerified()).orElse(false);
+		Boolean isEmailVerified = Optional.ofNullable(request.getIsEmailVerified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
 
 //		phone Verified
-		boolean isPhoneVerified = Optional.ofNullable(signupRequest.isPhoneVerified()).orElse(false);
+		Boolean isPhoneVerified = Optional.ofNullable(request.getIsPhoneVerified()).orElse(false);
 		user.setPhoneVerified(isPhoneVerified);
 
 //		set username
-		String username = Optional.ofNullable(signupRequest.getUsername()).orElse("").trim();
+		String username = Optional.ofNullable(request.getUsername()).orElse("").trim();
 		Assert.isTrue(!username.isEmpty(), "Preferred Name can't be empty!");
 		user.setUsername(username);
 
 //		set password 
-		String password = Optional.ofNullable(signupRequest.getPassword()).orElse("").trim();
+		String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
 		user.setPassword(encodePassword(password, true));
 
 //		user profile
@@ -158,36 +157,36 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromGoogleSignupRequest(GoogleSignupRequest googleSignupRequest) {
+	public User getUserFromGoogleRequest(GoogleRequest request) {
 
 		User user = new User();
 
-		String password = Optional.ofNullable(googleSignupRequest.getSub().trim()).orElse("");
+		String password = Optional.ofNullable(request.getSub().trim()).orElse("");
 		user.setPassword(encodePassword(password, false));
 
 //		user email
-		String email = Optional.ofNullable(googleSignupRequest.getEmail().trim()).orElse("");
+		String email = Optional.ofNullable(request.getEmail().trim()).orElse("");
 		Assert.isTrue(!email.isEmpty(), "Invalid Email Address!");
 		user.setEmail(email);
 
 //		firstname
-		String firstname = Optional.ofNullable(googleSignupRequest.getGiven_name()).orElse("").trim();
+		String firstname = Optional.ofNullable(request.getGiven_name()).orElse("").trim();
 		user.setFirstName(firstname);
 
 //		lastname
-		String lastname = Optional.ofNullable(googleSignupRequest.getFamily_name()).orElse("").trim();
+		String lastname = Optional.ofNullable(request.getFamily_name()).orElse("").trim();
 		user.setLastName(lastname);
 
 //		username
-		String username = Optional.ofNullable(googleSignupRequest.getName()).orElse("").trim();
+		String username = Optional.ofNullable(request.getName()).orElse("").trim();
 		user.setUsername(username);
 
 //		if email verified
-		boolean isEmailVerified = Optional.ofNullable(googleSignupRequest.isEmail_verified()).orElse(false);
+		boolean isEmailVerified = Optional.ofNullable(request.isEmail_verified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
 
 //		user profile
-		String pictureUrl = Optional.ofNullable(googleSignupRequest.getPicture()).orElse("").trim();
+		String pictureUrl = Optional.ofNullable(request.getPicture()).orElse("").trim();
 		Storage picture = null;
 
 		if (pictureUrl.equals("")) {
@@ -214,7 +213,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromAppleSignupRequest(AppleSignupRequest appleSignupRequest) {
+	public User getUserFromAppleRequest(AppleRequest appleSignupRequest) {
 		User user = new User();
 
 		String password = Optional.ofNullable(appleSignupRequest.getSub().trim()).orElse("");
@@ -248,7 +247,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromFacebookSignupRequest(FacebookSignupRequest facebookSignupRequest) {
+	public User getUserFromFacebookSignupRequest(FacebookRequest facebookSignupRequest) {
 
 		User user = new User();
 
@@ -334,7 +333,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromUpdateInfoRequest(User user, UserUpdateInfoRequest userUpdateInfoRequest) {
+	public User getUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest) {
 
 //		username
 		String username = Optional.ofNullable(userUpdateInfoRequest.getUsername()).orElse(null);

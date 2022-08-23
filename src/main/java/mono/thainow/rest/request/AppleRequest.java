@@ -5,10 +5,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GoogleSigninRequest {
-	
+public class AppleRequest {
+
 	private String sub;
-	
+
 	private String email;
+
+	private boolean email_verified = false;
+	
+	private String name;
 
 }

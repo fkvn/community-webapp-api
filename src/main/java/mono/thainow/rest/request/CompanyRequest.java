@@ -7,11 +7,29 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CompanyUpdateInfoRequest {
-
+public class CompanyRequest {
+	
+//	private String name;
+//
+//	private String industry;
+//
+//	private String email;
+//
+//	private String phone;
+//
+//	private boolean isInformal = false;
+//
+//	private String website;
+//
+//	private String address;
+//
+//	private String placeid;
+	
 	private String name;
 	
 	private String industry;
+	
+	private boolean isInformal = false;
 	
 	private String address;
 	
@@ -38,5 +56,5 @@ public class CompanyUpdateInfoRequest {
 	private String size;
 	
 	private Boolean isSizePublic;
-	
+
 }

@@ -31,6 +31,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -61,6 +62,7 @@ public class User implements Serializable {
 
 	@Id
 	@GeneratedValue
+	@JsonIgnore
 	private Long id;
 
 	@Column(name = "USER_USERNAME")
@@ -89,7 +91,7 @@ public class User implements Serializable {
 	@NotNull(message = "User status can't be null!")
 	@Enumerated(EnumType.STRING)
 	@Column(name = "USER_STATUS")
-	private UserStatus status = UserStatus.DEACTIVATED;
+	private UserStatus status = UserStatus.DISABLED;
 	
 //  Detail Information
 	

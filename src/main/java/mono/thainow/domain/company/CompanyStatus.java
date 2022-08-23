@@ -1,5 +1,5 @@
 package mono.thainow.domain.company;
 
 public enum CompanyStatus {
-	UNREGISTERED, PENDING, REGISTERED, REJECTED, DEACTIVATED
+	UNREGISTERED, PENDING, REGISTERED, REJECTED, DISABLED
 }

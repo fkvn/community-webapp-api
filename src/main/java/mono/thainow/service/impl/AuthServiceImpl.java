@@ -10,19 +10,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.annotation.JsonView;
-
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.AppleSigninRequest;
-import mono.thainow.rest.request.AppleSignupRequest;
-import mono.thainow.rest.request.FacebookSigninRequest;
-import mono.thainow.rest.request.FacebookSignupRequest;
-import mono.thainow.rest.request.GoogleSigninRequest;
-import mono.thainow.rest.request.GoogleSignupRequest;
+import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.FacebookRequest;
+import mono.thainow.rest.request.GoogleRequest;
 import mono.thainow.rest.request.TokenRequest;
-import mono.thainow.rest.request.UserSigninRequest;
-import mono.thainow.rest.request.UserSignupRequest;
+import mono.thainow.rest.request.UserRequest;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.security.jwt.JwtUtils;
@@ -31,7 +25,6 @@ import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.TwilioService;
 import mono.thainow.service.UserService;
-import mono.thainow.view.View;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -84,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public Long signupWithThaiNow(UserSignupRequest signUpRequest) {
+	public Long signupWithThaiNow(UserRequest signUpRequest) {
 
 //		check Type of verification
 		boolean isVerified = Optional.ofNullable(signUpRequest.isVerified()).orElse(false);
@@ -105,16 +98,16 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public JwtResponse signinWithThaiNow(UserSigninRequest userSigninRequest) {
+	public JwtResponse signinWithThaiNow(UserRequest request) {
 
-		String channel = Optional.ofNullable(userSigninRequest.getChannel()).orElse("");
+		String channel = Optional.ofNullable(request.getChannel()).orElse("");
 
 //		only verify by email and phone
 		Assert.isTrue(channel.equals("email") || channel.equals("phone"),
 				"Only Email and Phone are supported at the moment!");
 
 //		password verification
-		String password = Optional.ofNullable(userSigninRequest.getPassword()).orElse("").trim();
+		String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
 
 		String username = "";
 
@@ -122,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
 
 		case "email": {
 
-			String email = Optional.ofNullable(userSigninRequest.getEmail()).orElse("").trim();
+			String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
 
 //			email is required
 			Assert.isTrue(!email.isEmpty(), "Email is required!");
@@ -135,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
 
 		case "phone": {
 
-			String phone = Optional.ofNullable(userSigninRequest.getPhone()).orElse("").trim();
+			String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
 
 //			phone number is required
 			Assert.isTrue(!phone.isEmpty(), "Phone number is required!");
@@ -154,27 +147,15 @@ public class AuthServiceImpl implements AuthService {
 
 	}
 
-	@Override
-	public JwtResponse signinWithGoogle(GoogleSigninRequest googleSigninRequest) {
-
-		String email = Optional.ofNullable(googleSigninRequest.getEmail().trim()).orElse("");
-		String password = Optional.ofNullable(googleSigninRequest.getSub().trim()).orElse("");
-
-//		internal custom username - used for sign in only, not user's username
-		String username = "email-login," + email;
-
-		return signedJWTAuth(username, password);
-
-	}
 
 	@Override
-	public JwtResponse signupWithGoogle(GoogleSignupRequest googleSignupRequest) {
+	public JwtResponse accessWithGoogle(GoogleRequest request) {
 
-		String email = Optional.ofNullable(googleSignupRequest.getEmail().trim()).orElse("");
+		String email = Optional.ofNullable(request.getEmail().trim()).orElse("");
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
-			User user = userService.getUserFromGoogleSignupRequest(googleSignupRequest);
+			User user = userService.getUserFromGoogleRequest(request);
 
 //			persit user
 			user = userService.saveUser(user);
@@ -185,13 +166,11 @@ public class AuthServiceImpl implements AuthService {
 			User user = userService.getActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals("GOOGLE"), "The email linked with this account has already taken!");
 		}
+		
+		String username = "email-login," + email;
+		String password = Optional.ofNullable(request.getSub().trim()).orElse("");
 
-//		return to sign in
-		GoogleSigninRequest signinRequest = new GoogleSigninRequest();
-		signinRequest.setEmail(googleSignupRequest.getEmail());
-		signinRequest.setSub(googleSignupRequest.getSub());
-
-		return signinWithGoogle(signinRequest);
+		return signedJWTAuth(username, password);
 	}
 
 	@Override
@@ -219,13 +198,13 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public JwtResponse signupWithApple(AppleSignupRequest appleSignupRequest) {
+	public JwtResponse accessWithApple(AppleRequest request) {
 
-		String email = Optional.ofNullable(appleSignupRequest.getEmail().trim()).orElse("");
+		String email = Optional.ofNullable(request.getEmail().trim()).orElse("");
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
-			User user = userService.getUserFromAppleSignupRequest(appleSignupRequest);
+			User user = userService.getUserFromAppleRequest(request);
 
 //			persit user
 			user = userService.saveUser(user);
@@ -236,35 +215,21 @@ public class AuthServiceImpl implements AuthService {
 			User user = userService.getActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals("APPLE"), "The email linked with this account has already taken!");
 		}
-
-//		return to sign in
-		AppleSigninRequest signinRequest = new AppleSigninRequest();
-		signinRequest.setEmail(appleSignupRequest.getEmail());
-		signinRequest.setSub(appleSignupRequest.getSub());
-
-		return signinWithApple(signinRequest);
-	}
-
-	@Override
-	public JwtResponse signinWithApple(AppleSigninRequest appleSigninRequest) {
-
-		String email = Optional.ofNullable(appleSigninRequest.getEmail().trim()).orElse("");
-		String password = Optional.ofNullable(appleSigninRequest.getSub().trim()).orElse("");
-
-//		internal custom username - used for sign in only, not user's username
+		
 		String username = "email-login," + email;
+		String password = Optional.ofNullable(request.getSub().trim()).orElse("");
 
 		return signedJWTAuth(username, password);
 	}
 
 	@Override
-	public JwtResponse signupWithFacebook(FacebookSignupRequest facebookSignupRequest) {
+	public JwtResponse accessWithFacebook(FacebookRequest request) {
 
-		String email = Optional.ofNullable(facebookSignupRequest.getEmail().trim()).orElse("");
+		String email = Optional.ofNullable(request.getEmail().trim()).orElse("");
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
-			User user = userService.getUserFromFacebookSignupRequest(facebookSignupRequest);
+			User user = userService.getUserFromFacebookSignupRequest(request);
 
 //			persit user
 			user = userService.saveUser(user);
@@ -276,23 +241,9 @@ public class AuthServiceImpl implements AuthService {
 			Assert.isTrue(user.getProvider().equals("FACEBOOK"),
 					"The email linked with this account has already taken!");
 		}
-
-//		return to sign in
-		FacebookSigninRequest signinRequest = new FacebookSigninRequest();
-		signinRequest.setEmail(facebookSignupRequest.getEmail());
-		signinRequest.setId(facebookSignupRequest.getId());
-
-		return signinWithFacebook(signinRequest);
-	}
-
-	@Override
-	public JwtResponse signinWithFacebook(FacebookSigninRequest facebookSigninRequest) {
-
-		String email = Optional.ofNullable(facebookSigninRequest.getEmail().trim()).orElse("");
-		String password = Optional.ofNullable(facebookSigninRequest.getId().trim()).orElse("");
-
-//		internal custom username - used for sign in only, not user's username
+		
 		String username = "email-login," + email;
+		String password = Optional.ofNullable(request.getId().trim()).orElse("");
 
 		return signedJWTAuth(username, password);
 	}

@@ -1,104 +1,80 @@
 package mono.thainow.domain.post.deal;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.PrePersist;
-import javax.validation.constraints.NotEmpty;
+import javax.persistence.OneToOne;
 
-import org.springframework.data.annotation.Transient;
-import org.springframework.util.Assert;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.Post;
-import mono.thainow.util.Util;
+import mono.thainow.domain.post.PostStatus;
+import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.storage.Storage;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
 @Entity
-@DiscriminatorValue("DEAL")
+@DiscriminatorValue("DEAL_POST")
 public class DealPost extends Post {
 
 	/**
-	* 
-	*/
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
 
-	@Getter
-	private static final String[] DEAL_CATEGORY = { "Restaurant", "Massage / Spa", "Beauty", "Insurance",
-			"Auto Services", "Travel", "Retail", "Market", "Factory", "Financial" };
-
-	private boolean isOnlineDeal = false;
-
-	@NotEmpty
-	private String category = "";
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "DEAL_DISCOUNT_TYPE")
-	private DealDiscountType discountType;
-
-	private String discountValue = "";
-
-	@PrePersist
-	private void validateDeal() {
-
-//		validate category
-		this.category = validateCategory();
-		
-//		validate discount type
-		validateDiscountType();
-
+	public DealPost(Profile owner, Deal deal) {
+		this.setOwner(owner);
+		this.setDeal(deal);
 	}
 
-	public String validateCategory() {
+	@OneToOne
+	@JsonIgnore
+	private Deal deal;
 
-		Assert.isTrue(!this.category.isEmpty(), "Category can't be empty");
-		
-		String category = this.category;
-
-		int categoryIdx = Arrays.stream(DealPost.DEAL_CATEGORY).map(ctg -> ctg.toUpperCase())
-				.collect(Collectors.toList()).indexOf(category.toUpperCase());
-
-		if (categoryIdx >= 0) {
-			category = DealPost.DEAL_CATEGORY[categoryIdx];
-		}
-		
-		return category;
-		
+	@Override
+	public String getTitle() {
+		return this.getDeal().getTitle();
 	}
 
-	@Transient
-	public void validateDiscountType() {
-		Assert.isTrue(this.discountType != null, "Invalid Discount Type");
+	@Override
+	public Location getLocation() {
+		return this.getDeal().getLocation();
+	}
 
-		switch (this.discountType) {
-		case PERCENT_OFF: {
-//			get percent off
-			Integer percent = Util.getIntegerNumeric(discountValue);
+	@Override
+	public List<Storage> getPictures() {
+		return this.getDeal().getPictures();
+	}
 
-//			assert that is invalid number
-			Assert.isTrue(percent != null, "Invalid Percentage!");
+	@Override
+	public Map<String, String> getContactInfo() {
+		return this.getDeal().getContactInfo();
+	}
 
-//			0-100 range
-			Assert.isTrue(percent >= 0 && percent <= 100, "Out of range for percentage!");
+	@Override
+	public PostStatus getStatus() {
+		return this.getDeal().getStatus();
+	}
 
-		}
-			break;
+	@Override
+	public Object getDetailInfo() {
+		return this.getDeal();
+	}
 
-		default:
-			Assert.isTrue(!discountValue.isEmpty(), "Invalid Discount Value");
-			break;
-		}
+	@Override
+	public Date getLastUpdatedOn() {
+		return this.getDeal().getUpdatedOn();
 	}
 
 }

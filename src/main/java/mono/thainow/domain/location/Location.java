@@ -59,6 +59,7 @@ public class Location implements Serializable {
 	
 	@Id
 	@GeneratedValue
+	@JsonIgnore
 	private Long id;
 
 	@Column(name = "LOCATION_PLACEID")
