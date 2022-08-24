@@ -23,9 +23,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.post.PostStatus;
-import mono.thainow.domain.post.deal.DealPost;
+import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.rest.request.DealRequest;
+import mono.thainow.rest.request.JobRequest;
 import mono.thainow.service.PostService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.UserService;
@@ -33,8 +33,8 @@ import mono.thainow.util.AuthUtil;
 import mono.thainow.view.View;
 
 @RestController
-@RequestMapping("/api/posts/deals")
-public class DealPostController {
+@RequestMapping("/api/posts/jobs")
+public class JobPostController {
 
 	@Autowired
 	UserService userService;
@@ -48,7 +48,7 @@ public class DealPostController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
-	public Long createDeal(@Valid @RequestBody DealRequest request) {
+	public Long createJob(@Valid @RequestBody JobRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
@@ -57,79 +57,79 @@ public class DealPostController {
 
 		AuthUtil.authorizedAccess(postOwner, true);
 
-		DealPost deal = postService.createPost(postOwner, request);
+		JobPost job = postService.createPost(postOwner, request);
 
-		return deal.getId();
+		return job.getId();
 	}
 
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
-	public DealPost getDeal(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
+	public JobPost getJob(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		JobPost jobPost = postService.getValidJobPost(postId);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		if (dealPost.getStatus() == PostStatus.PRIVATE) {
-			AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		if (jobPost.getStatus() == PostStatus.PRIVATE) {
+			AuthUtil.authorizedAccess(postOwner, jobPost, true);
 		}
 
-		return dealPost;
+		return jobPost;
 
 	}
 
 	@PatchMapping("/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void updateDeal(@PathVariable Long postId, @RequestBody DealRequest request) {
+	public void updateJob(@PathVariable Long postId, @RequestBody JobRequest request) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		JobPost jobPost = postService.getValidJobPost(postId);
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		AuthUtil.authorizedAccess(postOwner, jobPost, true);
 
-		postService.updatePost(dealPost, request);
+		postService.updatePost(jobPost, request);
 
 	}
 
 	@DeleteMapping("/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void removeDeal(@PathVariable Long postId, @RequestParam Long profileId) {
+	public void removeJob(@PathVariable Long postId, @RequestParam Long profileId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		JobPost jobPost = postService.getValidJobPost(postId);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		AuthUtil.authorizedAccess(postOwner, jobPost, true);
 
-		postService.removePost(dealPost);
+		postService.removePost(jobPost);
 
 	}
 	
 	@PatchMapping("/{postId}/activate")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
-	public DealPost activateDeal(@PathVariable Long postId) {
+	public JobPost activateJob(@PathVariable Long postId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		JobPost jobPost = postService.getValidJobPost(postId);
 		
-		return postService.activatePost(dealPost);
+		return postService.activatePost(jobPost);
 	}
 
 	@PatchMapping("/{postId}/disable")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public void disableDeal(@PathVariable Long postId) {
+	public void disableJob(@PathVariable Long postId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		JobPost jobPost = postService.getValidJobPost(postId);
 
-		postService.disablePost(dealPost);
+		postService.disablePost(jobPost);
 
 	}
 

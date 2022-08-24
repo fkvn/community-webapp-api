@@ -1,4 +1,4 @@
-package mono.thainow.domain.post.deal;
+package mono.thainow.domain.post.housing;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -44,8 +44,8 @@ import mono.thainow.view.View;
 @RequiredArgsConstructor
 @Entity
 @JsonView(View.Basic.class)
-@Audited( withModifiedFlag = true )
-public class Deal implements Serializable {
+@Audited(withModifiedFlag = true)
+public class Housing implements Serializable {
 
 	/**
 	* 
@@ -59,27 +59,27 @@ public class Deal implements Serializable {
 	@JsonIgnore
 	private Long id;
 
-	@Column(name = "DEAL_TITLE")
+	@Column(name = "HOUSING_TITLE")
 	private String title;
 
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "DEAL_UPDATED_ON")
+	@Column(name = "HOUSING_UPDATED_ON")
 	private Date updatedOn = new Date();
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "DEAL_STATUS")
+	@Column(name = "HOUSING_STATUS")
 	private PostStatus status = PostStatus.DISABLED;
 
 	@ManyToOne
-	@JoinColumn(name = "DEAL_LOCATION_ID")
+	@JoinColumn(name = "HOUSING_LOCATION_ID")
 	private Location location;
 
 	@OneToMany
 	private List<Storage> pictures = new ArrayList<>();
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "DEAL_EXPIRED_ON")
+	@Column(name = "HOUSING_EXPIRED_ON")
 	private Date expiredOn;
 
 //	Detail Information
@@ -87,16 +87,35 @@ public class Deal implements Serializable {
 	@ElementCollection
 	@MapKeyColumn(name = "CONTACT_FIELD")
 	@Column(name = "CONTACT_VALUE")
-	@CollectionTable(name = "DEAL_CONTACT_INFO", joinColumns = @JoinColumn(name = "DEAL_ID"))
+	@CollectionTable(name = "HOUSING_CONTACT_INFO", joinColumns = @JoinColumn(name = "HOUSING_ID"))
 	@JsonView(View.Detail.class)
 	private Map<String, String> contactInfo = new HashMap<>();
 
-	@Column(name = "DEAL_CATEGORY")
+	@Column(name = "HOUSING_TYPE")
+	@JsonView(View.Detail.class)
+	private String type;
+
+	@Column(name = "HOUSING_COST")
+	@JsonView(View.Detail.class)
+	private String cost;
+
+	@Column(name = "HOUSING_CATEGORY")
 	@JsonView(View.Detail.class)
 	private String category;
 
+	@JsonView(View.Detail.class)
+	@ElementCollection
+	private List<String> amenities;
+
+	@ElementCollection
+	@MapKeyColumn(name = "INTERIOR_FIELD")
+	@Column(name = "INTERIOR_VALUE")
+	@CollectionTable(name = "HOUSING_INTERIOR", joinColumns = @JoinColumn(name = "HOUSING_ID"))
+	@JsonView(View.Detail.class)
+	private Map<String, String> interior = new HashMap<>();
+
 	@Lob
-	@Column(name = "DEAL_DESCRIPTION")
+	@Column(name = "HOUSING_DESCRIPTION")
 	@JsonView(View.Detail.class)
 	private String description;
 
@@ -104,7 +123,7 @@ public class Deal implements Serializable {
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonView(View.FullDetail.class)
-	@Column(name = "DEAL_CREATED_ON")
+	@Column(name = "HOUSING_CREATED_ON")
 	private Date createdOn = new Date();
 
 }

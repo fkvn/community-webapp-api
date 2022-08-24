@@ -1,4 +1,4 @@
-package mono.thainow.domain.post.deal;
+package mono.thainow.domain.post.job;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ import mono.thainow.view.View;
 @Entity
 @JsonView(View.Basic.class)
 @Audited( withModifiedFlag = true )
-public class Deal implements Serializable {
+public class Job implements Serializable {
 
 	/**
 	* 
@@ -59,27 +59,27 @@ public class Deal implements Serializable {
 	@JsonIgnore
 	private Long id;
 
-	@Column(name = "DEAL_TITLE")
+	@Column(name = "JOB_TITLE")
 	private String title;
 
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "DEAL_UPDATED_ON")
+	@Column(name = "JOB_UPDATED_ON")
 	private Date updatedOn = new Date();
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "DEAL_STATUS")
+	@Column(name = "JOB_STATUS")
 	private PostStatus status = PostStatus.DISABLED;
 
 	@ManyToOne
-	@JoinColumn(name = "DEAL_LOCATION_ID")
+	@JoinColumn(name = "JOB_LOCATION_ID")
 	private Location location;
 
 	@OneToMany
 	private List<Storage> pictures = new ArrayList<>();
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Column(name = "DEAL_EXPIRED_ON")
+	@Column(name = "JOB_EXPIRED_ON")
 	private Date expiredOn;
 
 //	Detail Information
@@ -87,16 +87,28 @@ public class Deal implements Serializable {
 	@ElementCollection
 	@MapKeyColumn(name = "CONTACT_FIELD")
 	@Column(name = "CONTACT_VALUE")
-	@CollectionTable(name = "DEAL_CONTACT_INFO", joinColumns = @JoinColumn(name = "DEAL_ID"))
+	@CollectionTable(name = "JOB_CONTACT_INFO", joinColumns = @JoinColumn(name = "JOB_ID"))
 	@JsonView(View.Detail.class)
 	private Map<String, String> contactInfo = new HashMap<>();
 
-	@Column(name = "DEAL_CATEGORY")
 	@JsonView(View.Detail.class)
-	private String category;
-
+	@ElementCollection
+	private List<String> positions;
+	
+	@Column(name = "JOB_EXPERIENCE")
+	@JsonView(View.Detail.class)
+	private String experience;
+	
+	@Column(name = "JOB_SALARY")
+	@JsonView(View.Detail.class)
+	private String salary;
+	
+	@Column(name = "JOB_SKILLS")
+	@JsonView(View.Detail.class)
+	private String skills;
+	
 	@Lob
-	@Column(name = "DEAL_DESCRIPTION")
+	@Column(name = "JOB_DESCRIPTION")
 	@JsonView(View.Detail.class)
 	private String description;
 
@@ -104,7 +116,7 @@ public class Deal implements Serializable {
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonView(View.FullDetail.class)
-	@Column(name = "DEAL_CREATED_ON")
+	@Column(name = "JOB_CREATED_ON")
 	private Date createdOn = new Date();
 
 }

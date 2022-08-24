@@ -14,6 +14,8 @@ import mono.thainow.dao.PostDao;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.deal.DealPost;
+import mono.thainow.domain.post.housing.HousingPost;
+import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.repository.PostRepository;
 
@@ -65,6 +67,20 @@ public class PostDaoImpl implements PostDao {
 	public List<Post> getPosts(Profile profile) {
 		return entityManager.createQuery("from Post where owner =: owner", Post.class).setParameter("owner", profile)
 				.getResultList();
+	}
+
+	@Override
+	public JobPost getValidJobPost(Long postId) {
+		return entityManager.createQuery("from DealPost where job.status IN (:status) and id =:id", JobPost.class)
+				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
+				.setParameter("id", postId).getSingleResult();
+	}
+
+	@Override
+	public HousingPost getValidHousingPost(Long postId) {
+		return entityManager.createQuery("from HousingPost where housing.status IN (:status) and id =:id", HousingPost.class)
+				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
+				.setParameter("id", postId).getSingleResult();
 	}
 
 }

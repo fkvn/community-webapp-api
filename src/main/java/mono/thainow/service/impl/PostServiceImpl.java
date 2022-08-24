@@ -2,6 +2,8 @@ package mono.thainow.service.impl;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +12,17 @@ import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.deal.Deal;
 import mono.thainow.domain.post.deal.DealPost;
+import mono.thainow.domain.post.housing.Housing;
+import mono.thainow.domain.post.housing.HousingPost;
+import mono.thainow.domain.post.job.Job;
+import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.rest.request.DealRequest;
+import mono.thainow.rest.request.HousingRequest;
+import mono.thainow.rest.request.JobRequest;
 import mono.thainow.service.DealService;
+import mono.thainow.service.HousingService;
+import mono.thainow.service.JobService;
 import mono.thainow.service.PostService;
 
 @Service
@@ -23,7 +33,13 @@ public class PostServiceImpl implements PostService {
 
 	@Autowired
 	private DealService dealService;
-
+	
+	@Autowired
+	private JobService jobService;
+	
+	@Autowired
+	private HousingService housingService;
+	
 	@Override
 	public DealPost createPost(Profile owner, DealRequest request) {
 
@@ -119,6 +135,110 @@ public class PostServiceImpl implements PostService {
 				break;
 			}
 		});
+	}
+
+	@Override
+	public JobPost createPost(Profile postOwner, @Valid JobRequest request) {
+		Job job = jobService.createJob(request);
+
+		JobPost jobPost = new JobPost(postOwner, job);
+		jobPost = (JobPost) savePost(jobPost);
+
+		return jobPost;
+	}
+
+	@Override
+	public JobPost getValidJobPost(Long postId) {
+		return postDao.getValidJobPost(postId);
+	}
+
+	@Override
+	public void updatePost(JobPost jobPost, JobRequest request) {
+		Job job = jobService.getJobFromUpdateRequest(jobPost.getJob(), request);
+
+		jobService.saveJob(job);
+	}
+
+	@Override
+	public void removePost(JobPost jobPost) {
+//		remove job
+		jobService.remove(jobPost.getJob());
+
+//		delete job post
+		postDao.deletePost(jobPost.getId());
+	}
+
+	@Override
+	public JobPost activatePost(JobPost jobPost) {
+		Job job = jobPost.getJob();
+
+		job.setStatus(PostStatus.PRIVATE);
+
+		jobService.saveJob(job);
+
+		return jobPost;
+	}
+
+	@Override
+	public void disablePost(JobPost jobPost) {
+		Job job = jobPost.getJob();
+
+		job.setStatus(PostStatus.DISABLED);
+
+		jobService.saveJob(job);
+	}
+
+	@Override
+	public HousingPost createPost(Profile postOwner, @Valid HousingRequest request) {
+		Housing housing = housingService.createHousing(request);
+
+		HousingPost housingPost = new HousingPost(postOwner, housing);
+		housingPost = (HousingPost) savePost(housingPost);
+
+		return housingPost;
+	}
+
+	@Override
+	public HousingPost getValidHousingPost(Long postId) {
+		return postDao.getValidHousingPost(postId);
+	}
+
+	@Override
+	public void updatePost(HousingPost housingPost, HousingRequest request) {
+		Housing housing = housingService.getHousingFromUpdateRequest(housingPost.getHousing(), request);
+
+		housingService.saveHousing(housing);
+		
+	}
+
+	@Override
+	public void removePost(HousingPost housingPost) {
+//		remove housing
+		housingService.remove(housingPost.getHousing());
+
+//		delete deal post
+		postDao.deletePost(housingPost.getId());
+		
+	}
+
+	@Override
+	public HousingPost activatePost(HousingPost housingPost) {
+		Housing housing = housingPost.getHousing();
+
+		housing.setStatus(PostStatus.PRIVATE);
+
+		housingService.saveHousing(housing);
+
+		return housingPost;
+	}
+
+	@Override
+	public void disablePost(HousingPost housingPost) {
+		Housing housing = housingPost.getHousing();
+
+		housing.setStatus(PostStatus.DISABLED);
+
+		housingService.saveHousing(housing);
 	}
 
 }

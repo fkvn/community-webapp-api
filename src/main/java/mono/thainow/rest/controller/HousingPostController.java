@@ -23,9 +23,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.post.PostStatus;
-import mono.thainow.domain.post.deal.DealPost;
+import mono.thainow.domain.post.housing.HousingPost;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.rest.request.DealRequest;
+import mono.thainow.rest.request.HousingRequest;
 import mono.thainow.service.PostService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.UserService;
@@ -33,8 +33,8 @@ import mono.thainow.util.AuthUtil;
 import mono.thainow.view.View;
 
 @RestController
-@RequestMapping("/api/posts/deals")
-public class DealPostController {
+@RequestMapping("/api/posts/housings")
+public class HousingPostController {
 
 	@Autowired
 	UserService userService;
@@ -48,7 +48,7 @@ public class DealPostController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
-	public Long createDeal(@Valid @RequestBody DealRequest request) {
+	public Long createHousing(@Valid @RequestBody HousingRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
@@ -57,79 +57,79 @@ public class DealPostController {
 
 		AuthUtil.authorizedAccess(postOwner, true);
 
-		DealPost deal = postService.createPost(postOwner, request);
+		HousingPost housing = postService.createPost(postOwner, request);
 
-		return deal.getId();
+		return housing.getId();
 	}
 
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
-	public DealPost getDeal(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
+	public HousingPost getHousing(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		HousingPost housingPost = postService.getValidHousingPost(postId);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		if (dealPost.getStatus() == PostStatus.PRIVATE) {
-			AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		if (housingPost.getStatus() == PostStatus.PRIVATE) {
+			AuthUtil.authorizedAccess(postOwner, housingPost, true);
 		}
 
-		return dealPost;
+		return housingPost;
 
 	}
 
 	@PatchMapping("/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void updateDeal(@PathVariable Long postId, @RequestBody DealRequest request) {
+	public void updateHousing(@PathVariable Long postId, @RequestBody HousingRequest request) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		HousingPost housingPost = postService.getValidHousingPost(postId);
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		AuthUtil.authorizedAccess(postOwner, housingPost, true);
 
-		postService.updatePost(dealPost, request);
+		postService.updatePost(housingPost, request);
 
 	}
 
 	@DeleteMapping("/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void removeDeal(@PathVariable Long postId, @RequestParam Long profileId) {
+	public void removeHousing(@PathVariable Long postId, @RequestParam Long profileId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		HousingPost housingPost = postService.getValidHousingPost(postId);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		AuthUtil.authorizedAccess(postOwner, housingPost, true);
 
-		postService.removePost(dealPost);
+		postService.removePost(housingPost);
 
 	}
 	
 	@PatchMapping("/{postId}/activate")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
-	public DealPost activateDeal(@PathVariable Long postId) {
+	public HousingPost activateHousing(@PathVariable Long postId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		HousingPost housingPost = postService.getValidHousingPost(postId);
 		
-		return postService.activatePost(dealPost);
+		return postService.activatePost(housingPost);
 	}
 
 	@PatchMapping("/{postId}/disable")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public void disableDeal(@PathVariable Long postId) {
+	public void disableHousing(@PathVariable Long postId) {
 
-		DealPost dealPost = postService.getValidDealPost(postId);
+		HousingPost housingPost = postService.getValidHousingPost(postId);
 
-		postService.disablePost(dealPost);
+		postService.disablePost(housingPost);
 
 	}
 
