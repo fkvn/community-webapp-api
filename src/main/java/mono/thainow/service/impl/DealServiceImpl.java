@@ -55,10 +55,10 @@ public class DealServiceImpl implements DealService {
 		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
 		Assert.isTrue(pictures.size() > 0, "Deal picture is required!");
 		deal.setPictures(pictures);
-		
+
 //		contact information
 		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new HashMap<>());
-		Assert.isTrue(contactInfo.size() > 0, "Job contact information is required!");
+		Assert.isTrue(contactInfo.size() > 0, "Deal contact information is required!");
 		deal.setContactInfo(contactInfo);
 
 //		description
@@ -122,7 +122,7 @@ public class DealServiceImpl implements DealService {
 			deal.setPictures(pictures);
 		}
 		Assert.isTrue(deal.getPictures().size() > 0, "Deal picture is required!");
-		
+
 //		contact information
 		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
 		if (contactInfo != null && contactInfo.size() > 0) {
@@ -160,6 +160,24 @@ public class DealServiceImpl implements DealService {
 	@Override
 	public void remove(Deal deal) {
 		deal.setStatus(PostStatus.DELETED);
+		saveDeal(deal);
+	}
+
+	@Override
+	public void activateDeal(Deal deal) {
+		deal.setStatus(PostStatus.PRIVATE);
+		saveDeal(deal);
+	}
+
+	@Override
+	public void updateDeal(Deal deal, DealRequest request) {
+		getDealFromUpdateRequest(deal, request);
+		saveDeal(deal);
+	}
+
+	@Override
+	public void disableDeal(Deal deal) {
+		deal.setStatus(PostStatus.DISABLED);
 		saveDeal(deal);
 	}
 

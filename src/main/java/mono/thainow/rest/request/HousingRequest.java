@@ -8,11 +8,8 @@ import lombok.Getter;
 import mono.thainow.domain.post.PostStatus;
 
 @Getter
-public class HousingRequest {
+public class HousingRequest extends PostRequest {
 
-
-	private Long profileId;
-	
 	private String title;
 	
 	private String address;

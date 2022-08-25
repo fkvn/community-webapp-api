@@ -70,7 +70,7 @@ public class ProfileServiceImpl implements ProfileService {
 		
 //		remove related post
 		List<Post> posts = postService.getPosts(profile);
-		postService.removePost(posts);
+		postService.removePosts(posts);
 		
 		if (removeAccount) {
 	//		remove / delete company profiles
@@ -142,7 +142,7 @@ public class ProfileServiceImpl implements ProfileService {
 
 //		remove related post
 		List<Post> posts = postService.getPosts(companyProfile);
-		postService.removePost(posts);
+		postService.removePosts(posts);
 
 //		delete profile (hard delete)
 		profileDao.deleteProfile(companyProfile.getId());

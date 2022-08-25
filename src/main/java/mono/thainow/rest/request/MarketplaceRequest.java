@@ -8,7 +8,7 @@ import lombok.Getter;
 import mono.thainow.domain.post.PostStatus;
 
 @Getter
-public class JobRequest extends PostRequest {
+public class MarketplaceRequest  extends PostRequest {
 	
 	private String title;
 	
@@ -20,16 +20,15 @@ public class JobRequest extends PostRequest {
 	
 	private Map<String, String> contactInfo;
 	
-	private List<String> positions;
-	
-	private String salary;
-	
-	private String skills;
-	
 	private String description;
+	
+	private String cost;
+	
+	private String condition;
+	
+	private String category;
 	
 	private Date expiredOn;
 	
 	private PostStatus status;
-
 }

@@ -25,9 +25,9 @@ import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.PostType;
-import mono.thainow.domain.post.deal.DealPost;
+import mono.thainow.domain.post.marketplace.MarketplacePost;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.rest.request.DealRequest;
+import mono.thainow.rest.request.MarketplaceRequest;
 import mono.thainow.service.PostService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.UserService;
@@ -35,8 +35,8 @@ import mono.thainow.util.AuthUtil;
 import mono.thainow.view.View;
 
 @RestController
-@RequestMapping("/api/posts/deals")
-public class DealPostController {
+@RequestMapping("/api/posts/marketplaces")
+public class MarketplacePostController {
 
 	@Autowired
 	UserService userService;
@@ -50,7 +50,7 @@ public class DealPostController {
 //	@PostMapping
 //	@ResponseStatus(HttpStatus.CREATED)
 //	@AuthenticatedAccess
-//	public Long createDeal(@Valid @RequestBody DealRequest request) {
+//	public Long createMarketplace(@Valid @RequestBody MarketplaceRequest request) {
 //
 //		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 //		Assert.isTrue(profileId != null, "Missing profile information!");
@@ -59,7 +59,7 @@ public class DealPostController {
 //
 //		AuthUtil.authorizedAccess(postOwner, true);
 //
-//		Post newPost = postService.createPost(postOwner, PostType.DEAL_POST, request);
+//		Post newPost = postService.createPost(postOwner, PostType.MARKETPLACE_POST, request);
 //
 //		return newPost.getId();
 //	}
@@ -67,71 +67,71 @@ public class DealPostController {
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
-	public Post getDeal(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
+	public MarketplacePost getMarketplace(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
 
-		DealPost dealPost = (DealPost) postService.getValidPost(postId, PostType.DEAL_POST);
+		MarketplacePost marketplacePost =(MarketplacePost) postService.getValidPost(postId, PostType.MARKETPLACE_POST);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		if (dealPost.getStatus() == PostStatus.PRIVATE) {
-			AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		if (marketplacePost.getStatus() == PostStatus.PRIVATE) {
+			AuthUtil.authorizedAccess(postOwner, marketplacePost, true);
 		}
 
-		return dealPost;
+		return marketplacePost;
 
 	}
 
 	@PatchMapping("/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void updateDeal(@PathVariable Long postId, @RequestBody DealRequest request) {
+	public void updateMarketplace(@PathVariable Long postId, @RequestBody MarketplaceRequest request) {
 
-		DealPost dealPost = (DealPost) postService.getValidPost(postId, PostType.DEAL_POST);
+		MarketplacePost marketplacePost =(MarketplacePost) postService.getValidPost(postId, PostType.MARKETPLACE_POST);
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		AuthUtil.authorizedAccess(postOwner, marketplacePost, true);
 
-		postService.updatePost(dealPost, request);
+		postService.updatePost(marketplacePost, request);
 
 	}
 
 	@DeleteMapping("/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void removeDeal(@PathVariable Long postId, @RequestParam Long profileId) {
+	public void removeMarketplace(@PathVariable Long postId, @RequestParam Long profileId) {
 
-		DealPost dealPost = (DealPost) postService.getValidPost(postId, PostType.DEAL_POST);
+		MarketplacePost marketplacePost =(MarketplacePost) postService.getValidPost(postId, PostType.MARKETPLACE_POST);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		AuthUtil.authorizedAccess(postOwner, dealPost, true);
+		AuthUtil.authorizedAccess(postOwner, marketplacePost, true);
 
-		postService.removePost(dealPost);
+		postService.removePost(marketplacePost);
 
 	}
 	
 	@PatchMapping("/{postId}/activate")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
-	public Post activateDeal(@PathVariable Long postId) {
+	public Post activateMarketplace(@PathVariable Long postId) {
 
-		DealPost dealPost = (DealPost) postService.getValidPost(postId, PostType.DEAL_POST);
+		MarketplacePost marketplacePost =(MarketplacePost) postService.getValidPost(postId, PostType.MARKETPLACE_POST);
 		
-		return postService.activatePost(dealPost);
+		return postService.activatePost(marketplacePost);
 	}
 
 	@PatchMapping("/{postId}/disable")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public void disableDeal(@PathVariable Long postId) {
+	public void disableMarketplace(@PathVariable Long postId) {
 
-		DealPost dealPost = (DealPost) postService.getValidPost(postId, PostType.DEAL_POST);
+		MarketplacePost marketplacePost =(MarketplacePost) postService.getValidPost(postId, PostType.MARKETPLACE_POST);
 
-		postService.disablePost(dealPost);
+		postService.disablePost(marketplacePost);
 
 	}
 

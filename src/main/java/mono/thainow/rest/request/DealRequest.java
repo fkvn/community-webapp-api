@@ -8,9 +8,7 @@ import lombok.Getter;
 import mono.thainow.domain.post.PostStatus;
 
 @Getter
-public class DealRequest {
-	
-	private Long profileId;
+public class DealRequest extends PostRequest {
 	
 	private String title;
 	

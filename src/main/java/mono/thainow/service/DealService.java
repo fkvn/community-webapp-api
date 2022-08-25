@@ -14,4 +14,10 @@ public interface DealService {
 	Deal getDealFromUpdateRequest(Deal deal, DealRequest request);
 
 	void remove(Deal deal);
+
+	void activateDeal(Deal deal);
+
+	void updateDeal(Deal deal, DealRequest request);
+
+	void disableDeal(Deal deal);
 }

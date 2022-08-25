@@ -1,41 +1,13 @@
 package mono.thainow.rest.request;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import lombok.Getter;
-import lombok.Setter;
-import mono.thainow.domain.location.Location;
+import mono.thainow.domain.post.PostType;
 
 @Getter
-@Setter
 public class PostRequest {
 	
-	@NotEmpty
-	private String title;
+	private Long profileId;
 	
-	private String description;
-	
-	@NotEmpty
-	private String status;
-	
-	@NotEmpty
-	private String type;
-	
-	@NotNull
-	private Location location; 
-	
-	private boolean isCompanyPost;
-	
-	private Long CompanyId;
-	
-	private Long authorId;
-	
-//	deal info
-	private String category;
-	private String dealDiscountType;
-	private String discountValue;
-	
-	
+	private PostType postType;
 	
 }

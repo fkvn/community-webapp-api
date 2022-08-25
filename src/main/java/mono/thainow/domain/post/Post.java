@@ -70,8 +70,8 @@ public abstract class Post implements Serializable {
 
 	@Transient
 	@JsonProperty("type")
-	public String getType() {
-		return this.getClass().getAnnotation(DiscriminatorValue.class).value();
+	public PostType getType() {
+		return PostType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
 	}
 
 	public abstract String getTitle();

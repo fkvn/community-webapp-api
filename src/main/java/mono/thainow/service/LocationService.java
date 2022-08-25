@@ -7,7 +7,6 @@ import com.google.maps.model.GeocodingResult;
 
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.PostRequest;
 
 public interface LocationService {
 
@@ -16,8 +15,6 @@ public interface LocationService {
 	Location createLocationByAddress(String address);
 	
 	Location getLocationFromPlaceidAndAddress(String placeid, String address);
-
-	Location getLocationFromPostRequest(PostRequest postRequest);
 	
 	Location getLocationFromGeocodingResult(GeocodingResult geoResult);
 	

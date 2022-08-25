@@ -187,4 +187,23 @@ public class JobServiceImpl implements JobService {
 		saveJob(job);
 	}
 
+	
+	@Override
+	public void updateJob(Job job, JobRequest request) {
+		job = getJobFromUpdateRequest(job, request);
+		saveJob(job);
+	}
+
+	@Override
+	public void disableJob(Job job) {
+		job.setStatus(PostStatus.DISABLED);
+		saveJob(job);
+	}
+
+	@Override
+	public void activateJob(Job job) {
+		job.setStatus(PostStatus.PRIVATE);
+		saveJob(job);
+	}
+
 }

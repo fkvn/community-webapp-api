@@ -22,7 +22,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
+import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
+import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.rest.request.JobRequest;
@@ -45,29 +47,29 @@ public class JobPostController {
 	@Autowired
 	ProfileService profileService;
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	@AuthenticatedAccess
-	public Long createJob(@Valid @RequestBody JobRequest request) {
-
-		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		Assert.isTrue(profileId != null, "Missing profile information!");
-
-		Profile postOwner = profileService.getProfile(profileId);
-
-		AuthUtil.authorizedAccess(postOwner, true);
-
-		JobPost job = postService.createPost(postOwner, request);
-
-		return job.getId();
-	}
+//	@PostMapping
+//	@ResponseStatus(HttpStatus.CREATED)
+//	@AuthenticatedAccess
+//	public Long createJob(@Valid @RequestBody JobRequest request) {
+//
+//		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
+//		Assert.isTrue(profileId != null, "Missing profile information!");
+//
+//		Profile postOwner = profileService.getProfile(profileId);
+//
+//		AuthUtil.authorizedAccess(postOwner, true);
+//
+//		Post newPost = postService.createPost(postOwner, PostType.JOB_POST, request);
+//
+//		return newPost.getId();
+//	}
 
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
 	public JobPost getJob(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
 
-		JobPost jobPost = postService.getValidJobPost(postId);
+		JobPost jobPost = (JobPost) postService.getValidPost(postId, PostType.JOB_POST);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
@@ -84,7 +86,7 @@ public class JobPostController {
 	@AuthenticatedAccess
 	public void updateJob(@PathVariable Long postId, @RequestBody JobRequest request) {
 
-		JobPost jobPost = postService.getValidJobPost(postId);
+		JobPost jobPost = (JobPost) postService.getValidPost(postId, PostType.JOB_POST);
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
@@ -102,7 +104,7 @@ public class JobPostController {
 	@AuthenticatedAccess
 	public void removeJob(@PathVariable Long postId, @RequestParam Long profileId) {
 
-		JobPost jobPost = postService.getValidJobPost(postId);
+		JobPost jobPost = (JobPost) postService.getValidPost(postId, PostType.JOB_POST);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
@@ -115,9 +117,9 @@ public class JobPostController {
 	@PatchMapping("/{postId}/activate")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
-	public JobPost activateJob(@PathVariable Long postId) {
+	public Post activateJob(@PathVariable Long postId) {
 
-		JobPost jobPost = postService.getValidJobPost(postId);
+		JobPost jobPost = (JobPost) postService.getValidPost(postId, PostType.JOB_POST);
 		
 		return postService.activatePost(jobPost);
 	}
@@ -127,7 +129,7 @@ public class JobPostController {
 	@AdminAndSAdminAccess
 	public void disableJob(@PathVariable Long postId) {
 
-		JobPost jobPost = postService.getValidJobPost(postId);
+		JobPost jobPost = (JobPost) postService.getValidPost(postId, PostType.JOB_POST);
 
 		postService.disablePost(jobPost);
 

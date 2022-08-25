@@ -2,7 +2,6 @@ package mono.thainow.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import mono.thainow.dao.LocationDao;
 import mono.thainow.domain.google.GoogleGeoAPI;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.PostRequest;
 import mono.thainow.service.LocationService;
 
 @Service
@@ -55,20 +53,6 @@ public class LocationServiceImpl implements LocationService {
 
 		return location;
 
-	}
-
-	@Override
-	public Location getLocationFromPostRequest(PostRequest postRequest) {
-
-//		get location
-		Location location = Optional.ofNullable(postRequest.getLocation()).orElse(new Location());
-
-		Assert.isTrue(location != null, "Location cannot be null");
-
-////		validate location
-//		location = validateIfLocationExist(location);
-
-		return location;
 	}
 
 	@Override

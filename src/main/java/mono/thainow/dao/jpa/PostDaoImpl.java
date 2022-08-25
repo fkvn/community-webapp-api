@@ -7,17 +7,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import mono.thainow.dao.PostDao;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
-import mono.thainow.domain.post.deal.DealPost;
-import mono.thainow.domain.post.housing.HousingPost;
-import mono.thainow.domain.post.job.JobPost;
+import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.repository.PostRepository;
 
 @Repository
 public class PostDaoImpl implements PostDao {
@@ -25,14 +21,12 @@ public class PostDaoImpl implements PostDao {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@Autowired
-	private PostRepository postRepository;
-
 //	===========================================
 
 	@Override
-	public List<Post> getAllPosts() {
-		return postRepository.findAll();
+	public List<Post> getPosts(Profile profile) {
+		return entityManager.createQuery("from Post where owner =: owner", Post.class).setParameter("owner", profile)
+				.getResultList();
 	}
 
 	@Override
@@ -40,6 +34,33 @@ public class PostDaoImpl implements PostDao {
 		return entityManager.find(Post.class, id);
 	}
 
+	@Override
+	public Post getValidPost(Long postId, PostType type) {
+		
+		String sql = "";
+		
+		switch (type) {
+		case DEAL_POST:
+			sql = "from Post where deal.status IN (:status) and id =:id";
+			break;
+		case JOB_POST:
+			sql = "from Post where job.status IN (:status) and id =:id";
+			break;
+		case HOUSING_POST:
+			sql = "from Post where housing.status IN (:status) and id =:id";
+			break;
+		case MARKETPLACE_POST:
+			sql = "from Post where marketplace.status IN (:status) and id =:id";
+			break;
+		default:
+			break;
+		}
+
+		return entityManager.createQuery(sql, Post.class)
+				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
+				.setParameter("id", postId).getSingleResult();
+	}
+	
 //	===========================================
 
 	@Override
@@ -54,33 +75,5 @@ public class PostDaoImpl implements PostDao {
 		Post post = entityManager.find(Post.class, id);
 		entityManager.remove(post);
 	}
-
-	@Override
-	public DealPost getValidDealPost(Long postId) {
-
-		return entityManager.createQuery("from DealPost where deal.status IN (:status) and id =:id", DealPost.class)
-				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
-				.setParameter("id", postId).getSingleResult();
-	}
-
-	@Override
-	public List<Post> getPosts(Profile profile) {
-		return entityManager.createQuery("from Post where owner =: owner", Post.class).setParameter("owner", profile)
-				.getResultList();
-	}
-
-	@Override
-	public JobPost getValidJobPost(Long postId) {
-		return entityManager.createQuery("from DealPost where job.status IN (:status) and id =:id", JobPost.class)
-				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
-				.setParameter("id", postId).getSingleResult();
-	}
-
-	@Override
-	public HousingPost getValidHousingPost(Long postId) {
-		return entityManager.createQuery("from HousingPost where housing.status IN (:status) and id =:id", HousingPost.class)
-				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
-				.setParameter("id", postId).getSingleResult();
-	}
-
+		
 }

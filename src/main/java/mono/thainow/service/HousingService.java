@@ -14,4 +14,10 @@ public interface HousingService {
 	Housing getHousingFromUpdateRequest(Housing housing, HousingRequest request);
 
 	void remove(Housing housing);
+
+	void updateHousing(Housing housing, HousingRequest request);
+
+	void disableHousing(Housing housing);
+
+	void activateHousing(Housing housing);
 }

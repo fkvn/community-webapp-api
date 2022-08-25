@@ -2,27 +2,31 @@ package mono.thainow.service.impl;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import mono.thainow.dao.PostDao;
 import mono.thainow.domain.post.Post;
-import mono.thainow.domain.post.PostStatus;
+import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.post.deal.Deal;
 import mono.thainow.domain.post.deal.DealPost;
 import mono.thainow.domain.post.housing.Housing;
 import mono.thainow.domain.post.housing.HousingPost;
 import mono.thainow.domain.post.job.Job;
 import mono.thainow.domain.post.job.JobPost;
+import mono.thainow.domain.post.marketplace.Marketplace;
+import mono.thainow.domain.post.marketplace.MarketplacePost;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.rest.request.DealRequest;
 import mono.thainow.rest.request.HousingRequest;
 import mono.thainow.rest.request.JobRequest;
+import mono.thainow.rest.request.MarketplaceRequest;
+import mono.thainow.rest.request.PostRequest;
 import mono.thainow.service.DealService;
 import mono.thainow.service.HousingService;
 import mono.thainow.service.JobService;
+import mono.thainow.service.MarketplaceService;
 import mono.thainow.service.PostService;
 
 @Service
@@ -33,76 +37,17 @@ public class PostServiceImpl implements PostService {
 
 	@Autowired
 	private DealService dealService;
-	
+
 	@Autowired
 	private JobService jobService;
-	
+
 	@Autowired
 	private HousingService housingService;
-	
-	@Override
-	public DealPost createPost(Profile owner, DealRequest request) {
 
-		Deal deal = dealService.createDeal(request);
+	@Autowired
+	private MarketplaceService marketplaceService;
 
-		DealPost dealPost = new DealPost(owner, deal);
-		dealPost = (DealPost) savePost(dealPost);
-
-		return dealPost;
-	}
-
-	@Override
-	public Post savePost(Post post) {
-		return postDao.savePost(post);
-	}
-
-	@Override
-	public DealPost getValidDealPost(Long postId) {
-		return postDao.getValidDealPost(postId);
-	}
-
-	@Override
-	public void updatePost(DealPost dealPost, DealRequest request) {
-
-		Deal deal = dealService.getDealFromUpdateRequest(dealPost.getDeal(), request);
-
-		dealService.saveDeal(deal);
-
-	}
-
-	@Override
-	public void removePost(DealPost dealPost) {
-
-//		remove deal
-		dealService.remove(dealPost.getDeal());
-
-//		delete deal post
-		postDao.deletePost(dealPost.getId());
-
-	}
-
-	@Override
-	public void disablePost(DealPost dealPost) {
-
-		Deal deal = dealPost.getDeal();
-
-		deal.setStatus(PostStatus.DISABLED);
-
-		dealService.saveDeal(deal);
-
-	}
-
-	@Override
-	public DealPost activatePost(DealPost dealPost) {
-
-		Deal deal = dealPost.getDeal();
-
-		deal.setStatus(PostStatus.PRIVATE);
-
-		dealService.saveDeal(deal);
-
-		return dealPost;
-	}
+//	=============================================================
 
 	@Override
 	public List<Post> getPosts(Profile profile) {
@@ -110,135 +55,167 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
+	public void removePosts(List<Post> posts) {
+		posts.forEach(post -> {
+			removePost(post);
+		});
+	}
+
+	@Override
 	public void disablePost(List<Post> posts) {
-
 		posts.forEach(post -> {
-			switch (post.getType()) {
-			case "DEAL_POST":
-				disablePost((DealPost) post);
-				break;
-			default:
-				break;
-			}
-
+			disablePost(post);
 		});
 	}
+//	=============================================================
 
 	@Override
-	public void removePost(List<Post> posts) {
-		posts.forEach(post -> {
-			switch (post.getType()) {
-			case "DEAL_POST":
-				removePost((DealPost) post);
-				break;
-			default:
-				break;
-			}
-		});
+	public Post getValidPost(Long postId, PostType type) {
+		return postDao.getValidPost(postId, type);
 	}
 
 	@Override
-	public JobPost createPost(Profile postOwner, @Valid JobRequest request) {
-		Job job = jobService.createJob(request);
+	public Post createPost(Profile owner, PostRequest request) {
 
-		JobPost jobPost = new JobPost(postOwner, job);
-		jobPost = (JobPost) savePost(jobPost);
+		Post newPost = null;
 
-		return jobPost;
+		switch (request.getPostType()) {
+		case DEAL_POST: {
+			Deal deal = dealService.createDeal((DealRequest) request);
+			newPost = new DealPost(owner, deal);
+		}
+			break;
+		case JOB_POST: {
+			Job job = jobService.createJob((JobRequest) request);
+			newPost = new JobPost(owner, job);
+		}
+			break;
+		case HOUSING_POST: {
+			Housing housing = housingService.createHousing((HousingRequest) request);
+			newPost = new HousingPost(owner, housing);
+		}
+			break;
+		case MARKETPLACE_POST: {
+			Marketplace marketplace = marketplaceService.createMarketplace((MarketplaceRequest) request);
+			newPost = new MarketplacePost(owner, marketplace);
+		}
+			break;
+		default:
+			break;
+		}
+
+		Assert.isTrue(newPost != null, "Failed to create new post!");
+
+		newPost = savePost(newPost);
+
+		return newPost;
 	}
 
 	@Override
-	public JobPost getValidJobPost(Long postId) {
-		return postDao.getValidJobPost(postId);
+	public void updatePost(Post post, Object request) {
+
+		switch (post.getType()) {
+		case DEAL_POST: {
+			dealService.updateDeal(((DealPost) post).getDeal(), (DealRequest) request);
+		}
+			break;
+		case JOB_POST: {
+			jobService.updateJob(((JobPost) post).getJob(), (JobRequest) request);
+		}
+			break;
+		case HOUSING_POST: {
+			housingService.updateHousing(((HousingPost) post).getHousing(), (HousingRequest) request);
+		}
+			break;
+		case MARKETPLACE_POST: {
+			marketplaceService.updateMarketplace(((MarketplacePost) post).getMarketplace(),
+					(MarketplaceRequest) request);
+		}
+			break;
+		default:
+			break;
+		}
+
 	}
 
 	@Override
-	public void updatePost(JobPost jobPost, JobRequest request) {
-		Job job = jobService.getJobFromUpdateRequest(jobPost.getJob(), request);
+	public void removePost(Post post) {
 
-		jobService.saveJob(job);
+//		remove related entity
+		switch (post.getType()) {
+		case DEAL_POST:
+			dealService.remove(((DealPost) post).getDeal());
+			break;
+		case JOB_POST:
+			jobService.remove(((JobPost) post).getJob());
+			break;
+		case HOUSING_POST:
+			housingService.remove(((HousingPost) post).getHousing());
+			break;
+		case MARKETPLACE_POST:
+			marketplaceService.remove(((MarketplacePost) post).getMarketplace());
+			break;
+		default:
+			break;
+		}
+
+//		delete post
+		postDao.deletePost(post.getId());
+
 	}
 
 	@Override
-	public void removePost(JobPost jobPost) {
-//		remove job
-		jobService.remove(jobPost.getJob());
+	public Post activatePost(Post post) {
 
-//		delete job post
-		postDao.deletePost(jobPost.getId());
+		switch (post.getType()) {
+		case DEAL_POST:
+			dealService.activateDeal(((DealPost) post).getDeal());
+			break;
+		case JOB_POST:
+			jobService.activateJob(((JobPost) post).getJob());
+			break;
+		case HOUSING_POST:
+			housingService.activateHousing(((HousingPost) post).getHousing());
+			break;
+		case MARKETPLACE_POST:
+			marketplaceService.activateMarketplace(((MarketplacePost) post).getMarketplace());
+			break;
+		default:
+			break;
+		}
+
+		return post;
 	}
 
 	@Override
-	public JobPost activatePost(JobPost jobPost) {
-		Job job = jobPost.getJob();
+	public void disablePost(Post post) {
 
-		job.setStatus(PostStatus.PRIVATE);
+		switch (post.getType()) {
+		case DEAL_POST: {
+			dealService.disableDeal(((DealPost) post).getDeal());
+		}
+			break;
+		case JOB_POST: {
+			jobService.disableJob(((JobPost) post).getJob());
+		}
+			break;
+		case HOUSING_POST: {
+			housingService.disableHousing(((HousingPost) post).getHousing());
+		}
+			break;
+		case MARKETPLACE_POST: {
+			marketplaceService.disableMarketplace(((MarketplacePost) post).getMarketplace());
+		}
+			break;
+		default:
+			break;
+		}
 
-		jobService.saveJob(job);
-
-		return jobPost;
 	}
 
 	@Override
-	public void disablePost(JobPost jobPost) {
-		Job job = jobPost.getJob();
-
-		job.setStatus(PostStatus.DISABLED);
-
-		jobService.saveJob(job);
-	}
-
-	@Override
-	public HousingPost createPost(Profile postOwner, @Valid HousingRequest request) {
-		Housing housing = housingService.createHousing(request);
-
-		HousingPost housingPost = new HousingPost(postOwner, housing);
-		housingPost = (HousingPost) savePost(housingPost);
-
-		return housingPost;
-	}
-
-	@Override
-	public HousingPost getValidHousingPost(Long postId) {
-		return postDao.getValidHousingPost(postId);
-	}
-
-	@Override
-	public void updatePost(HousingPost housingPost, HousingRequest request) {
-		Housing housing = housingService.getHousingFromUpdateRequest(housingPost.getHousing(), request);
-
-		housingService.saveHousing(housing);
-		
-	}
-
-	@Override
-	public void removePost(HousingPost housingPost) {
-//		remove housing
-		housingService.remove(housingPost.getHousing());
-
-//		delete deal post
-		postDao.deletePost(housingPost.getId());
-		
-	}
-
-	@Override
-	public HousingPost activatePost(HousingPost housingPost) {
-		Housing housing = housingPost.getHousing();
-
-		housing.setStatus(PostStatus.PRIVATE);
-
-		housingService.saveHousing(housing);
-
-		return housingPost;
-	}
-
-	@Override
-	public void disablePost(HousingPost housingPost) {
-		Housing housing = housingPost.getHousing();
-
-		housing.setStatus(PostStatus.DISABLED);
-
-		housingService.saveHousing(housing);
+	public Post savePost(Post post) {
+		return postDao.savePost(post);
 	}
 
 }

@@ -22,7 +22,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
+import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
+import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.post.housing.HousingPost;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.rest.request.HousingRequest;
@@ -45,29 +47,29 @@ public class HousingPostController {
 	@Autowired
 	ProfileService profileService;
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	@AuthenticatedAccess
-	public Long createHousing(@Valid @RequestBody HousingRequest request) {
-
-		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		Assert.isTrue(profileId != null, "Missing profile information!");
-
-		Profile postOwner = profileService.getProfile(profileId);
-
-		AuthUtil.authorizedAccess(postOwner, true);
-
-		HousingPost housing = postService.createPost(postOwner, request);
-
-		return housing.getId();
-	}
+//	@PostMapping
+//	@ResponseStatus(HttpStatus.CREATED)
+//	@AuthenticatedAccess
+//	public Long createHousing(@Valid @RequestBody HousingRequest request) {
+//
+//		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
+//		Assert.isTrue(profileId != null, "Missing profile information!");
+//
+//		Profile postOwner = profileService.getProfile(profileId);
+//
+//		AuthUtil.authorizedAccess(postOwner, true);
+//
+//		Post newPost = postService.createPost(postOwner, PostType.HOUSING_POST, request);
+//
+//		return newPost.getId();
+//	}
 
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
 	public HousingPost getHousing(@PathVariable Long postId, @RequestParam(required = false) Long profileId) {
 
-		HousingPost housingPost = postService.getValidHousingPost(postId);
+		HousingPost housingPost = (HousingPost) postService.getValidPost(postId, PostType.HOUSING_POST);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
@@ -84,7 +86,7 @@ public class HousingPostController {
 	@AuthenticatedAccess
 	public void updateHousing(@PathVariable Long postId, @RequestBody HousingRequest request) {
 
-		HousingPost housingPost = postService.getValidHousingPost(postId);
+		HousingPost housingPost = (HousingPost) postService.getValidPost(postId, PostType.HOUSING_POST);
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
@@ -102,7 +104,7 @@ public class HousingPostController {
 	@AuthenticatedAccess
 	public void removeHousing(@PathVariable Long postId, @RequestParam Long profileId) {
 
-		HousingPost housingPost = postService.getValidHousingPost(postId);
+		HousingPost housingPost = (HousingPost) postService.getValidPost(postId, PostType.HOUSING_POST);
 
 		Profile postOwner = profileService.getProfile(profileId);
 
@@ -111,14 +113,14 @@ public class HousingPostController {
 		postService.removePost(housingPost);
 
 	}
-	
+
 	@PatchMapping("/{postId}/activate")
 	@ResponseStatus(HttpStatus.OK)
 	@AdminAndSAdminAccess
-	public HousingPost activateHousing(@PathVariable Long postId) {
+	public Post activateHousing(@PathVariable Long postId) {
 
-		HousingPost housingPost = postService.getValidHousingPost(postId);
-		
+		HousingPost housingPost = (HousingPost) postService.getValidPost(postId, PostType.HOUSING_POST);
+
 		return postService.activatePost(housingPost);
 	}
 
@@ -127,7 +129,7 @@ public class HousingPostController {
 	@AdminAndSAdminAccess
 	public void disableHousing(@PathVariable Long postId) {
 
-		HousingPost housingPost = postService.getValidHousingPost(postId);
+		HousingPost housingPost = (HousingPost) postService.getValidPost(postId, PostType.HOUSING_POST);
 
 		postService.disablePost(housingPost);
 

@@ -205,4 +205,22 @@ public class HousingServiceImpl implements HousingService {
 		saveHousing(housing);
 	}
 
+	@Override
+	public void updateHousing(Housing housing, HousingRequest request) {
+		housing = getHousingFromUpdateRequest(housing, request);
+		saveHousing(housing);
+	}
+
+	@Override
+	public void disableHousing(Housing housing) {
+		housing.setStatus(PostStatus.DISABLED);
+		saveHousing(housing);
+	}
+
+	@Override
+	public void activateHousing(Housing housing) {
+		housing.setStatus(PostStatus.PRIVATE);
+		saveHousing(housing);
+	}
+
 }
