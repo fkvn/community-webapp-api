@@ -53,6 +53,11 @@ public class PostServiceImpl implements PostService {
 	public List<Post> getPosts(Profile profile) {
 		return postDao.getPosts(profile);
 	}
+	
+	@Override
+	public List<Post> getPosts(Profile postOwner, PostType postType) {
+		return postDao.getPosts(postOwner, postType);
+	}
 
 	@Override
 	public void removePosts(List<Post> posts) {
@@ -68,6 +73,11 @@ public class PostServiceImpl implements PostService {
 		});
 	}
 //	=============================================================
+
+	@Override
+	public Post getPost(Long postId) {
+		return postDao.getPost(postId);
+	}
 
 	@Override
 	public Post getValidPost(Long postId, PostType type) {
@@ -217,5 +227,7 @@ public class PostServiceImpl implements PostService {
 	public Post savePost(Post post) {
 		return postDao.savePost(post);
 	}
+
+
 
 }

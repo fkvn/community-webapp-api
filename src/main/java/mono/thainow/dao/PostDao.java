@@ -17,4 +17,6 @@ public interface PostDao {
 	public Post savePost(Post post);
 
 	public void deletePost(long id);
+
+	public List<Post> getPosts(Profile postOwner, PostType postType);
 }

@@ -1,13 +1,17 @@
 package mono.thainow.rest.controller;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
@@ -34,7 +39,6 @@ import mono.thainow.util.AuthUtil;
 import mono.thainow.view.View;
 
 @RestController
-//@PreAuthorize("hasAnyAuthority('ALL_POST_MANAGE')")
 @RequestMapping("/api/posts")
 public class PostController {
 
@@ -62,6 +66,42 @@ public class PostController {
 		return newPost.getId();
 	}
 
+//	updatePost Helper
+	private void updatePostFromRequest(Long postId, PostRequest request) {
+
+		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
+		Assert.isTrue(profileId != null, "Missing profile information!");
+
+		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
+		Assert.isTrue(type != null, "Invalid Post Type!");
+
+		Profile postOwner = profileService.getProfile(profileId);
+
+		Post post = postService.getValidPost(postId, PostType.DEAL_POST);
+
+		AuthUtil.authorizedAccess(postOwner, post, true);
+
+		postService.updatePost(post, request);
+	}
+
+	@GetMapping
+	@ResponseStatus(HttpStatus.OK)
+	public List<Post> getPosts(@RequestParam Long profileId, @RequestParam PostType postType) {
+
+		Profile postOwner = profileService.getProfile(profileId);
+
+		List<Post> posts = postService.getPosts(postOwner, postType);
+
+//		anonymousUser -> public request
+		if (AuthUtil.getAuthenticatedUser() == null || !AuthUtil.authorizedAccess(postOwner, false)) {
+			posts = posts.stream().filter(post -> post.getStatus() == PostStatus.AVAILABLE)
+					.collect(Collectors.toList());
+		}
+
+		return posts;
+
+	}
+
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
@@ -86,21 +126,21 @@ public class PostController {
 	public Long createDealPost(@Valid @RequestBody DealRequest request) {
 		return createPostFromRequest(request);
 	}
-	
+
 	@PostMapping("/jobs")
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	public Long createJobPost(@Valid @RequestBody JobRequest request) {
 		return createPostFromRequest(request);
 	}
-	
+
 	@PostMapping("/housings")
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	public Long createHousingPost(@Valid @RequestBody HousingRequest request) {
 		return createPostFromRequest(request);
 	}
-	
+
 	@PostMapping("/marketplaces")
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
@@ -108,7 +148,68 @@ public class PostController {
 		return createPostFromRequest(request);
 	}
 
+	@PatchMapping("/deals/{postId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@AuthenticatedAccess
+	public void updateDeal(@PathVariable Long postId, @Valid @RequestBody DealRequest request) {
+		updatePostFromRequest(postId, request);
+	}
 
+	@PatchMapping("/jobs/{postId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@AuthenticatedAccess
+	public void updateJob(@PathVariable Long postId, @Valid @RequestBody JobRequest request) {
+		updatePostFromRequest(postId, request);
+	}
 
+	@PatchMapping("/housing/{postId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@AuthenticatedAccess
+	public void updateHousing(@PathVariable Long postId, @Valid @RequestBody HousingRequest request) {
+		updatePostFromRequest(postId, request);
+	}
 
+	@PatchMapping("/marketplace/{postId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@AuthenticatedAccess
+	public void updateMarketplace(@PathVariable Long postId, @Valid @RequestBody MarketplaceRequest request) {
+		updatePostFromRequest(postId, request);
+	}
+
+	@PatchMapping("/{postId}/disable")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@AdminAndSAdminAccess
+	public void disablePost(@PathVariable Long postId) {
+
+		Post post = postService.getPost(postId);
+
+		postService.disablePost(post);
+
+	}
+
+	@PatchMapping("/{postId}/activate")
+	@ResponseStatus(HttpStatus.OK)
+	@AdminAndSAdminAccess
+	@JsonView(View.Detail.class)
+	public Post activateDeal(@PathVariable Long postId) {
+
+		Post post = postService.getPost(postId);
+
+		return postService.activatePost(post);
+	}
+
+	@DeleteMapping("/{postId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@AuthenticatedAccess
+	public void removeDeal(@PathVariable Long postId, @RequestParam Long profileId) {
+
+		Post post = postService.getPost(postId);
+
+		Profile postOwner = profileService.getProfile(profileId);
+
+		AuthUtil.authorizedAccess(postOwner, post, true);
+
+		postService.removePost(post);
+
+	}
 }

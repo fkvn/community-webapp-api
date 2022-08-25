@@ -10,12 +10,16 @@ import mono.thainow.rest.request.PostRequest;
 public interface PostService {
 	
 	List<Post> getPosts(Profile profile);
+	
+	List<Post> getPosts(Profile postOwner, PostType postType);
 
 	void removePosts(List<Post> posts);
 	
 	void disablePost(List<Post> posts);
 	
 //	============================================
+	
+	Post getPost(Long postId);
 	
 	Post getValidPost(Long postId, PostType type);
 
@@ -30,5 +34,9 @@ public interface PostService {
 	void removePost(Post post);
 	
 	Post savePost(Post post);
+
+	
+
+	
 
 }

@@ -30,15 +30,42 @@ public class PostDaoImpl implements PostDao {
 	}
 
 	@Override
+	public List<Post> getPosts(Profile postOwner, PostType postType) {
+
+		String sql = "";
+
+		switch (postType) {
+		case DEAL_POST:
+			sql = "from Post where owner =: owner and deal.status IN (:status)";
+			break;
+		case JOB_POST:
+			sql = "from Post where owner =: owner and job.status IN (:status)";
+			break;
+		case HOUSING_POST:
+			sql = "from Post where owner =: owner and housing.status IN (:status)";
+			break;
+		case MARKETPLACE_POST:
+			sql = "from Post where owner =: owner and marketplace.status IN (:status)";
+			break;
+		default:
+			break;
+		}
+
+		return entityManager.createQuery(sql, Post.class)
+				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
+				.setParameter("owner", postOwner).getResultList();
+	}
+
+	@Override
 	public Post getPost(long id) {
 		return entityManager.find(Post.class, id);
 	}
 
 	@Override
 	public Post getValidPost(Long postId, PostType type) {
-		
+
 		String sql = "";
-		
+
 		switch (type) {
 		case DEAL_POST:
 			sql = "from Post where deal.status IN (:status) and id =:id";
@@ -60,7 +87,7 @@ public class PostDaoImpl implements PostDao {
 				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
 				.setParameter("id", postId).getSingleResult();
 	}
-	
+
 //	===========================================
 
 	@Override
@@ -75,5 +102,5 @@ public class PostDaoImpl implements PostDao {
 		Post post = entityManager.find(Post.class, id);
 		entityManager.remove(post);
 	}
-		
+
 }
