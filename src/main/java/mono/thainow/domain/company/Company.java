@@ -17,6 +17,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -24,8 +25,13 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.GeoPointBinding;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.Latitude;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.Longitude;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -48,8 +54,9 @@ import mono.thainow.view.View;
 @EqualsAndHashCode
 @Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = false) })
 @Indexed
+@GeoPointBinding(fieldName = "companyLocation", sortable =Sortable.YES)
 @JsonView(View.Basic.class)
-@Audited( withModifiedFlag = true )
+@Audited(withModifiedFlag = true)
 public class Company implements Serializable {
 
 	/**
@@ -71,6 +78,7 @@ public class Company implements Serializable {
 
 	@NotEmpty
 	@Column(name = "COMPANY_INDUSTRY")
+	@FullTextField
 	private String industry;
 
 	@OneToOne
@@ -83,6 +91,7 @@ public class Company implements Serializable {
 	@NotNull
 	@Enumerated(EnumType.STRING)
 	@Column(name = "COMPANY_STATUS")
+	@KeywordField
 	private CompanyStatus status = CompanyStatus.UNREGISTERED;
 
 	@UpdateTimestamp
@@ -92,27 +101,28 @@ public class Company implements Serializable {
 
 	@OneToMany
 	private List<Storage> coverPictures = new ArrayList<>();
-	
+
 //	Public Detail Information
-	
+
 	@Lob
 	@Column(name = "COMPANY_DESCRIPTION")
 	@JsonView(View.Detail.class)
+	@FullTextField
 	private String description;
-	
+
 	@Column(name = "COMPANY_EMAIL")
 	@JsonView(View.Detail.class)
 	private String email;
-	
+
 	@Column(name = "COMPANY_PHONE")
 	@JsonView(View.Detail.class)
 	private String phone;
-	
+
 	@Column(name = "COMPANY_WEBSITE")
 //	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Company website must be a valid URL")
 	@JsonView(View.Detail.class)
 	private String website;
-	
+
 	@Column(name = "COMPANY_FOUNDED")
 	@JsonView(View.Detail.class)
 	private String founded;
@@ -124,13 +134,13 @@ public class Company implements Serializable {
 	@Column(name = "COMPANY_SIZE")
 	@JsonView(View.Detail.class)
 	private String size;
-	
+
 //	Private Detail Information
-	
+
 	@Column(name = "IS_COMPANY_DESCRIPTION_PUBLIC")
 	@JsonView(View.Detail.class)
 	private boolean descriptionPublic = true;
-	
+
 	@Column(name = "IS_COMPANY_EMAIL_PUBLIC")
 	@JsonView(View.Detail.class)
 	private boolean emailPublic = true;
@@ -142,19 +152,19 @@ public class Company implements Serializable {
 	@Column(name = "IS_COMPANY_WEBSITE_PUBLIC")
 	@JsonView(View.Detail.class)
 	private boolean websitePublic = true;
-	
+
 	@Column(name = "IS_COMPANY_SIZE_PUBLIC")
 	@JsonView(View.Detail.class)
 	private boolean sizePublic = true;
-	
+
 //	Full Detail Information
-	
+
 	@CreationTimestamp
 	@Column(name = "COMPANY_CREATED_ON")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonView(View.FullDetail.class)
 	private Date createdOn = new Date();
-	
+
 	@Column(name = "IS_COMPANY_INFORMAL")
 	@JsonView(View.FullDetail.class)
 	private boolean informalCompany = false;
@@ -162,9 +172,22 @@ public class Company implements Serializable {
 	@Column(name = "IS_COMPANY_EMAIL_VERIFIED")
 	@JsonView(View.FullDetail.class)
 	private boolean emailVerified = false;
-	
+
 	@Column(name = "IS_COMPANY_PHONE_VERIFIED")
 	@JsonView(View.FullDetail.class)
 	private boolean phoneVerified = false;
-	
+
+//	
+	@Latitude
+	private Double lat;
+
+	@Longitude
+	private Double lng;
+
+	@PrePersist
+	private void updateLocation() {
+		this.lat = this.getLocation().getLat();
+		this.lng = this.getLocation().getLng();
+	}
+
 }

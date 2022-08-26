@@ -11,7 +11,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.dao.CompanyDao;
-import mono.thainow.dao.ElasticSearchDao;
+import mono.thainow.dao.SearchDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
@@ -42,7 +42,7 @@ public class CompanyServiceImpl implements CompanyService {
 	private StorageService storageService;
 
 	@Autowired
-	private ElasticSearchDao elasticSearchDao;
+	private SearchDao elasticSearchDao;
 
 	@Override
 	public List<Company> getAllCompanies() {

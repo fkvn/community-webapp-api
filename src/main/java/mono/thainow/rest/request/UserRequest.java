@@ -3,13 +3,9 @@ package mono.thainow.rest.request;
 import java.util.List;
 
 import lombok.Getter;
-import lombok.Setter;
-
 
 @Getter
-@Setter
 public class UserRequest {
-	
 	
 //	Sign UP ONLY  - if false, otp was not verified
 	private boolean isVerified = false;

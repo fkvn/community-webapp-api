@@ -49,7 +49,7 @@ import mono.thainow.view.View;
 		@Index(name = "location_lng_UNIQUE", columnList = "LOCATION_LNG", unique = true) })
 @JsonView(View.Basic.class)
 @Audited( withModifiedFlag = true )
-public class Location implements Serializable {
+public class Location implements Serializable{
 	/**
 	* 
 	*/

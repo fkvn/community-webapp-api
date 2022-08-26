@@ -58,8 +58,11 @@ public class CompanyProfileController {
 		Company company = companyService.createCompany(companyRequest);
 
 		User account = userService.getByUserId(AuthUtil.getAuthenticatedUser().getId());
-		account.setRole(UserRole.BUSINESS);
-		account = userService.saveUser(account);
+
+		if (account.getRole() == UserRole.CLASSIC) {
+			account.setRole(UserRole.BUSINESS);
+			account = userService.saveUser(account);
+		}
 
 		return profileService.createProfile(account, company);
 	}
@@ -101,7 +104,7 @@ public class CompanyProfileController {
 			@Valid @RequestBody CompanyRequest request) {
 
 		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
-		
+
 		AuthUtil.authorizedAccess(profile, true);
 
 //		update company
@@ -118,7 +121,7 @@ public class CompanyProfileController {
 	public void removeCompanyProfile(@PathVariable Long profileId) {
 
 		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
-		
+
 		AuthUtil.authorizedAccess(profile, true);
 
 //		disable company profile 
@@ -140,7 +143,7 @@ public class CompanyProfileController {
 
 //		get profile
 		CompanyProfile profile = profileService.getValidCompanyProfile(profileId);
-		
+
 		AuthUtil.authorizedAccess(profile, true);
 
 //		get storage

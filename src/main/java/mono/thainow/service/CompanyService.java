@@ -34,4 +34,5 @@ public interface CompanyService {
 	void remove(Company company);
 
 	Company getCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request);
+
 }
