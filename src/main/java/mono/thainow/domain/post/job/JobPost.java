@@ -73,7 +73,7 @@ public class JobPost extends Post {
 	}
 
 	@Override
-	public Date getLastUpdatedOn() {
+	public Date getUpdatedOn() {
 		return this.getJob().getUpdatedOn();
 	}
 

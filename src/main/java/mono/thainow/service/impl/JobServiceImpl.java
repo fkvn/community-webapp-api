@@ -39,13 +39,13 @@ public class JobServiceImpl implements JobService {
 		Job job = new Job();
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse("");
+		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
 		Assert.isTrue(!title.isEmpty(), "Job title is required!");
 		job.setTitle(title);
 
 //		location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("");
-		String address = Optional.ofNullable(request.getAddress()).orElse("");
+		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
+		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Job location is required!");
 		job.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 
@@ -55,7 +55,7 @@ public class JobServiceImpl implements JobService {
 		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
 		Assert.isTrue(pictures.size() > 0, "Job picture is required!");
 		job.setPictures(pictures);
-		
+
 //		contact information
 		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new HashMap<>());
 		Assert.isTrue(contactInfo.size() > 0, "Job contact information is required!");
@@ -64,7 +64,7 @@ public class JobServiceImpl implements JobService {
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			job.setDescription(description);
+			job.setDescription(description.trim());
 		}
 
 //		positions
@@ -72,17 +72,23 @@ public class JobServiceImpl implements JobService {
 		if (positions != null && positions.size() > 0) {
 			job.setPositions(positions);
 		}
-		
+
+//		experience
+		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
+		if (experience != null) {
+			job.setExperience(experience.trim());
+		}
+
 //		salary
 		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
 		if (salary != null) {
-			job.setSalary(salary);
+			job.setSalary(salary.trim());
 		}
-		
-//		salary
+
+//		skills
 		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
 		if (skills != null) {
-			job.setSkills(skills);
+			job.setSkills(skills.trim());
 		}
 
 //		expiration Date
@@ -113,7 +119,7 @@ public class JobServiceImpl implements JobService {
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse(null);
 		if (title != null) {
-			job.setTitle(title);
+			job.setTitle(title.trim());
 		}
 		Assert.isTrue(!job.getTitle().isEmpty(), "Job title is required!");
 
@@ -124,7 +130,7 @@ public class JobServiceImpl implements JobService {
 				"Invalid Location");
 		if (placeid != null && address != null) {
 			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Job location is required!");
-			job.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			job.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid.trim(), address.trim()));
 		}
 
 //		new cover pictures
@@ -134,7 +140,7 @@ public class JobServiceImpl implements JobService {
 			job.setPictures(pictures);
 		}
 		Assert.isTrue(job.getPictures().size() > 0, "Job picture is required!");
-		
+
 //		contact information
 		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
 		if (contactInfo != null && contactInfo.size() > 0) {
@@ -144,7 +150,7 @@ public class JobServiceImpl implements JobService {
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			job.setDescription(description);
+			job.setDescription(description.trim());
 		}
 
 //		positions
@@ -152,17 +158,23 @@ public class JobServiceImpl implements JobService {
 		if (positions != null && positions.size() > 0) {
 			job.setPositions(positions);
 		}
-		
+
+//		experience
+		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
+		if (experience != null) {
+			job.setExperience(experience.trim());
+		}
+
 //		salary
 		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
 		if (salary != null) {
-			job.setSalary(salary);
+			job.setSalary(salary.trim());
 		}
-		
-//		salary
+
+//		skills
 		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
 		if (skills != null) {
-			job.setSkills(skills);
+			job.setSkills(skills.trim());
 		}
 
 //		expiration Date
@@ -187,7 +199,6 @@ public class JobServiceImpl implements JobService {
 		saveJob(job);
 	}
 
-	
 	@Override
 	public void updateJob(Job job, JobRequest request) {
 		job = getJobFromUpdateRequest(job, request);

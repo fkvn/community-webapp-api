@@ -39,13 +39,13 @@ public class HousingServiceImpl implements HousingService {
 		Housing housing = new Housing();
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse("");
+		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
 		Assert.isTrue(!title.isEmpty(), "Housing title is required!");
 		housing.setTitle(title);
 
 //		location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("");
-		String address = Optional.ofNullable(request.getAddress()).orElse("");
+		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
+		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Housing location is required!");
 		housing.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 
@@ -62,9 +62,9 @@ public class HousingServiceImpl implements HousingService {
 		housing.setContactInfo(contactInfo);
 		
 //		interior information
-		Map<String, String> interior = Optional.ofNullable(request.getInterior()).orElse(null);
+		Map<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
 		if (interior !=null && interior.size() > 0) {
-			housing.setContactInfo(contactInfo);
+			housing.setInterior(interior);
 		}
 		
 //		amenities
@@ -76,25 +76,43 @@ public class HousingServiceImpl implements HousingService {
 //		type
 		String type = Optional.ofNullable(request.getType()).orElse(null);
 		if (type != null) {
-			housing.setType(type);
+			housing.setType(type.trim());
 		}
 		
-//		cost
-		String cost = Optional.ofNullable(request.getCost()).orElse(null);
-		if (cost != null) {
-			housing.setCost(cost);
+//		daily cost
+		Double dailyCost = Optional.ofNullable(request.getDailyCost()).orElse(null);
+		if (dailyCost != null) {
+			housing.setDailyCost(dailyCost);
+		}
+		
+//		monthly cost
+		Double monthlyCost = Optional.ofNullable(request.getMonthlyCost()).orElse(null);
+		if (monthlyCost != null) {
+			housing.setMonthlyCost(monthlyCost);
+		}
+		
+//		annual cost
+		Double annualCost = Optional.ofNullable(request.getAnnualCost()).orElse(null);
+		if (annualCost != null) {
+			housing.setAnnualCost(annualCost);
+		}
+		
+//		deposit cost
+		Double depositCost = Optional.ofNullable(request.getDepositCost()).orElse(null);
+		if (depositCost != null) {
+			housing.setDepositCost(depositCost);
 		}
 		
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			housing.setDescription(description);
+			housing.setDescription(description.trim());
 		}
 
 //		category
 		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			housing.setCategory(category);
+			housing.setCategory(category.trim());
 		}
 
 //		expiration Date
@@ -153,34 +171,58 @@ public class HousingServiceImpl implements HousingService {
 			housing.setContactInfo(contactInfo);
 		}
 
+//		interior information
+		Map<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
+		if (interior !=null && interior.size() > 0) {
+			housing.setInterior(interior);
+		}
+		
 //		amenities
 		List<String> amenities = Optional.ofNullable(request.getAmenities()).orElse(null);
 		if (amenities != null && amenities.size() > 0) {
 			housing.setAmenities(amenities);
 		}
-
+		
 //		type
 		String type = Optional.ofNullable(request.getType()).orElse(null);
 		if (type != null) {
-			housing.setType(type);
+			housing.setType(type.trim());
 		}
-
-//		cost
-		String cost = Optional.ofNullable(request.getCost()).orElse(null);
-		if (cost != null) {
-			housing.setCost(cost);
+		
+//		daily cost
+		Double dailyCost = Optional.ofNullable(request.getDailyCost()).orElse(null);
+		if (dailyCost != null) {
+			housing.setDailyCost(dailyCost);
 		}
-
+		
+//		monthly cost
+		Double monthlyCost = Optional.ofNullable(request.getMonthlyCost()).orElse(null);
+		if (monthlyCost != null) {
+			housing.setMonthlyCost(monthlyCost);
+		}
+		
+//		annual cost
+		Double annualCost = Optional.ofNullable(request.getAnnualCost()).orElse(null);
+		if (annualCost != null) {
+			housing.setAnnualCost(annualCost);
+		}
+		
+//		deposit cost
+		Double depositCost = Optional.ofNullable(request.getDepositCost()).orElse(null);
+		if (depositCost != null) {
+			housing.setDepositCost(depositCost);
+		}
+		
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			housing.setDescription(description);
+			housing.setDescription(description.trim());
 		}
 
 //		category
 		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			housing.setCategory(category);
+			housing.setCategory(category.trim());
 		}
 
 //		expiration Date

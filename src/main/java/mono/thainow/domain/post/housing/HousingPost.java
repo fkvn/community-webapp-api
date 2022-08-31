@@ -73,7 +73,7 @@ public class HousingPost extends Post {
 	}
 
 	@Override
-	public Date getLastUpdatedOn() {
+	public Date getUpdatedOn() {
 		return this.getHousing().getUpdatedOn();
 	}
 

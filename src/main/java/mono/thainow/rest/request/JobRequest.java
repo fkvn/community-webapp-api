@@ -26,6 +26,8 @@ public class JobRequest extends PostRequest {
 	
 	private String skills;
 	
+	private String experience;
+	
 	private String description;
 	
 	private Date expiredOn;

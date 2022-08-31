@@ -73,7 +73,7 @@ public class MarketplacePost extends Post {
 	}
 
 	@Override
-	public Date getLastUpdatedOn() {
+	public Date getUpdatedOn() {
 		return this.getMarketplace().getUpdatedOn();
 	}
 

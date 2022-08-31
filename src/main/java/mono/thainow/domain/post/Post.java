@@ -17,6 +17,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -82,7 +83,8 @@ public abstract class Post implements Serializable {
 
 	public abstract Map<String, String> getContactInfo();
 
-	public abstract Date getLastUpdatedOn();
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	public abstract Date getUpdatedOn();
 
 	@JsonView(View.Detail.class)
 	public abstract PostStatus getStatus();

@@ -1,7 +1,6 @@
 package mono.thainow.rest.controller;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,5 +78,48 @@ public class FullTextSearchController {
 				topLeft, bottomRight);
 	}
 
+	@GetMapping("/jobs")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@JsonView(View.Basic.class)
+	public SearchResponse<?> SearchJobs(@RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String position,
+			@RequestParam(defaultValue = "All") String experience,
+			@RequestParam(defaultValue = "All") String skills,
+			@RequestParam(defaultValue = "false") Boolean remote,
+			@RequestParam double centerLat,
+			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
+
+		return searchService.searchJob(keywords, position, experience, skills, remote, centerLat, centerLng, limit, page, sort, within, radius,
+				topLeft, bottomRight);
+	}
+	
+//	@GetMapping("/housing")
+//	@ResponseStatus(HttpStatus.ACCEPTED)
+//	@JsonView(View.Basic.class)
+//	public SearchResponse<?> SearchHousing(@RequestParam(defaultValue = "") String keywords,
+//			@RequestParam(defaultValue = "All") String type,
+//			@RequestParam(defaultValue = "Monthly") String costType,
+//			@RequestParam(defaultValue = "0") Long minCost,
+//			@RequestParam(defaultValue = "0") Long maxCost,
+//			@RequestParam(defaultValue = "0") Integer guest,
+//			@RequestParam(defaultValue = "0") Integer bed,
+//			@RequestParam(defaultValue = "0") Integer parking,
+//			@RequestParam(defaultValue = "0") Integer bath,
+////			@RequestParam(defaultValue = "0") String ,
+//			@RequestParam(defaultValue = "") List<String> remote,
+//			@RequestParam double centerLat,
+//			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
+//			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+//			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+//			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
+//			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
+//
+//		return searchService.searchJob(keywords, position, experience, skills, remote, centerLat, centerLng, limit, page, sort, within, radius,
+//				topLeft, bottomRight);
+//	}
 
 }

@@ -13,7 +13,7 @@ import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.post.deal.Deal;
-import mono.thainow.domain.post.deal.DealPost;
+import mono.thainow.domain.post.job.Job;
 import mono.thainow.rest.response.SearchResponse;
 import mono.thainow.service.PostService;
 import mono.thainow.service.ProfileService;
@@ -71,6 +71,30 @@ public class SearchServiceImpl implements SearchService {
 
 		List<Post> posts = deals.stream().map(deal -> 
 			postService.getValidPost(PostType.DEAL_POST, deal)
+		).collect(Collectors.toList());
+		
+		
+		searchRes.setFetchResult(posts);
+
+		return searchRes;
+	}
+
+	@Override
+	public SearchResponse<?> searchJob(String keywords, String position, String experience, String skills,
+			Boolean remote, double centerLat, double centerLng, int limit, int page, String sort, String within,
+			int radius, List<Double> topLeft, List<Double> bottomRight) {
+		
+		SearchResult<Job> result = searchDao.searchJob(keywords, position, experience, skills, remote, limit, page, centerLat, centerLng,
+				sort, within, radius, topLeft, bottomRight);
+
+		SearchResponse<Post> searchRes = new SearchResponse<Post>();
+		searchRes.setTotalCount(result.total().hitCountLowerBound());
+		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
+
+		List<Job> jobs = result.hits();
+
+		List<Post> posts = jobs.stream().map(job -> 
+			postService.getValidPost(PostType.JOB_POST, job)
 		).collect(Collectors.toList());
 		
 		

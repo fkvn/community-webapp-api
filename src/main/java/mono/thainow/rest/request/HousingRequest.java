@@ -20,13 +20,19 @@ public class HousingRequest extends PostRequest {
 	
 	private Map<String, String> contactInfo;
 	
-	private Map<String, String> interior;
+	private Map<String, Integer> interior;
 	
 	private List<String> amenities;
 	
 	private String type;
 	
-	private String cost;
+	private Double dailyCost;
+	
+	private Double monthlyCost;
+	
+	private Double annualCost;
+	
+	private Double depositCost;
 	
 	private String category;
 	

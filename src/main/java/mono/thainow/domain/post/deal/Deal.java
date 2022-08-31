@@ -24,11 +24,11 @@ import javax.persistence.OneToMany;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
-import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.GeoPointBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
@@ -75,6 +75,7 @@ public class Deal implements Serializable {
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "DEAL_UPDATED_ON")
+	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
 
 	@Enumerated(EnumType.STRING)
@@ -106,7 +107,7 @@ public class Deal implements Serializable {
 
 	@Column(name = "DEAL_CATEGORY")
 	@JsonView(View.Detail.class)
-	@KeywordField(projectable = Projectable.YES)
+	@KeywordField
 	@FullTextField(name = "category_search")
 	private String category;
 

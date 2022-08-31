@@ -24,6 +24,14 @@ import javax.persistence.OneToMany;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.GeoPointBinding;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,6 +53,7 @@ import mono.thainow.view.View;
 @Entity
 @JsonView(View.Basic.class)
 @Audited(withModifiedFlag = true)
+@Indexed
 public class Housing implements Serializable {
 
 	/**
@@ -60,19 +69,24 @@ public class Housing implements Serializable {
 	private Long id;
 
 	@Column(name = "HOUSING_TITLE")
+	@FullTextField
 	private String title;
 
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "HOUSING_UPDATED_ON")
+	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "HOUSING_STATUS")
+	@KeywordField
 	private PostStatus status = PostStatus.DISABLED;
 
 	@ManyToOne
 	@JoinColumn(name = "HOUSING_LOCATION_ID")
+	@GeoPointBinding(sortable = Sortable.YES)
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Location location;
 
 	@OneToMany
@@ -93,18 +107,37 @@ public class Housing implements Serializable {
 
 	@Column(name = "HOUSING_TYPE")
 	@JsonView(View.Detail.class)
+	@KeywordField
 	private String type;
 
-	@Column(name = "HOUSING_COST")
+	@Column(name = "HOUSING_DAILY_COST")
 	@JsonView(View.Detail.class)
-	private String cost;
+	@GenericField
+	private Double dailyCost;
+	
+	@Column(name = "HOUSING_MONTHLY_COST")
+	@JsonView(View.Detail.class)
+	@GenericField
+	private Double monthlyCost;
+	
+	@Column(name = "HOUSING_ANNUAL_COST")
+	@JsonView(View.Detail.class)
+	@GenericField
+	private Double annualCost;
+	
+	@Column(name = "HOUSING_DEPOSIT_COST")
+	@JsonView(View.Detail.class)
+	@GenericField
+	private Double depositCost;
 
 	@Column(name = "HOUSING_CATEGORY")
 	@JsonView(View.Detail.class)
+	@KeywordField
 	private String category;
 
 	@JsonView(View.Detail.class)
 	@ElementCollection
+	@FullTextField
 	private List<String> amenities;
 
 	@ElementCollection
@@ -112,11 +145,13 @@ public class Housing implements Serializable {
 	@Column(name = "INTERIOR_VALUE")
 	@CollectionTable(name = "HOUSING_INTERIOR", joinColumns = @JoinColumn(name = "HOUSING_ID"))
 	@JsonView(View.Detail.class)
-	private Map<String, String> interior = new HashMap<>();
+	@GenericField
+	private Map<String, Integer> interior = new HashMap<>();
 
 	@Lob
 	@Column(name = "HOUSING_DESCRIPTION")
 	@JsonView(View.Detail.class)
+	@FullTextField
 	private String description;
 
 //	Full Detail Information
