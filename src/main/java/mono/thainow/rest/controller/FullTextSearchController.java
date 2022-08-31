@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -15,9 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.domain.company.Company;
-import mono.thainow.rest.request.SearchRequest;
+import mono.thainow.rest.response.SearchResponse;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.FullTextSearchService;
+import mono.thainow.service.SearchService;
 import mono.thainow.view.View;
 
 @RestController
@@ -51,9 +51,16 @@ public class FullTextSearchController {
 	@GetMapping("/companies")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
-	public List<Company> SearchCompanies(@RequestBody SearchRequest request) {
-		return searchService.searchCompany(request.getKeywords(), request.getLimit(), request.getPage(),
-				request.getCenter());
+	public SearchResponse<?> SearchCompanies(@RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String industry, @RequestParam double centerLat,
+			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
+
+		return searchService.searchCompany(industry, keywords, centerLat, centerLng, limit, page, sort, within, radius,
+				topLeft, bottomRight);
 	}
 
 }

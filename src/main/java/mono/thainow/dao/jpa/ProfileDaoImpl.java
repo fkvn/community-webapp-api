@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import mono.thainow.dao.ProfileDao;
+import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
@@ -92,6 +93,13 @@ public class ProfileDaoImpl implements ProfileDao {
 	public void deleteProfile(Long profileId) {
 		Profile profile = entityManager.find(Profile.class, profileId);
 		entityManager.remove(profile);
+	}
+
+	@Override
+	public CompanyProfile getValidCompanyProfile(Company com) {
+		return entityManager
+				.createQuery("from CompanyProfile where company =: com and company.status = :status", CompanyProfile.class)
+				.setParameter("com", com).setParameter("status", CompanyStatus.REGISTERED).getSingleResult();
 	}
 
 }

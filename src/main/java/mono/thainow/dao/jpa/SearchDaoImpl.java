@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hibernate.search.engine.search.query.SearchResult;
+import org.hibernate.search.engine.spatial.DistanceUnit;
+import org.hibernate.search.engine.spatial.GeoBoundingBox;
 import org.hibernate.search.engine.spatial.GeoPoint;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
@@ -72,15 +75,14 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public List<Company> searchCompany(String keywords, int limit, int page, Location locationCenter) {
-
-		List<Company> companies = new ArrayList<>();
+	public SearchResult<Company> searchCompany(String keywords, int limit, int page, double centerLat, double centerLng,
+			String industry, String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
-		GeoPoint center = GeoPoint.of(locationCenter.getLat(), locationCenter.getLng());
+		GeoPoint center = GeoPoint.of(centerLat, centerLng);
 
-		companies = searchSession.search(Company.class).where(f -> f.bool(b -> {
+		SearchResult<Company> companies = searchSession.search(Company.class).where(f -> f.bool(b -> {
 //			keywords
 			if (!keywords.isEmpty()) {
 				b.must(f.match().field("name").boost(3.0f).field("industry").boost(2.0f).field("description")
@@ -89,9 +91,41 @@ public class SearchDaoImpl implements SearchDao {
 
 //			status
 			b.must(f.terms().field("status").matchingAny(CompanyStatus.REGISTERED, CompanyStatus.UNREGISTERED));
-		}
 
-		)).sort(f -> f.distance("companyLocation", center)).fetchHits(limit * page, limit);
+//			industry filter
+			if (!industry.equals("All")) {
+				b.filter(f.match().field("industry").matching(industry));
+			}
+
+//			radius default 20 miles
+			switch (within) {
+			case "circle":
+				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
+				break;
+			case "box": {
+				GeoBoundingBox box = GeoBoundingBox.of(topLeft.get(0), topLeft.get(1), bottomRight.get(0),
+						bottomRight.get(1));
+
+				b.must(f.spatial().within().field("location").boundingBox(box));
+			}
+				break;
+			}
+
+		})).sort(f -> f.composite(b -> {
+			switch (sort) {
+			case "Date":
+				b.add(f.field("updatedOn").desc());
+				break;
+			case "Distance":
+				b.add(f.distance("location", center));
+				break;
+			default:
+//				score, or other qualities
+				b.add(f.field("updatedOn").desc());
+				break;
+			}
+
+		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
 
 		return companies;
 	}

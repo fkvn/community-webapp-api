@@ -2,6 +2,7 @@ package mono.thainow.dao;
 
 import java.util.List;
 
+import mono.thainow.domain.company.Company;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
@@ -26,5 +27,7 @@ public interface ProfileDao {
 	void deleteProfile(Long profileId);
 
 	Profile getProfile(Long profileId);
+
+	CompanyProfile getValidCompanyProfile(Company com);
 
 }

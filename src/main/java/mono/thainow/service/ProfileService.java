@@ -31,7 +31,7 @@ public interface ProfileService {
 	CompanyProfile getValidCompanyProfile(Long profileId);
 
 	CompanyProfile activateProfile(CompanyProfile profile);
-	
+
 	CompanyProfile disableProfile(CompanyProfile profile);
 
 	UserProfile disableProfile(UserProfile profile);
@@ -41,5 +41,7 @@ public interface ProfileService {
 	Profile saveProfile(Profile profile);
 
 	UserProfile activateProfile(UserProfile profile);
+
+	CompanyProfile getValidCompanyProfile(Company com);
 
 }

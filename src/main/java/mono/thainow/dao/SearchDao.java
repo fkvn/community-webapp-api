@@ -2,8 +2,9 @@ package mono.thainow.dao;
 
 import java.util.List;
 
+import org.hibernate.search.engine.search.query.SearchResult;
+
 import mono.thainow.domain.company.Company;
-import mono.thainow.domain.location.Location;
 
 public interface SearchDao {
 
@@ -11,5 +12,5 @@ public interface SearchDao {
 	
 	List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit);
 
-	List<Company> searchCompany(String keywords, int limit, int page, Location location);
+	SearchResult<Company> searchCompany(String keywords, int limit, int page, double centerLat, double centerLng, String industry, String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 }

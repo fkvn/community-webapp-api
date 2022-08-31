@@ -20,6 +20,8 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.Latitude;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.Longitude;
 import org.springframework.data.annotation.Transient;
 import org.springframework.util.Assert;
 
@@ -81,9 +83,11 @@ public class Location implements Serializable{
 	private String zipcode = "";
 	
 	@Column(name = "LOCATION_LAT")
+	@Latitude
 	private double lat;
 
 	@Column(name = "LOCATION_LNG")
+	@Longitude
 	private double lng;
 	
 //  Full Detail Property

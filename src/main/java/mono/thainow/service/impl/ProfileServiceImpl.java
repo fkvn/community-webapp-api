@@ -189,4 +189,9 @@ public class ProfileServiceImpl implements ProfileService {
 		return profile;
 	}
 
+	@Override
+	public CompanyProfile getValidCompanyProfile(Company com) {
+		return profileDao.getValidCompanyProfile(com);
+	}
+
 }

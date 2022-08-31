@@ -17,8 +17,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -26,12 +26,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.GeoPointBinding;
-import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.Latitude;
-import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.Longitude;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,6 +46,7 @@ import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
+import mono.thainow.service.ProfileService;
 import mono.thainow.view.View;
 
 @Entity
@@ -54,7 +57,6 @@ import mono.thainow.view.View;
 @EqualsAndHashCode
 @Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = false) })
 @Indexed
-@GeoPointBinding(fieldName = "companyLocation", sortable =Sortable.YES)
 @JsonView(View.Basic.class)
 @Audited(withModifiedFlag = true)
 public class Company implements Serializable {
@@ -83,9 +85,14 @@ public class Company implements Serializable {
 
 	@OneToOne
 	private Storage logo;
+	
+	@Transient
+	public Long profileId;
 
 	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")
+	@GeoPointBinding(sortable = Sortable.YES)
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Location location;
 
 	@NotNull
@@ -97,6 +104,7 @@ public class Company implements Serializable {
 	@UpdateTimestamp
 	@Column(name = "COMPANY_UPDATED_ON")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
 
 	@OneToMany
@@ -178,16 +186,20 @@ public class Company implements Serializable {
 	private boolean phoneVerified = false;
 
 //	
-	@Latitude
-	private Double lat;
-
-	@Longitude
-	private Double lng;
-
-	@PrePersist
-	private void updateLocation() {
-		this.lat = this.getLocation().getLat();
-		this.lng = this.getLocation().getLng();
-	}
+//	@Latitude
+//	@Column(name = "COMPANY_LAT")
+//	@JsonView(View.FullDetail.class)
+//	private Double lat;
+//
+//	@Longitude
+//	@Column(name = "COMPANY_LNG")
+//	@JsonView(View.FullDetail.class)
+//	private Double lng;
+//
+//	@PrePersist
+//	private void updateLocation() {
+//		this.lat = Optional.ofNullable(this.getLocation().getLat()).orElse(null);
+//		this.lng = Optional.ofNullable(this.getLocation().getLng()).orElse(null);
+//	}
 
 }
