@@ -53,7 +53,7 @@ public class PostServiceImpl implements PostService {
 	public List<Post> getPosts(Profile profile) {
 		return postDao.getPosts(profile);
 	}
-	
+
 	@Override
 	public List<Post> getPosts(Profile postOwner, PostType postType) {
 		return postDao.getPosts(postOwner, postType);
@@ -228,6 +228,9 @@ public class PostServiceImpl implements PostService {
 		return postDao.savePost(post);
 	}
 
-
+	@Override
+	public Post getValidPost(PostType type, Object entity) {
+		return postDao.getPost(type, entity);
+	}
 
 }

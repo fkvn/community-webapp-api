@@ -19,4 +19,6 @@ public interface PostDao {
 	public void deletePost(long id);
 
 	public List<Post> getPosts(Profile postOwner, PostType postType);
+
+	public Post getPost(PostType type, Object entity);
 }

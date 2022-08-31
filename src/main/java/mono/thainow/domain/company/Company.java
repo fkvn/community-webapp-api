@@ -11,7 +11,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -33,7 +32,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -46,7 +44,6 @@ import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.service.ProfileService;
 import mono.thainow.view.View;
 
 @Entity
@@ -55,7 +52,7 @@ import mono.thainow.view.View;
 @Setter
 @ToString
 @EqualsAndHashCode
-@Table(indexes = { @Index(name = "company_name_UNIQUE", columnList = "COMPANY_NAME", unique = false) })
+@Table
 @Indexed
 @JsonView(View.Basic.class)
 @Audited(withModifiedFlag = true)
@@ -85,7 +82,7 @@ public class Company implements Serializable {
 
 	@OneToOne
 	private Storage logo;
-	
+
 	@Transient
 	public Long profileId;
 

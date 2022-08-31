@@ -9,4 +9,6 @@ public interface SearchService {
 	SearchResponse<?> searchCompany(String industry, String keywords, double centerLat, double centerLng, int limit,
 			int page, String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
+	SearchResponse<?> searchDeal(String category, String keywords, double centerLat, double centerLng, int limit,
+			int page, String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 }

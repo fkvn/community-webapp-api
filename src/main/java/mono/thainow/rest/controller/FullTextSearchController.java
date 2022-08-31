@@ -1,6 +1,7 @@
 package mono.thainow.rest.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,5 +63,21 @@ public class FullTextSearchController {
 		return searchService.searchCompany(industry, keywords, centerLat, centerLng, limit, page, sort, within, radius,
 				topLeft, bottomRight);
 	}
+	
+	@GetMapping("/deals")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@JsonView(View.Basic.class)
+	public SearchResponse<?> SearchDeals(@RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String category, @RequestParam double centerLat,
+			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
+
+		return searchService.searchDeal(category, keywords, centerLat, centerLng, limit, page, sort, within, radius,
+				topLeft, bottomRight);
+	}
+
 
 }

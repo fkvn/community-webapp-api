@@ -21,6 +21,9 @@ import mono.thainow.dao.SearchDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.location.Location;
+import mono.thainow.domain.post.PostStatus;
+import mono.thainow.domain.post.deal.Deal;
+import mono.thainow.domain.post.deal.DealPost;
 
 @Repository
 public class SearchDaoImpl implements SearchDao {
@@ -39,8 +42,11 @@ public class SearchDaoImpl implements SearchDao {
 		case "Company":
 			indexer = searchSession.massIndexer(Company.class).threadsToLoadObjects(7);
 			break;
-		case "Location":
-			indexer = searchSession.massIndexer(Location.class).threadsToLoadObjects(7);
+		case "DealPost":
+			indexer = searchSession.massIndexer(DealPost.class).threadsToLoadObjects(7);
+			break;
+		case "Deal":
+			indexer = searchSession.massIndexer(Deal.class).threadsToLoadObjects(7);
 			break;
 
 		}
@@ -93,7 +99,7 @@ public class SearchDaoImpl implements SearchDao {
 			b.must(f.terms().field("status").matchingAny(CompanyStatus.REGISTERED, CompanyStatus.UNREGISTERED));
 
 //			industry filter
-			if (!industry.equals("All")) {
+			if (!industry.equals("All") || !industry.isEmpty()) {
 				b.filter(f.match().field("industry").matching(industry));
 			}
 
@@ -128,6 +134,64 @@ public class SearchDaoImpl implements SearchDao {
 		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
 
 		return companies;
+	}
+
+	@Override
+	public SearchResult<Deal> searchDeal(String keywords, int limit, int page, double centerLat, double centerLng,
+			String category, String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+
+		SearchSession searchSession = Search.session(entityManager);
+
+		GeoPoint center = GeoPoint.of(centerLat, centerLng);
+
+		SearchResult<Deal> deals = searchSession.search(Deal.class).where(f -> f.bool(b -> {
+
+//			keywords
+			if (!keywords.isEmpty()) {
+				b.must(f.match().field("title").boost(3.0f).field("category_search").boost(2.0f).field("description")
+						.boost(1.0f).matching(keywords));
+			}
+
+//			status
+			b.must(f.terms().field("status").matchingAny(PostStatus.AVAILABLE));
+//
+////			industry filter
+//			if (!industry.equals("All") || !industry.isEmpty()) {
+//				b.filter(f.match().field("industry").matching(industry));
+//			}
+//
+////			radius default 20 miles
+//			switch (within) {
+//			case "circle":
+//				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
+//				break;
+//			case "box": {
+//				GeoBoundingBox box = GeoBoundingBox.of(topLeft.get(0), topLeft.get(1), bottomRight.get(0),
+//						bottomRight.get(1));
+//
+//				b.must(f.spatial().within().field("location").boundingBox(box));
+//			}
+//				break;
+//			}
+
+		}))
+//		.sort(f -> f.composite(b -> {
+//			switch (sort) {
+//			case "Date":
+//				b.add(f.field("updatedOn").desc());
+//				break;
+//			case "Distance":
+//				b.add(f.distance("location", center));
+//				break;
+//			default:
+////				score, or other qualities
+//				b.add(f.field("updatedOn").desc());
+//				break;
+//			}
+//		}))
+				.totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
+
+		return deals;
 	}
 
 }

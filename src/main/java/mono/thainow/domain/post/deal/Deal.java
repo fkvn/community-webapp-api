@@ -24,6 +24,14 @@ import javax.persistence.OneToMany;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.GeoPointBinding;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,6 +53,7 @@ import mono.thainow.view.View;
 @Entity
 @JsonView(View.Basic.class)
 @Audited( withModifiedFlag = true )
+@Indexed
 public class Deal implements Serializable {
 
 	/**
@@ -60,6 +69,7 @@ public class Deal implements Serializable {
 	private Long id;
 
 	@Column(name = "DEAL_TITLE")
+	@FullTextField
 	private String title;
 
 	@UpdateTimestamp
@@ -69,10 +79,13 @@ public class Deal implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "DEAL_STATUS")
+	@KeywordField
 	private PostStatus status = PostStatus.DISABLED;
 
 	@ManyToOne
 	@JoinColumn(name = "DEAL_LOCATION_ID")
+	@GeoPointBinding(sortable = Sortable.YES)
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Location location;
 
 	@OneToMany
@@ -93,11 +106,14 @@ public class Deal implements Serializable {
 
 	@Column(name = "DEAL_CATEGORY")
 	@JsonView(View.Detail.class)
+	@KeywordField(projectable = Projectable.YES)
+	@FullTextField(name = "category_search")
 	private String category;
 
 	@Lob
 	@Column(name = "DEAL_DESCRIPTION")
 	@JsonView(View.Detail.class)
+	@FullTextField
 	private String description;
 
 //	Full Detail Information

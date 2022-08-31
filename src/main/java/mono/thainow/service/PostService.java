@@ -4,6 +4,7 @@ import java.util.List;
 
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostType;
+import mono.thainow.domain.post.deal.Deal;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.rest.request.PostRequest;
 
@@ -34,6 +35,8 @@ public interface PostService {
 	void removePost(Post post);
 	
 	Post savePost(Post post);
+
+	Post getValidPost(PostType type, Object entity);
 
 	
 

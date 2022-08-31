@@ -103,4 +103,28 @@ public class PostDaoImpl implements PostDao {
 		entityManager.remove(post);
 	}
 
+	@Override
+	public Post getPost(PostType type, Object entity) {
+		String sql = "";
+
+		switch (type) {
+		case DEAL_POST:
+			sql = "from Post where deal =:entity";
+			break;
+		case JOB_POST:
+			sql = "from Post where job =:entity";
+			break;
+		case HOUSING_POST:
+			sql = "from Post where housing =:entity";
+			break;
+		case MARKETPLACE_POST:
+			sql = "from Post where marketplace =:entity";
+			break;
+		default:
+			break;
+		}
+
+		return entityManager.createQuery(sql, Post.class).setParameter("entity", entity).getSingleResult();
+	}
+
 }
