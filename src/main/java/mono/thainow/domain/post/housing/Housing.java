@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -20,6 +21,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -27,11 +29,13 @@ import org.hibernate.envers.Audited;
 import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.GeoPointBinding;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,6 +48,7 @@ import lombok.ToString;
 import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.storage.Storage;
+import mono.thainow.search.HousingInteriorSummary;
 import mono.thainow.view.View;
 
 @Getter
@@ -108,6 +113,7 @@ public class Housing implements Serializable {
 	@Column(name = "HOUSING_TYPE")
 	@JsonView(View.Detail.class)
 	@KeywordField
+	@FullTextField(name = "type_search")
 	private String type;
 
 	@Column(name = "HOUSING_DAILY_COST")
@@ -133,6 +139,7 @@ public class Housing implements Serializable {
 	@Column(name = "HOUSING_CATEGORY")
 	@JsonView(View.Detail.class)
 	@KeywordField
+	@FullTextField(name = "category_search")
 	private String category;
 
 	@JsonView(View.Detail.class)
@@ -145,8 +152,8 @@ public class Housing implements Serializable {
 	@Column(name = "INTERIOR_VALUE")
 	@CollectionTable(name = "HOUSING_INTERIOR", joinColumns = @JoinColumn(name = "HOUSING_ID"))
 	@JsonView(View.Detail.class)
-	@GenericField
-	private Map<String, Integer> interior = new HashMap<>();
+	@PropertyBinding(binder = @PropertyBinderRef(type = HousingInteriorSummary.class))
+	private Map<String, Integer> interior = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Lob
 	@Column(name = "HOUSING_DESCRIPTION")

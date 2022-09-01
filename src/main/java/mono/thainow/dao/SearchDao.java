@@ -6,6 +6,7 @@ import org.hibernate.search.engine.search.query.SearchResult;
 
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.post.deal.Deal;
+import mono.thainow.domain.post.housing.Housing;
 import mono.thainow.domain.post.job.Job;
 
 public interface SearchDao {
@@ -21,5 +22,10 @@ public interface SearchDao {
 
 	SearchResult<Job> searchJob(String keywords, String position, String experience, String skills, Boolean remote,
 			int limit, int page, double centerLat, double centerLng, String sort, String within, int radius,
+			List<Double> topLeft, List<Double> bottomRight);
+
+	SearchResult<Housing> searchHousing(String keywords, String type, String costType, Double minCost, Double maxCost,
+			Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String category,
+			double centerLat, double centerLng, int limit, int page, String sort, String within, int radius,
 			List<Double> topLeft, List<Double> bottomRight);
 }

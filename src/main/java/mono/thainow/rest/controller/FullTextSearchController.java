@@ -62,11 +62,11 @@ public class FullTextSearchController {
 		return searchService.searchCompany(industry, keywords, centerLat, centerLng, limit, page, sort, within, radius,
 				topLeft, bottomRight);
 	}
-	
+
 	@GetMapping("/deals")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
-	public SearchResponse<?> SearchDeals(@RequestParam(defaultValue = "") String keywords,
+	public SearchResponse<?> searchDealPost(@RequestParam(defaultValue = "") String keywords,
 			@RequestParam(defaultValue = "All") String category, @RequestParam double centerLat,
 			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
 			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
@@ -74,52 +74,43 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		return searchService.searchDeal(category, keywords, centerLat, centerLng, limit, page, sort, within, radius,
+		return searchService.searchDealPost(category, keywords, centerLat, centerLng, limit, page, sort, within, radius,
 				topLeft, bottomRight);
 	}
 
 	@GetMapping("/jobs")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
-	public SearchResponse<?> SearchJobs(@RequestParam(defaultValue = "") String keywords,
-			@RequestParam(defaultValue = "All") String position,
-			@RequestParam(defaultValue = "All") String experience,
-			@RequestParam(defaultValue = "All") String skills,
-			@RequestParam(defaultValue = "false") Boolean remote,
-			@RequestParam double centerLat,
-			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
-			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
-			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
+	public SearchResponse<?> searchJobPost(@RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String position, @RequestParam(defaultValue = "All") String experience,
+			@RequestParam(defaultValue = "All") String skills, @RequestParam(defaultValue = "false") Boolean remote,
+			@RequestParam double centerLat, @RequestParam double centerLng,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
+			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		return searchService.searchJob(keywords, position, experience, skills, remote, centerLat, centerLng, limit, page, sort, within, radius,
-				topLeft, bottomRight);
+		return searchService.searchJobPost(keywords, position, experience, skills, remote, centerLat, centerLng, limit,
+				page, sort, within, radius, topLeft, bottomRight);
 	}
-	
-//	@GetMapping("/housing")
-//	@ResponseStatus(HttpStatus.ACCEPTED)
-//	@JsonView(View.Basic.class)
-//	public SearchResponse<?> SearchHousing(@RequestParam(defaultValue = "") String keywords,
-//			@RequestParam(defaultValue = "All") String type,
-//			@RequestParam(defaultValue = "Monthly") String costType,
-//			@RequestParam(defaultValue = "0") Long minCost,
-//			@RequestParam(defaultValue = "0") Long maxCost,
-//			@RequestParam(defaultValue = "0") Integer guest,
-//			@RequestParam(defaultValue = "0") Integer bed,
-//			@RequestParam(defaultValue = "0") Integer parking,
-//			@RequestParam(defaultValue = "0") Integer bath,
-////			@RequestParam(defaultValue = "0") String ,
-//			@RequestParam(defaultValue = "") List<String> remote,
-//			@RequestParam double centerLat,
-//			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
-//			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
-//			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
-//			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
-//			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
-//
-//		return searchService.searchJob(keywords, position, experience, skills, remote, centerLat, centerLng, limit, page, sort, within, radius,
-//				topLeft, bottomRight);
-//	}
+
+	@GetMapping("/housings")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@JsonView(View.Basic.class)
+	public SearchResponse<?> searchHousingPost(@RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String type, @RequestParam(defaultValue = "All") String costType,
+			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
+			@RequestParam(defaultValue = "0") Integer guest, @RequestParam(defaultValue = "0") Integer bed,
+			@RequestParam(defaultValue = "0") Integer parking, @RequestParam(defaultValue = "0") Integer bath,
+			@RequestParam(defaultValue = "0") String amenity, @RequestParam(defaultValue = "All") String category,
+			@RequestParam double centerLat, @RequestParam double centerLng,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
+			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
+
+		return searchService.searchHousingPost(keywords, type, costType, minCost, maxCost, guest, bed, parking, bath,
+				amenity, category, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+	}
 
 }
