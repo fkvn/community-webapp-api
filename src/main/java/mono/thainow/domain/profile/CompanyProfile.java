@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.company.Company;
-import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 
 @Getter
@@ -38,41 +37,9 @@ public class CompanyProfile extends Profile {
 	}
 
 	@Override
-	public String getUsername() {
-		return this.company.getName();
-	}
+	public Object getInfo() {
 
-	@Override
-	public ProfileStatus getStatus() {
-		switch (this.company.getStatus()) {
-		case REGISTERED:
-			return ProfileStatus.ACTIVATED;
-		case PENDING:
-			return ProfileStatus.PENDING;
-		case DISABLED:
-			return ProfileStatus.DISABLED;
-		default:
-			return ProfileStatus.DELETED;
-		}
-	}
-
-	@Override
-	public Storage getPicture() {
-		return this.company.getLogo();
-	}
-
-	@Override
-	public Object getDetailInfo() {
-		
-		Company company = this.getCompany();
-		
-		if (!company.isEmailPublic()) company.setEmail(null);
-		if (!company.isPhonePublic()) company.setPhone(null);
-		if (!company.isDescriptionPublic()) company.setDescription(null);
-		if (!company.isWebsitePublic()) company.setWebsite(null);
-		if (!company.isSizePublic()) company.setSize(null);
-		
-		return company;
+		return this.getCompany();
 	}
 
 }

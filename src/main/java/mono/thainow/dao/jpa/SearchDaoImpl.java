@@ -58,7 +58,6 @@ public class SearchDaoImpl implements SearchDao {
 			try {
 				indexer.startAndWait();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -273,6 +272,8 @@ public class SearchDaoImpl implements SearchDao {
 			double centerLat, double centerLng, int limit, int page, String sort, String within, int radius,
 			List<Double> topLeft, List<Double> bottomRight) {
 
+		System.out.println(guest);
+
 		SearchSession searchSession = Search.session(entityManager);
 
 		GeoPoint center = GeoPoint.of(centerLat, centerLng);
@@ -290,23 +291,60 @@ public class SearchDaoImpl implements SearchDao {
 
 //			guess filter
 			if (guest > 0) {
-				b.filter(f.match().field("interior.guest").matching(guest));
+				b.filter(f.range().field("interiorObj.guest").atLeast(guest));
 			}
-//			
-////			experience filter
-//			if (!experience.isEmpty() && !experience.equals("All")) {
-//				b.filter(f.match().field("experience").matching(experience));
-//			}
-//			
-////			skills filter
-//			if (!skills.isEmpty() && !skills.equals("All")) {
-//				b.filter(f.match().field("skills").matching(skills));
-//			}
-//			
-////			remote filter
-//			if (remote) {
-//				b.filter(f.match().field("remote").matching(remote));
-//			}
+
+//			bed filter
+			if (bed > 0) {
+				b.filter(f.range().field("interiorObj.bed").atLeast(bed));
+			}
+
+//			bath filter
+			if (bath > 0) {
+				b.filter(f.range().field("interiorObj.bath").atLeast(bath));
+			}
+
+//			parking filter
+			if (parking > 0) {
+				b.filter(f.range().field("interiorObj.parking").atLeast(parking));
+			}
+
+//			type filter
+			if (!type.isEmpty() && !type.equals("All")) {
+				b.filter(f.match().field("type").matching(type));
+			}
+
+//			costType filter
+			Double maxCostRange = maxCost > 0 ? maxCost : null;
+			Double minCostRange = minCost > 0 ? minCost : null;
+
+			switch (costType) {
+			case "Daily":
+				b.filter(f.range().field("dailyCost").between(minCostRange, maxCostRange));
+				break;
+
+			case "Monthly":
+				b.filter(f.range().field("monthlyCost").between(minCostRange, maxCostRange));
+				break;
+
+			case "Annual":
+				b.filter(f.range().field("annualCost").between(minCostRange, maxCostRange));
+				break;
+
+			case "Deposit":
+				b.filter(f.range().field("depositCost").between(minCostRange, maxCostRange));
+				break;
+			}
+
+//			amenity filter
+			if (!amenity.isEmpty() && !amenity.equals("All")) {
+				b.filter(f.match().field("amenities").matching(amenity));
+			}
+
+//			category filter
+			if (!category.isEmpty() && !category.equals("All")) {
+				b.filter(f.match().field("category").matching(category));
+			}
 
 //			radius default 20 miles
 			switch (within) {

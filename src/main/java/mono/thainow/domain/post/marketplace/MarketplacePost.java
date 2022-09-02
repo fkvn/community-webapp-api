@@ -1,9 +1,5 @@
 package mono.thainow.domain.post.marketplace;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
@@ -14,11 +10,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import mono.thainow.domain.location.Location;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.domain.storage.Storage;
 
 @Getter
 @Setter
@@ -43,38 +37,13 @@ public class MarketplacePost extends Post {
 	private Marketplace marketplace;
 
 	@Override
-	public String getTitle() {
-		return this.getMarketplace().getTitle();
-	}
-
-	@Override
-	public Location getLocation() {
-		return this.getMarketplace().getLocation();
-	}
-
-	@Override
-	public List<Storage> getPictures() {
-		return this.getMarketplace().getPictures();
-	}
-
-	@Override
-	public Map<String, String> getContactInfo() {
-		return this.getMarketplace().getContactInfo();
-	}
-
-	@Override
 	public PostStatus getStatus() {
 		return this.getMarketplace().getStatus();
 	}
 
 	@Override
-	public Object getDetailInfo() {
+	public Marketplace getInfo() {
 		return this.getMarketplace();
-	}
-
-	@Override
-	public Date getUpdatedOn() {
-		return this.getMarketplace().getUpdatedOn();
 	}
 
 }

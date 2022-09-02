@@ -35,6 +35,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordFie
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.EqualsAndHashCode;
@@ -81,6 +82,7 @@ public class Company implements Serializable {
 	private String industry;
 
 	@OneToOne
+	@JsonProperty("picture")
 	private Storage logo;
 
 	@Transient
@@ -104,11 +106,12 @@ public class Company implements Serializable {
 	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
 
-	@OneToMany
-	private List<Storage> coverPictures = new ArrayList<>();
-
 //	Public Detail Information
 
+	@OneToMany
+	@JsonView(View.Detail.class)
+	private List<Storage> coverPictures = new ArrayList<>();
+	
 	@Lob
 	@Column(name = "COMPANY_DESCRIPTION")
 	@JsonView(View.Detail.class)

@@ -67,6 +67,7 @@ public class Job implements Serializable {
 	@GeneratedValue
 	@JsonIgnore
 	private Long id;
+	
 	@FullTextField
 	@Column(name = "JOB_TITLE")
 	private String title;

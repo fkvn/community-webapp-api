@@ -21,7 +21,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -120,17 +119,17 @@ public class Housing implements Serializable {
 	@JsonView(View.Detail.class)
 	@GenericField
 	private Double dailyCost;
-	
+
 	@Column(name = "HOUSING_MONTHLY_COST")
 	@JsonView(View.Detail.class)
 	@GenericField
 	private Double monthlyCost;
-	
+
 	@Column(name = "HOUSING_ANNUAL_COST")
 	@JsonView(View.Detail.class)
 	@GenericField
 	private Double annualCost;
-	
+
 	@Column(name = "HOUSING_DEPOSIT_COST")
 	@JsonView(View.Detail.class)
 	@GenericField
@@ -153,6 +152,7 @@ public class Housing implements Serializable {
 	@CollectionTable(name = "HOUSING_INTERIOR", joinColumns = @JoinColumn(name = "HOUSING_ID"))
 	@JsonView(View.Detail.class)
 	@PropertyBinding(binder = @PropertyBinderRef(type = HousingInteriorSummary.class))
+//	@GenericField(extraction = @ContainerExtraction(BuiltinContainerExtractors.MAP_KEY))
 	private Map<String, Integer> interior = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Lob

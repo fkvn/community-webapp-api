@@ -66,34 +66,28 @@ public class User implements Serializable {
 	private Long id;
 
 	@Column(name = "USER_USERNAME")
+	@JsonProperty("name")
 	private String username = "";
-
+	
+	@OneToOne
+	private Storage picture;
+	
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "USER_CREATED_ON")
 	private Date createdOn = new Date();
 	
-	@OneToOne
-	private Storage picture;
+//  Detail Information
 	
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "USER_UPDATED_ON")
+	@JsonView(View.Detail.class)
 	private Date updatedOn = new Date();
-
+	
 	@OneToMany
+	@JsonView(View.Detail.class)
 	private List<Storage> coverPictures = new ArrayList<>();
-	
-	@ManyToOne
-	@JoinColumn(name = "LOCATION_ID")
-	private Location location;
-	
-	@NotNull(message = "User status can't be null!")
-	@Enumerated(EnumType.STRING)
-	@Column(name = "USER_STATUS")
-	private UserStatus status = UserStatus.DISABLED;
-	
-//  Detail Information
 	
 	@Lob
 	@Column(name = "USER_DESCRIPTION")
@@ -143,6 +137,17 @@ public class User implements Serializable {
 	private boolean websitePublic = false;
 
 //	Full Detail Information
+	
+	@ManyToOne
+	@JoinColumn(name = "LOCATION_ID")
+	@JsonView(View.FullDetail.class)
+	private Location location;
+	
+	@NotNull(message = "User status can't be null!")
+	@Enumerated(EnumType.STRING)
+	@Column(name = "USER_STATUS")
+	@JsonView(View.FullDetail.class)
+	private UserStatus status = UserStatus.DISABLED;
 
 	@NotNull
 	@Column(name = "USER_ISSUER")

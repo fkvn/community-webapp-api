@@ -12,8 +12,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 
-import org.springframework.data.annotation.Transient;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -23,7 +21,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.view.View;
 
@@ -48,25 +45,12 @@ public abstract class Profile implements Serializable {
 	@GeneratedValue
 	private Long id;
 
-	public abstract String getUsername();
-	
-	@Transient
-	public abstract ProfileStatus getStatus();
-	
-	@Transient
-	public abstract Storage getPicture();
-	
-	@Transient
 	@JsonProperty("type")
 	public String getDecriminatorValue() {
 		return this.getClass().getAnnotation(DiscriminatorValue.class).value();
 	}
 	
-//	Public Detail Information
-	
-	@Transient
-	@JsonView(View.Detail.class)
-	public abstract Object getDetailInfo();
+	public abstract Object getInfo();
 	
 //	Request ONLY
 	

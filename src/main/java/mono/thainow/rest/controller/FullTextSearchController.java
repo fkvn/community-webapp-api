@@ -102,7 +102,7 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
 			@RequestParam(defaultValue = "0") Integer guest, @RequestParam(defaultValue = "0") Integer bed,
 			@RequestParam(defaultValue = "0") Integer parking, @RequestParam(defaultValue = "0") Integer bath,
-			@RequestParam(defaultValue = "0") String amenity, @RequestParam(defaultValue = "All") String category,
+			@RequestParam(defaultValue = "All") String amenity, @RequestParam(defaultValue = "All") String category,
 			@RequestParam double centerLat, @RequestParam double centerLng,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
 			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
