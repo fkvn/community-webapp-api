@@ -36,7 +36,7 @@ public interface PostService {
 	
 	Post savePost(Post post);
 
-	Post getValidPost(PostType type, Object entity);
+	Post getPost(PostType type, Object entity);
 
 	
 

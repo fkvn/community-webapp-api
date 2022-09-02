@@ -22,7 +22,7 @@ public class MarketplaceRequest  extends PostRequest {
 	
 	private String description;
 	
-	private String cost;
+	private Double cost;
 	
 	private String condition;
 	

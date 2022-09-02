@@ -15,6 +15,7 @@ import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.post.deal.Deal;
 import mono.thainow.domain.post.housing.Housing;
 import mono.thainow.domain.post.job.Job;
+import mono.thainow.domain.post.marketplace.Marketplace;
 import mono.thainow.rest.response.SearchResponse;
 import mono.thainow.service.PostService;
 import mono.thainow.service.ProfileService;
@@ -71,7 +72,7 @@ public class SearchServiceImpl implements SearchService {
 
 		List<Deal> deals = result.hits();
 
-		List<Post> posts = deals.stream().map(deal -> postService.getValidPost(PostType.DEAL_POST, deal))
+		List<Post> posts = deals.stream().map(deal -> postService.getPost(PostType.DEAL_POST, deal))
 				.collect(Collectors.toList());
 
 		searchRes.setFetchResult(posts);
@@ -93,7 +94,7 @@ public class SearchServiceImpl implements SearchService {
 
 		List<Job> jobs = result.hits();
 
-		List<Post> posts = jobs.stream().map(job -> postService.getValidPost(PostType.JOB_POST, job))
+		List<Post> posts = jobs.stream().map(job -> postService.getPost(PostType.JOB_POST, job))
 				.collect(Collectors.toList());
 
 		searchRes.setFetchResult(posts);
@@ -117,7 +118,30 @@ public class SearchServiceImpl implements SearchService {
 
 		List<Housing> housings = result.hits();
 
-		List<Post> posts = housings.stream().map(housing -> postService.getValidPost(PostType.HOUSING_POST, housing))
+		List<Post> posts = housings.stream().map(housing -> postService.getPost(PostType.HOUSING_POST, housing))
+				.collect(Collectors.toList());
+
+		searchRes.setFetchResult(posts);
+
+		return searchRes;
+	}
+
+	@Override
+	public SearchResponse<?> searchMarketplacePost(String keywords, String condition, String category, Double minCost,
+			Double maxCost, double centerLat, double centerLng, int limit, int page, String sort, String within,
+			int radius, List<Double> topLeft, List<Double> bottomRight) {
+
+		SearchResult<Marketplace> result = searchDao.searchMarketplace(keywords, condition, category, minCost, maxCost,
+				centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+
+		SearchResponse<Post> searchRes = new SearchResponse<Post>();
+		searchRes.setTotalCount(result.total().hitCountLowerBound());
+		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
+
+		List<Marketplace> marketplaces = result.hits();
+
+		List<Post> posts = marketplaces.stream()
+				.map(marketplace -> postService.getPost(PostType.MARKETPLACE_POST, marketplace))
 				.collect(Collectors.toList());
 
 		searchRes.setFetchResult(posts);

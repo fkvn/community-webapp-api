@@ -24,6 +24,14 @@ import javax.persistence.OneToMany;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.bridge.builtin.annotation.GeoPointBinding;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,6 +53,7 @@ import mono.thainow.view.View;
 @Entity
 @JsonView(View.Basic.class)
 @Audited( withModifiedFlag = true )
+@Indexed
 public class Marketplace implements Serializable {
 
 	/**
@@ -60,19 +69,24 @@ public class Marketplace implements Serializable {
 	private Long id;
 
 	@Column(name = "MARKETPLACE_TITLE")
+	@FullTextField
 	private String title;
 
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "MARKETPLACE_UPDATED_ON")
+	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "MARKETPLACE_STATUS")
+	@KeywordField
 	private PostStatus status = PostStatus.DISABLED;
 
 	@ManyToOne
 	@JoinColumn(name = "MARKETPLACE_LOCATION_ID")
+	@GeoPointBinding(sortable = Sortable.YES)
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Location location;
 
 	@OneToMany
@@ -94,19 +108,25 @@ public class Marketplace implements Serializable {
 	
 	@Column(name = "MARKETPLACE_CONDITION")
 	@JsonView(View.Detail.class)
+	@KeywordField
+	@FullTextField(name = "condition_search")
 	private String condition;
 	
 	@Column(name = "MARKETPLACE_COST")
 	@JsonView(View.Detail.class)
-	private String cost;
+	@GenericField
+	private Double cost;
 	
 	@Column(name = "MARKETPLACE_CATEGORY")
 	@JsonView(View.Detail.class)
+	@KeywordField
+	@FullTextField(name = "category_search")
 	private String category;
 	
 	@Lob
 	@Column(name = "MARKETPLACE_DESCRIPTION")
 	@JsonView(View.Detail.class)
+	@FullTextField
 	private String description;
 
 //	Full Detail Information

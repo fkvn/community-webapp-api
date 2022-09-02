@@ -112,5 +112,20 @@ public class FullTextSearchController {
 		return searchService.searchHousingPost(keywords, type, costType, minCost, maxCost, guest, bed, parking, bath,
 				amenity, category, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
 	}
+	
+	@GetMapping("/marketplaces")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@JsonView(View.Basic.class)
+	public SearchResponse<?> searchMarketplacePost(@RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String condition, @RequestParam(defaultValue = "All") String category,
+			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
+			@RequestParam double centerLat, @RequestParam double centerLng,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
+			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
+
+		return searchService.searchMarketplacePost(keywords, condition, category, minCost, maxCost, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+	}
 
 }

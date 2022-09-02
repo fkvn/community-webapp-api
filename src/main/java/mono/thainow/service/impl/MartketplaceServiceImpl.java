@@ -39,13 +39,13 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 		Marketplace marketplace = new Marketplace();
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse("");
+		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
 		Assert.isTrue(!title.isEmpty(), "Marketplace title is required!");
 		marketplace.setTitle(title);
 
 //		location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("");
-		String address = Optional.ofNullable(request.getAddress()).orElse("");
+		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
+		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Marketplace location is required!");
 		marketplace.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
 
@@ -64,11 +64,11 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			marketplace.setDescription(description);
+			marketplace.setDescription(description.trim());
 		}
 		
 //		cost
-		String cost = Optional.ofNullable(request.getCost()).orElse(null);
+		Double cost = Optional.ofNullable(request.getCost()).orElse(null);
 		if (cost != null) {
 			marketplace.setCost(cost);
 		}
@@ -76,13 +76,13 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 //		condition
 		String condition = Optional.ofNullable(request.getCondition()).orElse(null);
 		if (condition != null) {
-			marketplace.setCondition(condition);
+			marketplace.setCondition(condition.trim());
 		}
 
 //		category
 		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			marketplace.setCategory(category);
+			marketplace.setCategory(category.trim());
 		}
 
 //		expiration Date
@@ -113,7 +113,7 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse(null);
 		if (title != null) {
-			marketplace.setTitle(title);
+			marketplace.setTitle(title.trim());
 		}
 		Assert.isTrue(!marketplace.getTitle().isEmpty(), "Marketplace title is required!");
 
@@ -123,8 +123,8 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
 				"Invalid Location");
 		if (placeid != null && address != null) {
-			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Marketplace location is required!");
-			marketplace.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			Assert.isTrue(!placeid.trim().isEmpty() && !address.trim().isEmpty(), "Marketplace location is required!");
+			marketplace.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid.trim(), address.trim()));
 		}
 
 //		new cover pictures
@@ -144,11 +144,11 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			marketplace.setDescription(description);
+			marketplace.setDescription(description.trim());
 		}
 		
 //		cost
-		String cost = Optional.ofNullable(request.getCost()).orElse(null);
+		Double cost = Optional.ofNullable(request.getCost()).orElse(null);
 		if (cost != null) {
 			marketplace.setCost(cost);
 		}
@@ -156,13 +156,13 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 //		condition
 		String condition = Optional.ofNullable(request.getCondition()).orElse(null);
 		if (condition != null) {
-			marketplace.setCondition(condition);
+			marketplace.setCondition(condition.trim());
 		}
 
 //		category
 		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			marketplace.setCategory(category);
+			marketplace.setCategory(category.trim());
 		}
 
 //		expiration Date

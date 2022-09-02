@@ -80,6 +80,11 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
+	public Post getPost(PostType type, Object entity) {
+		return postDao.getPost(type, entity);
+	}
+
+	@Override
 	public Post getValidPost(Long postId, PostType type) {
 		return postDao.getValidPost(postId, type);
 	}
@@ -226,11 +231,6 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public Post savePost(Post post) {
 		return postDao.savePost(post);
-	}
-
-	@Override
-	public Post getValidPost(PostType type, Object entity) {
-		return postDao.getPost(type, entity);
 	}
 
 }

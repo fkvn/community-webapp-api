@@ -8,6 +8,7 @@ import mono.thainow.domain.company.Company;
 import mono.thainow.domain.post.deal.Deal;
 import mono.thainow.domain.post.housing.Housing;
 import mono.thainow.domain.post.job.Job;
+import mono.thainow.domain.post.marketplace.Marketplace;
 
 public interface SearchDao {
 
@@ -28,4 +29,8 @@ public interface SearchDao {
 			Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String category,
 			double centerLat, double centerLng, int limit, int page, String sort, String within, int radius,
 			List<Double> topLeft, List<Double> bottomRight);
+
+	SearchResult<Marketplace> searchMarketplace(String keywords, String condition, String category, Double minCost,
+			Double maxCost, double centerLat, double centerLng, int limit, int page, String sort, String within,
+			int radius, List<Double> topLeft, List<Double> bottomRight);
 }

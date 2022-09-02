@@ -20,4 +20,8 @@ public interface SearchService {
 			Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String category,
 			double centerLat, double centerLng, int limit, int page, String sort, String within, int radius,
 			List<Double> topLeft, List<Double> bottomRight);
+
+	SearchResponse<?> searchMarketplacePost(String keywords, String condition, String category, Double minCost,
+			Double maxCost, double centerLat, double centerLng, int limit, int page, String sort, String within,
+			int radius, List<Double> topLeft, List<Double> bottomRight);
 }

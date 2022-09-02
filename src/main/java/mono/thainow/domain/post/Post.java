@@ -11,7 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,12 +48,10 @@ public abstract class Post implements Serializable {
 	@JsonIgnore
 	private Profile owner;
 
-	@Transient
 	public Profile getPostOwner() {
 		return this.getOwner();
 	};
 
-	@Transient
 	@JsonProperty("type")
 	public PostType getType() {
 		return PostType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());

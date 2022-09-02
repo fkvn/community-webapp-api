@@ -24,6 +24,7 @@ import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.deal.Deal;
 import mono.thainow.domain.post.housing.Housing;
 import mono.thainow.domain.post.job.Job;
+import mono.thainow.domain.post.marketplace.Marketplace;
 
 @Repository
 public class SearchDaoImpl implements SearchDao {
@@ -117,6 +118,9 @@ public class SearchDaoImpl implements SearchDao {
 				b.must(f.spatial().within().field("location").boundingBox(box));
 			}
 				break;
+			default:
+				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
+				break;
 			}
 
 		})).sort(f -> f.composite(b -> {
@@ -173,6 +177,9 @@ public class SearchDaoImpl implements SearchDao {
 
 				b.must(f.spatial().within().field("location").boundingBox(box));
 			}
+				break;
+			default:
+				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
 				break;
 			}
 
@@ -246,6 +253,9 @@ public class SearchDaoImpl implements SearchDao {
 				b.must(f.spatial().within().field("location").boundingBox(box));
 			}
 				break;
+			default:
+				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
+				break;
 			}
 
 		})).sort(f -> f.composite(b -> {
@@ -271,8 +281,6 @@ public class SearchDaoImpl implements SearchDao {
 			Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String category,
 			double centerLat, double centerLng, int limit, int page, String sort, String within, int radius,
 			List<Double> topLeft, List<Double> bottomRight) {
-
-		System.out.println(guest);
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -358,6 +366,9 @@ public class SearchDaoImpl implements SearchDao {
 				b.must(f.spatial().within().field("location").boundingBox(box));
 			}
 				break;
+			default:
+				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
+				break;
 			}
 
 		})).sort(f -> f.composite(b -> {
@@ -376,6 +387,76 @@ public class SearchDaoImpl implements SearchDao {
 		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
 
 		return housings;
+	}
+
+	@Override
+	public SearchResult<Marketplace> searchMarketplace(String keywords, String condition, String category,
+			Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page, String sort,
+			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+
+		SearchSession searchSession = Search.session(entityManager);
+
+		GeoPoint center = GeoPoint.of(centerLat, centerLng);
+
+		SearchResult<Marketplace> marketplace = searchSession.search(Marketplace.class).where(f -> f.bool(b -> {
+
+//			keywords
+			if (!keywords.isEmpty()) {
+				b.must(f.match().field("title").boost(2.0f).field("category_search").boost(4.0f)
+						.field("condition_search").boost(3.0f).field("description").boost(1.0f).matching(keywords));
+			}
+
+//			status
+			b.must(f.terms().field("status").matchingAny(PostStatus.AVAILABLE));
+
+//			costType filter
+			Double maxCostRange = maxCost > 0 ? maxCost : null;
+			Double minCostRange = minCost > 0 ? minCost : null;
+			b.filter(f.range().field("cost").between(minCostRange, maxCostRange));
+
+//			amenity filter
+			if (!condition.isEmpty() && !condition.equals("All")) {
+				b.filter(f.match().field("condition").matching(condition));
+			}
+
+//			category filter
+			if (!category.isEmpty() && !category.equals("All")) {
+				b.filter(f.match().field("category").matching(category));
+			}
+
+//			radius default 20 miles
+			switch (within) {
+			case "circle":
+				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
+				break;
+			case "box": {
+				GeoBoundingBox box = GeoBoundingBox.of(topLeft.get(0), topLeft.get(1), bottomRight.get(0),
+						bottomRight.get(1));
+
+				b.must(f.spatial().within().field("location").boundingBox(box));
+			}
+				break;
+			default:
+				b.must(f.spatial().within().field("location").circle(center, radius, DistanceUnit.MILES));
+				break;
+			}
+
+		})).sort(f -> f.composite(b -> {
+			switch (sort) {
+			case "Date":
+				b.add(f.field("updatedOn").desc());
+				break;
+			case "Distance":
+				b.add(f.distance("location", center));
+				break;
+			default:
+//				default, score, or other qualities
+				b.add(f.field("updatedOn").desc());
+				break;
+			}
+		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
+
+		return marketplace;
 	}
 
 }
