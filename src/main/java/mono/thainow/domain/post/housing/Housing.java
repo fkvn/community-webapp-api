@@ -3,10 +3,9 @@ package mono.thainow.domain.post.housing;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -107,7 +106,7 @@ public class Housing implements Serializable {
 	@Column(name = "CONTACT_VALUE")
 	@CollectionTable(name = "HOUSING_CONTACT_INFO", joinColumns = @JoinColumn(name = "HOUSING_ID"))
 	@JsonView(View.Detail.class)
-	private Map<String, String> contactInfo = new HashMap<>();
+	private TreeMap<String, String> contactInfo = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Column(name = "HOUSING_TYPE")
 	@JsonView(View.Detail.class)
@@ -144,7 +143,7 @@ public class Housing implements Serializable {
 	@JsonView(View.Detail.class)
 	@ElementCollection
 	@FullTextField
-	private List<String> amenities;
+	private TreeSet<String> amenities = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
 	@ElementCollection
 	@MapKeyColumn(name = "INTERIOR_FIELD")
@@ -153,7 +152,7 @@ public class Housing implements Serializable {
 	@JsonView(View.Detail.class)
 	@PropertyBinding(binder = @PropertyBinderRef(type = HousingInteriorSummary.class))
 //	@GenericField(extraction = @ContainerExtraction(BuiltinContainerExtractors.MAP_KEY))
-	private Map<String, Integer> interior = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	private TreeMap<String, Integer> interior = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Lob
 	@Column(name = "HOUSING_DESCRIPTION")

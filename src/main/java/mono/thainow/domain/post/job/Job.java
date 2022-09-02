@@ -3,9 +3,11 @@ package mono.thainow.domain.post.job;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -67,7 +69,7 @@ public class Job implements Serializable {
 	@GeneratedValue
 	@JsonIgnore
 	private Long id;
-	
+
 	@FullTextField
 	@Column(name = "JOB_TITLE")
 	private String title;
@@ -103,7 +105,7 @@ public class Job implements Serializable {
 	@Column(name = "CONTACT_VALUE")
 	@CollectionTable(name = "JOB_CONTACT_INFO", joinColumns = @JoinColumn(name = "JOB_ID"))
 	@JsonView(View.Detail.class)
-	private Map<String, String> contactInfo = new HashMap<>();
+	private Map<String, String> contactInfo = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Column(name = "IS_JOB_REMOTE")
 	@JsonView(View.Detail.class)
@@ -113,7 +115,7 @@ public class Job implements Serializable {
 	@JsonView(View.Detail.class)
 	@ElementCollection
 	@FullTextField
-	private List<String> positions;
+	private Set<String> positions = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Column(name = "JOB_EXPERIENCE")
 	@JsonView(View.Detail.class)

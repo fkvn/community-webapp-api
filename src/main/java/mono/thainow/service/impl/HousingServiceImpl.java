@@ -2,10 +2,10 @@ package mono.thainow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,54 +55,55 @@ public class HousingServiceImpl implements HousingService {
 		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
 		Assert.isTrue(pictures.size() > 0, "Housing picture is required!");
 		housing.setPictures(pictures);
-		
+
 //		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new HashMap<>());
+		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
+				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
 		Assert.isTrue(contactInfo.size() > 0, "Housing contact information is required!");
 		housing.setContactInfo(contactInfo);
-		
+
 //		interior information
-		Map<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
-		if (interior !=null && interior.size() > 0) {
+		TreeMap<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
+		if (interior != null && interior.size() > 0) {
 			housing.setInterior(interior);
 		}
-		
+
 //		amenities
-		List<String> amenities = Optional.ofNullable(request.getAmenities()).orElse(null);
+		TreeSet<String> amenities = Optional.ofNullable(request.getAmenities()).orElse(null);
 		if (amenities != null && amenities.size() > 0) {
 			housing.setAmenities(amenities);
 		}
-		
+
 //		type
 		String type = Optional.ofNullable(request.getType()).orElse(null);
 		if (type != null) {
 			housing.setType(type.trim());
 		}
-		
+
 //		daily cost
 		Double dailyCost = Optional.ofNullable(request.getDailyCost()).orElse(null);
 		if (dailyCost != null) {
 			housing.setDailyCost(dailyCost);
 		}
-		
+
 //		monthly cost
 		Double monthlyCost = Optional.ofNullable(request.getMonthlyCost()).orElse(null);
 		if (monthlyCost != null) {
 			housing.setMonthlyCost(monthlyCost);
 		}
-		
+
 //		annual cost
 		Double annualCost = Optional.ofNullable(request.getAnnualCost()).orElse(null);
 		if (annualCost != null) {
 			housing.setAnnualCost(annualCost);
 		}
-		
+
 //		deposit cost
 		Double depositCost = Optional.ofNullable(request.getDepositCost()).orElse(null);
 		if (depositCost != null) {
 			housing.setDepositCost(depositCost);
 		}
-		
+
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
@@ -164,55 +165,55 @@ public class HousingServiceImpl implements HousingService {
 			housing.setPictures(pictures);
 		}
 		Assert.isTrue(housing.getPictures().size() > 0, "Housing picture is required!");
-		
+
 //		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
+		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
 		if (contactInfo != null && contactInfo.size() > 0) {
 			housing.setContactInfo(contactInfo);
 		}
 
 //		interior information
-		Map<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
-		if (interior !=null && interior.size() > 0) {
+		TreeMap<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
+		if (interior != null && interior.size() > 0) {
 			housing.setInterior(interior);
 		}
-		
+
 //		amenities
-		List<String> amenities = Optional.ofNullable(request.getAmenities()).orElse(null);
+		TreeSet<String> amenities = Optional.ofNullable(request.getAmenities()).orElse(null);
 		if (amenities != null && amenities.size() > 0) {
 			housing.setAmenities(amenities);
 		}
-		
+
 //		type
 		String type = Optional.ofNullable(request.getType()).orElse(null);
 		if (type != null) {
 			housing.setType(type.trim());
 		}
-		
+
 //		daily cost
 		Double dailyCost = Optional.ofNullable(request.getDailyCost()).orElse(null);
 		if (dailyCost != null) {
 			housing.setDailyCost(dailyCost);
 		}
-		
+
 //		monthly cost
 		Double monthlyCost = Optional.ofNullable(request.getMonthlyCost()).orElse(null);
 		if (monthlyCost != null) {
 			housing.setMonthlyCost(monthlyCost);
 		}
-		
+
 //		annual cost
 		Double annualCost = Optional.ofNullable(request.getAnnualCost()).orElse(null);
 		if (annualCost != null) {
 			housing.setAnnualCost(annualCost);
 		}
-		
+
 //		deposit cost
 		Double depositCost = Optional.ofNullable(request.getDepositCost()).orElse(null);
 		if (depositCost != null) {
 			housing.setDepositCost(depositCost);
 		}
-		
+
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {

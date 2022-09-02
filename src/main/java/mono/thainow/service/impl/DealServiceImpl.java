@@ -2,10 +2,10 @@ package mono.thainow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,7 +57,8 @@ public class DealServiceImpl implements DealService {
 		deal.setPictures(pictures);
 
 //		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new HashMap<>());
+		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
+				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
 		Assert.isTrue(contactInfo.size() > 0, "Deal contact information is required!");
 		deal.setContactInfo(contactInfo);
 

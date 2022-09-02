@@ -2,10 +2,10 @@ package mono.thainow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,7 +57,7 @@ public class JobServiceImpl implements JobService {
 		job.setPictures(pictures);
 
 //		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new HashMap<>());
+		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
 		Assert.isTrue(contactInfo.size() > 0, "Job contact information is required!");
 		job.setContactInfo(contactInfo);
 
@@ -68,7 +68,7 @@ public class JobServiceImpl implements JobService {
 		}
 
 //		positions
-		List<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
+		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
 		if (positions != null && positions.size() > 0) {
 			job.setPositions(positions);
 		}
@@ -142,7 +142,7 @@ public class JobServiceImpl implements JobService {
 		Assert.isTrue(job.getPictures().size() > 0, "Job picture is required!");
 
 //		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
+		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
 		if (contactInfo != null && contactInfo.size() > 0) {
 			job.setContactInfo(contactInfo);
 		}
@@ -154,7 +154,7 @@ public class JobServiceImpl implements JobService {
 		}
 
 //		positions
-		List<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
+		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
 		if (positions != null && positions.size() > 0) {
 			job.setPositions(positions);
 		}

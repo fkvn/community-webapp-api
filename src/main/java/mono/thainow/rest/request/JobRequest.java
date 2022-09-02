@@ -2,7 +2,8 @@ package mono.thainow.rest.request;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import lombok.Getter;
 import mono.thainow.domain.post.PostStatus;
@@ -18,9 +19,9 @@ public class JobRequest extends PostRequest {
 	
 	private List<StorageRequest> pictures;
 	
-	private Map<String, String> contactInfo;
+	private TreeMap<String, String> contactInfo = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
-	private List<String> positions;
+	private TreeSet<String> positions = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 	
 	private String salary;
 	

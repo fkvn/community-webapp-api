@@ -3,9 +3,9 @@ package mono.thainow.domain.post.deal;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -103,7 +103,7 @@ public class Deal implements Serializable {
 	@Column(name = "CONTACT_VALUE")
 	@CollectionTable(name = "DEAL_CONTACT_INFO", joinColumns = @JoinColumn(name = "DEAL_ID"))
 	@JsonView(View.Detail.class)
-	private Map<String, String> contactInfo = new HashMap<>();
+	private Map<String, String> contactInfo = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Column(name = "DEAL_CATEGORY")
 	@JsonView(View.Detail.class)
