@@ -1,4 +1,4 @@
-package mono.thainow.domain.profile;
+package mono.thainow.domain.review;
 
 import java.io.Serializable;
 
@@ -10,57 +10,62 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import mono.thainow.domain.user.User;
+import mono.thainow.domain.profile.Profile;
 import mono.thainow.view.View;
 
-@RequiredArgsConstructor
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode
+@RequiredArgsConstructor
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "PROFILE_TYPE", discriminatorType = DiscriminatorType.STRING)
 @JsonView(View.Basic.class)
+@Audited(withModifiedFlag = true)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "REVIEW_TYPE", discriminatorType = DiscriminatorType.STRING)
 @Indexed
-public abstract class Profile implements Serializable {
+public class Review implements Serializable {
+
 	/**
-	* 
-	*/
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
 
 //	Basic Information
-	
+
 	@Id
 	@GeneratedValue
 	private Long id;
 
-	@JsonProperty("type")
-	public String getDecriminatorValue() {
-		return this.getClass().getAnnotation(DiscriminatorValue.class).value();
-	}
-	
-	public abstract Object getInfo();
-	
-//	Request ONLY
-	
 	@ManyToOne
-	@JsonIgnore
-//	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-//	@JsonIdentityReference(alwaysAsId = true)
-	private User account;
+	@JoinColumn(name = "REVIEWER_ID")
+	@IndexedEmbedded
+	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+	private Profile reviewer;
+
+	@JsonProperty("type")
+	public ReviewType getDecriminatorValue() {
+		return ReviewType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
+	}
+
+	private String comment;
+
+	private int rate;
+
+	private int helpfulCount;
+
+	private int notHelpfulCount;
+
 }
