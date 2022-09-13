@@ -60,6 +60,12 @@ public class JobServiceImpl implements JobService {
 		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
 		Assert.isTrue(contactInfo.size() > 0, "Job contact information is required!");
 		job.setContactInfo(contactInfo);
+		
+//		remote job
+		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(null);
+		if (isRemote != null) {
+			job.setRemote(isRemote);
+		}
 
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
@@ -145,6 +151,12 @@ public class JobServiceImpl implements JobService {
 		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
 		if (contactInfo != null && contactInfo.size() > 0) {
 			job.setContactInfo(contactInfo);
+		}
+		
+//		remote job
+		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(null);
+		if (isRemote != null) {
+			job.setRemote(isRemote);
 		}
 
 //		description

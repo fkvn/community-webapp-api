@@ -23,6 +23,8 @@ public class JobRequest extends PostRequest {
 	
 	private TreeSet<String> positions = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 	
+	private Boolean isRemote;
+	
 	private String salary;
 	
 	private String skills;

@@ -12,7 +12,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 
-import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,6 +62,10 @@ public abstract class Post implements Serializable {
 
 	@JsonIgnore
 	public abstract PostStatus getStatus();
+	
+	public Long totalReview = (long) 0;
+	
+	public Double avgRate = (double) 0;
 
 	public abstract Object getInfo();
 
