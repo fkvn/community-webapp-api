@@ -77,7 +77,7 @@ public class PostController {
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		Post post = postService.getValidPost(postId, PostType.DEAL_POST);
+		Post post = postService.getValidPost(postId, type);
 
 		AuthUtil.authorizedAccess(postOwner, post, true);
 
@@ -124,6 +124,7 @@ public class PostController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	public Long createDealPost(@Valid @RequestBody DealRequest request) {
+		request.setPostType(PostType.DEAL_POST);
 		return createPostFromRequest(request);
 	}
 
@@ -131,6 +132,7 @@ public class PostController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	public Long createJobPost(@Valid @RequestBody JobRequest request) {
+		request.setPostType(PostType.JOB_POST);
 		return createPostFromRequest(request);
 	}
 
@@ -138,6 +140,7 @@ public class PostController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	public Long createHousingPost(@Valid @RequestBody HousingRequest request) {
+		request.setPostType(PostType.HOUSING_POST);
 		return createPostFromRequest(request);
 	}
 
@@ -145,6 +148,7 @@ public class PostController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	public Long createMarketplacePost(@Valid @RequestBody MarketplaceRequest request) {
+		request.setPostType(PostType.MARKETPLACE_POST);
 		return createPostFromRequest(request);
 	}
 
@@ -152,6 +156,7 @@ public class PostController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
 	public void updateDeal(@PathVariable Long postId, @Valid @RequestBody DealRequest request) {
+		request.setPostType(PostType.DEAL_POST);
 		updatePostFromRequest(postId, request);
 	}
 
@@ -159,20 +164,23 @@ public class PostController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
 	public void updateJob(@PathVariable Long postId, @Valid @RequestBody JobRequest request) {
+		request.setPostType(PostType.JOB_POST);
 		updatePostFromRequest(postId, request);
 	}
 
-	@PatchMapping("/housing/{postId}")
+	@PatchMapping("/housings/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
 	public void updateHousing(@PathVariable Long postId, @Valid @RequestBody HousingRequest request) {
+		request.setPostType(PostType.HOUSING_POST);
 		updatePostFromRequest(postId, request);
 	}
 
-	@PatchMapping("/marketplace/{postId}")
+	@PatchMapping("/marketplaces/{postId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
 	public void updateMarketplace(@PathVariable Long postId, @Valid @RequestBody MarketplaceRequest request) {
+		request.setPostType(PostType.MARKETPLACE_POST);
 		updatePostFromRequest(postId, request);
 	}
 

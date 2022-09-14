@@ -1,18 +1,24 @@
 package mono.thainow.domain.profile;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Set;
 
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,6 +29,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import mono.thainow.domain.review.ProfileReview;
 import mono.thainow.domain.user.User;
 import mono.thainow.view.View;
 
@@ -62,4 +69,26 @@ public abstract class Profile implements Serializable {
 //	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 //	@JsonIdentityReference(alwaysAsId = true)
 	private User account;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
+	@IndexedEmbedded
+	public Set<ProfileReview> reviews;
+
+	public int getTotalReview() {
+		return reviews.size();
+	}
+
+	public Double getAvgRating() {
+		try {
+
+			BigDecimal avgRating = new BigDecimal(
+					this.reviews.stream().reduce(0, (total, e) -> total + e.getRate(), Integer::sum)
+							/ (double) reviews.size()).setScale(1, RoundingMode.HALF_UP);
+
+			return avgRating.doubleValue();
+		} catch (Exception e) {
+			return 0.0;
+		}
+	}
 }

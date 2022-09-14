@@ -13,6 +13,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -20,6 +21,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -52,7 +54,7 @@ import mono.thainow.view.View;
 @RequiredArgsConstructor
 @Entity
 @JsonView(View.Basic.class)
-@Audited( withModifiedFlag = true )
+@Audited(withModifiedFlag = true)
 @Indexed
 public class Deal implements Serializable {
 
@@ -123,5 +125,11 @@ public class Deal implements Serializable {
 	@JsonView(View.FullDetail.class)
 	@Column(name = "DEAL_CREATED_ON")
 	private Date createdOn = new Date();
+
+//	Request Only
+	
+	@OneToOne(mappedBy = "deal", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private DealPost post;
 
 }

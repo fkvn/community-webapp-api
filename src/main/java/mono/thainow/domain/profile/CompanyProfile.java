@@ -4,6 +4,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
@@ -24,11 +26,10 @@ public class CompanyProfile extends Profile {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	@OneToOne
 	@JsonIgnore
-//	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-//	@JsonIdentityReference(alwaysAsId = true)
+	@IndexedEmbedded
 	private Company company;
 
 	public CompanyProfile(User owner, Company company) {
@@ -38,7 +39,7 @@ public class CompanyProfile extends Profile {
 
 	@Override
 	public Object getInfo() {
-
+		this.getCompany().setProfileId(this.getId());
 		return this.getCompany();
 	}
 

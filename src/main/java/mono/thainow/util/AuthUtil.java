@@ -4,6 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.review.Review;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.exception.AccessForbidden;
 import mono.thainow.service.impl.UserDetailsImpl;
@@ -51,6 +52,28 @@ public class AuthUtil {
 		boolean validPostOwner = validRequester && post != null && post.getOwner().getId().equals(postOwner.getId());
 
 		boolean authorizedAccess = adminAuthorized || (validRequester && validPostOwner);
+
+		if (throwError && !authorizedAccess) {
+			throw new AccessForbidden();
+		}
+
+		return authorizedAccess;
+	}
+
+	public static boolean authorizedAccess(Profile reviewer, Review review, boolean throwError) {
+
+		UserDetailsImpl userDetails = getAuthenticatedUser();
+
+		boolean adminAuthorized = userDetails.getRole() != UserRole.ADMIN
+				|| userDetails.getRole() != UserRole.SUPERADMIN;
+
+		boolean validRequester = userDetails != null && review != null
+				&& review.getReviewer().getId().equals(userDetails.getId());
+
+		boolean validReviewer = validRequester && review != null
+				&& review.getReviewer().getId().equals(reviewer.getId());
+
+		boolean authorizedAccess = adminAuthorized || (validRequester && validReviewer);
 
 		if (throwError && !authorizedAccess) {
 			throw new AccessForbidden();

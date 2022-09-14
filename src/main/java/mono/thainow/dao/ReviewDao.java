@@ -6,5 +6,7 @@ public interface ReviewDao {
 
 	Review saveReview(Review newReview);
 
+	Review getValidReview(Long reviewId);
+
 	
 }

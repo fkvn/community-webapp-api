@@ -4,8 +4,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 
-import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -37,7 +36,7 @@ public class HousingPost extends Post {
 
 	@OneToOne
 	@JsonIgnore
-	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
+	@IndexedEmbedded
 	private Housing housing;
 
 	@Override

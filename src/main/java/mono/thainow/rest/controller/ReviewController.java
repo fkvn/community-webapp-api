@@ -7,6 +7,8 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,11 +34,18 @@ public class ReviewController {
 	@Autowired
 	ProfileService profileService;
 
-//	createPost Helper
-	private Long createReviewFromRequest(ReviewRequest request) {
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	@AuthenticatedAccess
+	public Long createPostReview(@Valid @RequestBody ReviewRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getReviewerId()).orElse(null);
 		Assert.isTrue(profileId != null, "Missing profile information!");
+
+		ReviewType type = Optional.ofNullable(request.getType()).orElse(null);
+		
+		Assert.isTrue(type != null && (type == ReviewType.POST_REVIEW || type == ReviewType.PROFILE_REVIEW),
+				"Invalid Review Type!");
 
 		Profile reviewer = profileService.getProfile(profileId);
 		AuthUtil.authorizedAccess(reviewer, true);
@@ -44,167 +53,24 @@ public class ReviewController {
 		Review newReview = reviewService.createReview(reviewer, request);
 
 		return newReview.getId();
+
 	}
 
-////	updatePost Helper
-//	private void updatePostFromRequest(Long postId, PostRequest request) {
-//
-//		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-//		Assert.isTrue(profileId != null, "Missing profile information!");
-//
-//		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
-//		Assert.isTrue(type != null, "Invalid Post Type!");
-//
-//		Profile postOwner = profileService.getProfile(profileId);
-//
-//		Post post = postService.getValidPost(postId, PostType.DEAL_POST);
-//
-//		AuthUtil.authorizedAccess(postOwner, post, true);
-//
-//		postService.updatePost(post, request);
-//	}
-//
-//	@GetMapping
-//	@ResponseStatus(HttpStatus.OK)
-//	public List<Post> getPosts(@RequestParam Long profileId, @RequestParam PostType postType) {
-//
-//		Profile postOwner = profileService.getProfile(profileId);
-//
-//		List<Post> posts = postService.getPosts(postOwner, postType);
-//
-////		anonymousUser -> public request
-//		if (AuthUtil.getAuthenticatedUser() == null || !AuthUtil.authorizedAccess(postOwner, false)) {
-//			posts = posts.stream().filter(post -> post.getStatus() == PostStatus.AVAILABLE)
-//					.collect(Collectors.toList());
-//		}
-//
-//		return posts;
-//
-//	}
-//
-//	@GetMapping("/{postId}")
-//	@ResponseStatus(HttpStatus.ACCEPTED)
-//	@JsonView(View.Detail.class)
-//	public Post getPost(@PathVariable Long postId, @RequestParam(required = false) Long profileId,
-//			@RequestParam PostType type) {
-//
-//		Post post = postService.getValidPost(postId, type);
-//
-//		Profile postOwner = profileService.getProfile(profileId);
-//
-//		if (post.getStatus() == PostStatus.PRIVATE) {
-//			AuthUtil.authorizedAccess(postOwner, post, true);
-//		}
-//
-//		return post;
-//
-//	}
-
-	@PostMapping("/posts")
-	@ResponseStatus(HttpStatus.CREATED)
+	@PatchMapping("/{reviewId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public Long createPostReview(@Valid @RequestBody ReviewRequest request) {
+	public void updateReview(@PathVariable Long reviewId, @Valid @RequestBody ReviewRequest request) {
 
-		request.setType(ReviewType.POST_REVIEW);
+		Long profileId = Optional.ofNullable(request.getReviewerId()).orElse(null);
+		Assert.isTrue(profileId != null, "Missing profile information!");
 
-		return createReviewFromRequest(request);
+		Profile reviewer = profileService.getProfile(profileId);
 
+		Review review = reviewService.getValidReview(reviewId);
+
+		AuthUtil.authorizedAccess(reviewer, review, true);
+
+		reviewService.updateReview(review, request);
 	}
 
-	@PostMapping("/profiles")
-	@ResponseStatus(HttpStatus.CREATED)
-	@AuthenticatedAccess
-	public Long createProfileReview(@Valid @RequestBody ReviewRequest request) {
-
-		request.setType(ReviewType.PROFILE_REVIEW);
-
-		return createReviewFromRequest(request);
-
-	}
-
-//	@PostMapping("/jobs")
-//	@ResponseStatus(HttpStatus.CREATED)
-//	@AuthenticatedAccess
-//	public Long createJobPost(@Valid @RequestBody JobRequest request) {
-//		return createPostFromRequest(request);
-//	}
-//
-//	@PostMapping("/housings")
-//	@ResponseStatus(HttpStatus.CREATED)
-//	@AuthenticatedAccess
-//	public Long createHousingPost(@Valid @RequestBody HousingRequest request) {
-//		return createPostFromRequest(request);
-//	}
-//
-//	@PostMapping("/marketplaces")
-//	@ResponseStatus(HttpStatus.CREATED)
-//	@AuthenticatedAccess
-//	public Long createMarketplacePost(@Valid @RequestBody MarketplaceRequest request) {
-//		return createPostFromRequest(request);
-//	}
-//
-//	@PatchMapping("/deals/{postId}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	@AuthenticatedAccess
-//	public void updateDeal(@PathVariable Long postId, @Valid @RequestBody DealRequest request) {
-//		updatePostFromRequest(postId, request);
-//	}
-//
-//	@PatchMapping("/jobs/{postId}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	@AuthenticatedAccess
-//	public void updateJob(@PathVariable Long postId, @Valid @RequestBody JobRequest request) {
-//		updatePostFromRequest(postId, request);
-//	}
-//
-//	@PatchMapping("/housing/{postId}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	@AuthenticatedAccess
-//	public void updateHousing(@PathVariable Long postId, @Valid @RequestBody HousingRequest request) {
-//		updatePostFromRequest(postId, request);
-//	}
-//
-//	@PatchMapping("/marketplace/{postId}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	@AuthenticatedAccess
-//	public void updateMarketplace(@PathVariable Long postId, @Valid @RequestBody MarketplaceRequest request) {
-//		updatePostFromRequest(postId, request);
-//	}
-//
-//	@PatchMapping("/{postId}/disable")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	@AdminAndSAdminAccess
-//	public void disablePost(@PathVariable Long postId) {
-//
-//		Post post = postService.getPost(postId);
-//
-//		postService.disablePost(post);
-//
-//	}
-//
-//	@PatchMapping("/{postId}/activate")
-//	@ResponseStatus(HttpStatus.OK)
-//	@AdminAndSAdminAccess
-//	@JsonView(View.Detail.class)
-//	public Post activateDeal(@PathVariable Long postId) {
-//
-//		Post post = postService.getPost(postId);
-//
-//		return postService.activatePost(post);
-//	}
-//
-//	@DeleteMapping("/{postId}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-//	@AuthenticatedAccess
-//	public void removeDeal(@PathVariable Long postId, @RequestParam Long profileId) {
-//
-//		Post post = postService.getPost(postId);
-//
-//		Profile postOwner = profileService.getProfile(profileId);
-//
-//		AuthUtil.authorizedAccess(postOwner, post, true);
-//
-//		postService.removePost(post);
-//
-//	}
 }

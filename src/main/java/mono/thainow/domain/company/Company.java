@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -44,6 +45,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
+import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.view.View;
 
@@ -184,6 +186,12 @@ public class Company implements Serializable {
 	@Column(name = "IS_COMPANY_PHONE_VERIFIED")
 	@JsonView(View.FullDetail.class)
 	private boolean phoneVerified = false;
+	
+//	Request Only
+	
+	@OneToOne(mappedBy = "company", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private CompanyProfile profile;
 
 //	
 //	@Latitude

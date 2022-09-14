@@ -21,7 +21,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
+import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 
@@ -73,6 +75,7 @@ public class Review implements Serializable {
 	private String comment;
 
 	@Column(name = "REVIEW_RATE")
+	@GenericField(sortable = Sortable.YES)
 	private int rate = 0;
 
 	@Column(name = "REVIEW_HELPFUL_COUNT")

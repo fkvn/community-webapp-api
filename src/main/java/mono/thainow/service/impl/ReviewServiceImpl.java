@@ -2,6 +2,8 @@ package mono.thainow.service.impl;
 
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -38,22 +40,26 @@ public class ReviewServiceImpl implements ReviewService {
 
 		switch (request.getType()) {
 		case POST_REVIEW: {
-			Long postReviewId = Optional.ofNullable(request.getPostReviewId()).orElse(null);
+			Long postReviewId = Optional.ofNullable(request.getPostId()).orElse(null);
 			Assert.isTrue(postReviewId != null, "Invalid Reviewee");
 
 			Post reviewee = postService.getPost(postReviewId);
 
+			Assert.isTrue(!reviewee.getOwner().getId().equals(reviewer.getId()),
+					"Post owner can't review their own posts!");
+
 			review = new PostReview(reviewer, reviewee);
 
-			review = saveReview(getReviewFromRequest(review, request));
 		}
 
 			break;
 		case PROFILE_REVIEW: {
-			Long profileReviewId = Optional.ofNullable(request.getProfileReviewId()).orElse(null);
+			Long profileReviewId = Optional.ofNullable(request.getProfileId()).orElse(null);
 			Assert.isTrue(profileReviewId != null, "Invalid Reviewee");
 
 			Profile reviewee = profileService.getProfile(profileReviewId);
+			Assert.isTrue(!reviewer.getAccount().getId().equals(reviewee.getAccount().getId()),
+					"User can't review their own profiles!");
 
 			review = new ProfileReview(reviewer, reviewee);
 
@@ -88,6 +94,34 @@ public class ReviewServiceImpl implements ReviewService {
 		review.setStatus(ReviewStatus.ACTIVATED);
 
 		return review;
+	}
+
+	@Override
+	public Review getReviewFromUpdateRequest(Review review, ReviewRequest request) {
+
+//		rate
+		Integer rate = Optional.ofNullable(request.getRate()).orElse(null);
+		if (rate != null) {
+			review.setRate(rate);
+		}
+
+//		comment
+		String comment = Optional.ofNullable(request.getComment()).orElse(null);
+		if (comment != null) {
+			review.setComment(comment);
+		}
+
+		return review;
+	}
+
+	@Override
+	public Review getValidReview(Long reviewId) {
+		return reviewDao.getValidReview(reviewId);
+	}
+
+	@Override
+	public void updateReview(Review review, @Valid ReviewRequest request) {
+		saveReview(getReviewFromUpdateRequest(review, request));
 	}
 
 //	@Autowired

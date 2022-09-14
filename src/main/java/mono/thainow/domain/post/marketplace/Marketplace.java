@@ -13,6 +13,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -20,6 +21,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -130,10 +132,17 @@ public class Marketplace implements Serializable {
 	private String description;
 
 //	Full Detail Information
+	
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonView(View.FullDetail.class)
 	@Column(name = "MARKETPLACE_CREATED_ON")
 	private Date createdOn = new Date();
+	
+//	Request Only
+	
+	@OneToOne(mappedBy = "marketplace", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private MarketplacePost post;
 
 }

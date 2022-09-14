@@ -7,8 +7,6 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
-import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +38,6 @@ public class PostReview extends Review {
 	@ManyToOne
 	@JoinColumn(name = "REVIEWEE_ID")
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	private Post post;
 
 }
