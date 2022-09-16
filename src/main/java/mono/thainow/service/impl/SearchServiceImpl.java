@@ -1,7 +1,9 @@
 package mono.thainow.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +14,10 @@ import mono.thainow.domain.post.housing.HousingPost;
 import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.post.marketplace.MarketplacePost;
 import mono.thainow.domain.profile.CompanyProfile;
+import mono.thainow.domain.review.PostReview;
+import mono.thainow.domain.review.ProfileReview;
 import mono.thainow.rest.response.SearchResponse;
+import mono.thainow.rest.response.SearchReviewResponse;
 import mono.thainow.service.SearchService;
 
 @Service
@@ -37,16 +42,6 @@ public class SearchServiceImpl implements SearchService {
 		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
 		searchRes.setFetchResult(result.hits());
 
-//		List<Company> companies = result.hits();
-//
-//		companies.forEach(com -> {
-//			if (com.getStatus() == CompanyStatus.REGISTERED) {
-//				com.setProfileId(profileService.getValidCompanyProfile(com).getId());
-//			}
-//		});
-//
-//		searchRes.setFetchResult(companies);
-
 		return searchRes;
 	}
 
@@ -63,21 +58,6 @@ public class SearchServiceImpl implements SearchService {
 		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
 		searchRes.setFetchResult(result.hits());
 
-//		SearchResult<Deal> result = searchDao.searchDeal(keywords, limit, page, centerLat, centerLng, category, sort,
-//				within, radius, topLeft, bottomRight);
-//
-//		SearchResponse<Post> searchRes = new SearchResponse<Post>();
-//		System.out.println(result.total().isHitCountExact());
-//		searchRes.setTotalCount(result.total().hitCount());
-//		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
-//
-//		List<Deal> deals = result.hits();
-//
-//		List<Post> posts = deals.stream().map(deal -> postService.getPost(PostType.DEAL_POST, deal))
-//				.collect(Collectors.toList());
-//
-//		searchRes.setFetchResult(posts);
-
 		return searchRes;
 	}
 
@@ -93,20 +73,6 @@ public class SearchServiceImpl implements SearchService {
 		searchRes.setTotalCount(result.total().hitCount());
 		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
 		searchRes.setFetchResult(result.hits());
-
-//		SearchResult<Job> result = searchDao.searchJob(keywords, position, experience, skills, remote, limit, page,
-//				centerLat, centerLng, sort, within, radius, topLeft, bottomRight);
-//
-//		SearchResponse<Post> searchRes = new SearchResponse<Post>();
-//		searchRes.setTotalCount(result.total().hitCountLowerBound());
-//		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
-//
-//		List<Job> jobs = result.hits();
-//
-//		List<Post> posts = jobs.stream().map(job -> postService.getPost(PostType.JOB_POST, job))
-//				.collect(Collectors.toList());
-//
-//		searchRes.setFetchResult(posts);
 
 		return searchRes;
 	}
@@ -126,22 +92,6 @@ public class SearchServiceImpl implements SearchService {
 		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
 		searchRes.setFetchResult(result.hits());
 
-//		SearchResult<Housing> result = searchDao.searchHousing(keywords, type, costType, minCost, maxCost, guest, bed,
-//				parking, bath, amenity, category, centerLat, centerLng, limit, page, sort, within, radius, topLeft,
-//				bottomRight);
-//
-//		SearchResponse<Post> searchRes = new SearchResponse<Post>();
-//		System.out.println(result.total().isHitCountExact());
-//		searchRes.setTotalCount(result.total().hitCount());
-//		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
-//
-//		List<Housing> housings = result.hits();
-//
-//		List<Post> posts = housings.stream().map(housing -> postService.getPost(PostType.HOUSING_POST, housing))
-//				.collect(Collectors.toList());
-//
-//		searchRes.setFetchResult(posts);
-//
 		return searchRes;
 	}
 
@@ -158,21 +108,38 @@ public class SearchServiceImpl implements SearchService {
 		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
 		searchRes.setFetchResult(result.hits());
 
-//		SearchResult<Marketplace> result = searchDao.searchMarketplace(keywords, condition, category, minCost, maxCost,
-//				centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
-//
-//		SearchResponse<Post> searchRes = new SearchResponse<Post>();
-//		searchRes.setTotalCount(result.total().hitCountLowerBound());
-//		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
-//
-//		List<Marketplace> marketplaces = result.hits();
-//
-//		List<Post> posts = marketplaces.stream()
-//				.map(marketplace -> postService.getPost(PostType.MARKETPLACE_POST, marketplace))
-//				.collect(Collectors.toList());
-//
-//		searchRes.setFetchResult(posts);
-//
+		return searchRes;
+	}
+
+	@Override
+	public SearchReviewResponse<?> searchPostReview(Long id, String sort, int limit, int page, Long reviewerId) {
+
+		AggregationKey<Map<Integer, Long>> countsByRateKey = AggregationKey.of("countsByRate");
+
+		SearchResult<PostReview> result = searchDao.searchPostReview(id, sort, limit, page, countsByRateKey, reviewerId);
+
+		SearchReviewResponse<PostReview> searchRes = new SearchReviewResponse<PostReview>();
+		searchRes.setTotalCount(result.total().hitCount());
+		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
+		searchRes.setFetchResult(result.hits());
+		searchRes.setCategory(result.aggregation(countsByRateKey));
+
+		return searchRes;
+	}
+
+	@Override
+	public SearchReviewResponse<?> serachProfileReview(Long id, String sort, int limit, int page) {
+		
+		AggregationKey<Map<Integer, Long>> countsByRateKey = AggregationKey.of("countsByRate");
+		
+		SearchResult<ProfileReview> result = searchDao.searchProfileReview(id, sort, limit, page, countsByRateKey);
+
+		SearchReviewResponse<ProfileReview> searchRes = new SearchReviewResponse<ProfileReview>();
+		searchRes.setTotalCount(result.total().hitCount());
+		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
+		searchRes.setFetchResult(result.hits());
+		searchRes.setCategory(result.aggregation(countsByRateKey));
+
 		return searchRes;
 	}
 

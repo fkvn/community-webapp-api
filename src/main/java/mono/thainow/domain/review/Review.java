@@ -21,13 +21,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
+import org.hibernate.search.engine.backend.types.Aggregable;
 import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -58,6 +61,7 @@ public class Review implements Serializable {
 
 	@Id
 	@GeneratedValue
+	@GenericField
 	private Long id;
 
 	@ManyToOne
@@ -69,13 +73,14 @@ public class Review implements Serializable {
 	@UpdateTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "REVIEW_UPDATED_ON")
+	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
 
 	@Column(name = "REVIEW_COMMENT")
 	private String comment;
 
 	@Column(name = "REVIEW_RATE")
-	@GenericField(sortable = Sortable.YES)
+	@GenericField(sortable = Sortable.YES, aggregable = Aggregable.YES)
 	private int rate = 0;
 
 	@Column(name = "REVIEW_HELPFUL_COUNT")
@@ -83,6 +88,8 @@ public class Review implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "REVIEW_STATUS")
+	@KeywordField
+	@JsonIgnore
 	private ReviewStatus status = ReviewStatus.DISABLED;
 
 	@JsonProperty("type")

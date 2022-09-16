@@ -2,11 +2,13 @@ package mono.thainow.dao.jpa;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.common.SortMode;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.engine.spatial.DistanceUnit;
@@ -33,7 +35,10 @@ import mono.thainow.domain.post.marketplace.Marketplace;
 import mono.thainow.domain.post.marketplace.MarketplacePost;
 import mono.thainow.domain.profile.CompanyProfile;
 import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.review.PostReview;
+import mono.thainow.domain.review.ProfileReview;
 import mono.thainow.domain.review.Review;
+import mono.thainow.domain.review.ReviewStatus;
 
 @Repository
 public class SearchDaoImpl implements SearchDao {
@@ -857,13 +862,80 @@ public class SearchDaoImpl implements SearchDao {
 				break;
 			default:
 //				score, or other qualities
-				b.add(f.field("updatedOn").desc());
+				b.add(f.field("company.updatedOn").desc());
 				break;
 			}
 
 		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
 
 		return companies;
+	}
+
+	@Override
+	public SearchResult<PostReview> searchPostReview(Long postId, String sort, int limit, int page,
+			AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId) {
+
+		SearchSession searchSession = Search.session(entityManager);
+
+		SearchResult<PostReview> reviews = searchSession.search(PostReview.class).where(f -> f.bool(b -> {
+
+//			post id
+			b.must(f.match().field("post.id").matching(postId));
+
+//			status
+			b.must(f.terms().field("status").matchingAny(ReviewStatus.ACTIVATED));
+
+
+		})).aggregation(aggregationKey, f -> f.terms().field("rate", Integer.class)).sort(f -> f.composite(b -> {
+			switch (sort) {
+			case "Date":
+				b.add(f.field("updatedOn").desc());
+				break;
+			case "Rating":
+				b.add(f.field("rate").desc());
+				break;
+			default:
+//				score, or other qualities
+				b.add(f.field("updatedOn").desc());
+				break;
+			}
+
+		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
+
+		return reviews;
+	}
+
+	@Override
+	public SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, int limit, int page,
+			AggregationKey<Map<Integer, Long>> aggregationKey) {
+
+		SearchSession searchSession = Search.session(entityManager);
+
+		SearchResult<ProfileReview> reviews = searchSession.search(ProfileReview.class).where(f -> f.bool(b -> {
+
+//			profile id
+			b.must(f.match().field("profile.revieweeId").matching(profileId));
+
+//			status
+			b.must(f.terms().field("status").matchingAny(ReviewStatus.ACTIVATED));
+
+		})).aggregation(aggregationKey, f -> f.terms().field("rate", Integer.class)).sort(f -> f.composite(b -> {
+			switch (sort) {
+			case "Date":
+				b.add(f.field("updatedOn").desc());
+				break;
+			case "Rating":
+				b.add(f.field("rate").desc());
+				break;
+			default:
+//				score, or other qualities
+				b.add(f.field("updatedOn").desc());
+				break;
+			}
+
+		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
+
+		return reviews;
 	}
 
 }

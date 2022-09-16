@@ -2,7 +2,6 @@ package mono.thainow.rest.controller;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -86,19 +85,16 @@ public class PostController {
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
-	public List<Post> getPosts(@RequestParam Long profileId, @RequestParam PostType postType) {
+	@JsonView(View.Basic.class)
+	public List<Post> getPosts(@RequestParam Long profileId, @RequestParam PostType postType,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "20") int limit) {
 
 		Profile postOwner = profileService.getProfile(profileId);
 
-		List<Post> posts = postService.getPosts(postOwner, postType);
+		boolean ownerRequest = AuthUtil.getAuthenticatedUser() != null && AuthUtil.authorizedAccess(postOwner, false);
 
-//		anonymousUser -> public request
-		if (AuthUtil.getAuthenticatedUser() == null || !AuthUtil.authorizedAccess(postOwner, false)) {
-			posts = posts.stream().filter(post -> post.getStatus() == PostStatus.AVAILABLE)
-					.collect(Collectors.toList());
-		}
-
-		return posts;
+		return postService.getPosts(postOwner, postType, sort, page, limit, ownerRequest);
 
 	}
 
@@ -110,9 +106,8 @@ public class PostController {
 
 		Post post = postService.getValidPost(postId, type);
 
-		Profile postOwner = profileService.getProfile(profileId);
-
 		if (post.getStatus() == PostStatus.PRIVATE) {
+			Profile postOwner = profileService.getProfile(profileId);
 			AuthUtil.authorizedAccess(postOwner, post, true);
 		}
 

@@ -30,30 +30,45 @@ public class PostDaoImpl implements PostDao {
 	}
 
 	@Override
-	public List<Post> getPosts(Profile postOwner, PostType postType) {
+	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit,
+			boolean ownerRequest) {
 
 		String sql = "";
+		String entity = "";
 
+//		type
 		switch (postType) {
 		case DEAL_POST:
-			sql = "from Post where owner =: owner and deal.status IN (:status)";
+			entity = "deal";
 			break;
 		case JOB_POST:
-			sql = "from Post where owner =: owner and job.status IN (:status)";
+			entity = "job";
 			break;
 		case HOUSING_POST:
-			sql = "from Post where owner =: owner and housing.status IN (:status)";
+			entity = "housing";
 			break;
 		case MARKETPLACE_POST:
-			sql = "from Post where owner =: owner and marketplace.status IN (:status)";
+			entity = "marketplace";
 			break;
 		default:
 			break;
 		}
 
-		return entityManager.createQuery(sql, Post.class)
-				.setParameter("status", Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE))
-				.setParameter("owner", postOwner).getResultList();
+		sql = "from Post where owner =: owner and " + entity + ".status IN (:status)";
+
+//		sort
+		switch (sort) {
+		default:
+			sql += " ORDER BY " + entity + ".updatedOn DESC";
+			break;
+		}
+
+		List<PostStatus> validPostStatus = ownerRequest ? Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE)
+				: Arrays.asList(PostStatus.AVAILABLE);
+
+		return entityManager.createQuery(sql, Post.class).setParameter("status", validPostStatus)
+				.setParameter("owner", postOwner).setFirstResult((page - 1) * limit).setMaxResults(limit)
+				.getResultList();
 	}
 
 	@Override

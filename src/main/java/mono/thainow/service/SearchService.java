@@ -3,6 +3,7 @@ package mono.thainow.service;
 import java.util.List;
 
 import mono.thainow.rest.response.SearchResponse;
+import mono.thainow.rest.response.SearchReviewResponse;
 
 public interface SearchService {
 
@@ -24,4 +25,8 @@ public interface SearchService {
 	SearchResponse<?> searchMarketplacePost(String keywords, String condition, String category, Double minCost,
 			Double maxCost, double centerLat, double centerLng, int limit, int page, String sort, String within,
 			int radius, List<Double> topLeft, List<Double> bottomRight);
+
+	SearchReviewResponse<?> searchPostReview(Long id, String sort, int limit, int page, Long profileId);
+
+	SearchReviewResponse<?> serachProfileReview(Long id, String sort, int limit, int page);
 }

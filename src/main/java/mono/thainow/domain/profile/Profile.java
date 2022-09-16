@@ -17,6 +17,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
@@ -50,30 +51,37 @@ public abstract class Profile implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 //	Basic Information
-	
+
 	@Id
 	@GeneratedValue
+	@GenericField(name = "revieweeId")
+	@GenericField(name = "reviewerId")
 	private Long id;
 
 	@JsonProperty("type")
 	public String getDecriminatorValue() {
 		return this.getClass().getAnnotation(DiscriminatorValue.class).value();
 	}
-	
+
 	public abstract Object getInfo();
-	
+
 //	Request ONLY
-	
+
 	@ManyToOne
 	@JsonIgnore
 //	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 //	@JsonIdentityReference(alwaysAsId = true)
 	private User account;
-	
+
+//	@JsonIgnore
+//	@OneToMany(mappedBy = "reviewer", fetch = FetchType.LAZY)
+//	@IndexedEmbedded(includePaths = { "id" })
+//	private Set<Review> reviewedList;
+
 	@JsonIgnore
 	@OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
 	@IndexedEmbedded
-	public Set<ProfileReview> reviews;
+	private Set<ProfileReview> reviews;
 
 	public int getTotalReview() {
 		return reviews.size();

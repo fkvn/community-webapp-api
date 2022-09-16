@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.review.ReviewType;
+import mono.thainow.exception.BadRequest;
 import mono.thainow.rest.response.SearchResponse;
+import mono.thainow.rest.response.SearchReviewResponse;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.FullTextSearchService;
 import mono.thainow.service.SearchService;
@@ -112,7 +115,7 @@ public class FullTextSearchController {
 		return searchService.searchHousingPost(keywords, type, costType, minCost, maxCost, guest, bed, parking, bath,
 				amenity, category, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
 	}
-	
+
 	@GetMapping("/marketplaces")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
@@ -125,7 +128,25 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		return searchService.searchMarketplacePost(keywords, condition, category, minCost, maxCost, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+		return searchService.searchMarketplacePost(keywords, condition, category, minCost, maxCost, centerLat,
+				centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+	}
+
+	@GetMapping("/reviews")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@JsonView(View.Basic.class)
+	public SearchReviewResponse<?> searchReview(@RequestParam(defaultValue = "-1") Long reviewerId,
+			@RequestParam ReviewType type, @RequestParam Long id, @RequestParam(defaultValue = "Date") String sort,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit) {
+
+		switch (type) {
+		case POST_REVIEW:
+			return searchService.searchPostReview(id, sort, limit, page, reviewerId);
+		case PROFILE_REVIEW:
+			return searchService.serachProfileReview(id, sort, limit, page);
+		default:
+			throw new BadRequest("invalid review type request!");
+		}
 	}
 
 }

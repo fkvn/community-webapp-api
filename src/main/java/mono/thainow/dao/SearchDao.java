@@ -1,7 +1,9 @@
 package mono.thainow.dao;
 
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.search.engine.search.aggregation.AggregationKey;
 import org.hibernate.search.engine.search.query.SearchResult;
 
 import mono.thainow.domain.company.Company;
@@ -14,6 +16,8 @@ import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.post.marketplace.Marketplace;
 import mono.thainow.domain.post.marketplace.MarketplacePost;
 import mono.thainow.domain.profile.CompanyProfile;
+import mono.thainow.domain.review.PostReview;
+import mono.thainow.domain.review.ProfileReview;
 
 public interface SearchDao {
 
@@ -58,4 +62,8 @@ public interface SearchDao {
 	SearchResult<CompanyProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
 			double centerLng, String industry, String sort, String within, int radius, List<Double> topLeft,
 			List<Double> bottomRight);
+	
+	SearchResult<PostReview> searchPostReview(Long postId, String sort, int limit, int page, AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId);
+	
+	SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, int limit, int page, AggregationKey<Map<Integer, Long>> countsByRateKey);
 }

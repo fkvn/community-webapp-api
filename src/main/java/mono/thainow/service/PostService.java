@@ -11,7 +11,7 @@ public interface PostService {
 	
 	List<Post> getPosts(Profile profile);
 	
-	List<Post> getPosts(Profile postOwner, PostType postType);
+	List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest);
 
 	void removePosts(List<Post> posts);
 	

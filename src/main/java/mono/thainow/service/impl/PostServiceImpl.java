@@ -55,8 +55,8 @@ public class PostServiceImpl implements PostService {
 	}
 
 	@Override
-	public List<Post> getPosts(Profile postOwner, PostType postType) {
-		return postDao.getPosts(postOwner, postType);
+	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest) {
+		return postDao.getPosts(postOwner, postType, sort, page, limit, ownerRequest);
 	}
 
 	@Override
