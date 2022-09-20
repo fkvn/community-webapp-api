@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.Getter;
 import lombok.Setter;
+import mono.thainow.domain.location.Location;
 import mono.thainow.view.View;
 
 @Getter
@@ -18,4 +19,6 @@ public class SearchResponse<T> {
 	private long totalCount;
 
 	private List<T> fetchResult;
+	
+	private Location location;
 }

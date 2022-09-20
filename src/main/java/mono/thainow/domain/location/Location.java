@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.EqualsAndHashCode;
@@ -68,7 +69,7 @@ public class Location implements Serializable{
 	private String placeid;
 
 	@Column(name = "LOCATION_FORMATTED_ADDRESS")
-	private String description;
+	private String address;
 	
 	@Column(name = "LOCATION_CITY")
 	@NotEmpty(message = "Location city can't be empty")

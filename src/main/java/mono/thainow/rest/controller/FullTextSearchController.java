@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.domain.company.Company;
+import mono.thainow.domain.location.Location;
 import mono.thainow.domain.review.ReviewType;
 import mono.thainow.exception.BadRequest;
 import mono.thainow.rest.response.SearchResponse;
 import mono.thainow.rest.response.SearchReviewResponse;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.FullTextSearchService;
+import mono.thainow.service.LocationService;
 import mono.thainow.service.SearchService;
 import mono.thainow.view.View;
 
@@ -36,6 +38,9 @@ public class FullTextSearchController {
 
 	@Autowired
 	private SearchService searchService;
+
+	@Autowired
+	private LocationService locationService;
 
 	@PostMapping("/reindex")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
@@ -55,30 +60,40 @@ public class FullTextSearchController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> SearchCompanies(@RequestParam(defaultValue = "") String keywords,
-			@RequestParam(defaultValue = "All") String industry, @RequestParam double centerLat,
-			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
-			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
-			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "All") String industry,
+			@RequestParam(defaultValue = "") String placeid,
+			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
+			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		return searchService.searchCompany(industry, keywords, centerLat, centerLng, limit, page, sort, within, radius,
-				topLeft, bottomRight);
+		Location location = locationService.getLocationFromPlaceidAndAddress(placeid, address);
+		
+		SearchResponse<?> res = searchService.searchCompany(industry, keywords, location.getLat(), location.getLng(), limit, page, sort,
+				within, radius, topLeft, bottomRight);
+		
+		res.setLocation(location);
+
+		return res;
 	}
 
 	@GetMapping("/deals")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> searchDealPost(@RequestParam(defaultValue = "") String keywords,
-			@RequestParam(defaultValue = "All") String category, @RequestParam double centerLat,
-			@RequestParam double centerLng, @RequestParam(defaultValue = "Date") String sort,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
-			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
-			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "All") String category,
+			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
+			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
+			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		return searchService.searchDealPost(category, keywords, centerLat, centerLng, limit, page, sort, within, radius,
-				topLeft, bottomRight);
+		Location location = locationService.getLocationFromPlaceidAndAddress(placeid, address);
+
+		return searchService.searchDealPost(category, keywords, location.getLat(), location.getLng(), limit, page, sort,
+				within, radius, topLeft, bottomRight);
 	}
 
 	@GetMapping("/jobs")
@@ -87,14 +102,17 @@ public class FullTextSearchController {
 	public SearchResponse<?> searchJobPost(@RequestParam(defaultValue = "") String keywords,
 			@RequestParam(defaultValue = "All") String position, @RequestParam(defaultValue = "All") String experience,
 			@RequestParam(defaultValue = "All") String skills, @RequestParam(defaultValue = "false") Boolean remote,
-			@RequestParam double centerLat, @RequestParam double centerLng,
+			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
+			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
 			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		return searchService.searchJobPost(keywords, position, experience, skills, remote, centerLat, centerLng, limit,
-				page, sort, within, radius, topLeft, bottomRight);
+		Location location = locationService.getLocationFromPlaceidAndAddress(placeid, address);
+
+		return searchService.searchJobPost(keywords, position, experience, skills, remote, location.getLat(),
+				location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
 	}
 
 	@GetMapping("/housings")
@@ -106,14 +124,17 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "0") Integer guest, @RequestParam(defaultValue = "0") Integer bed,
 			@RequestParam(defaultValue = "0") Integer parking, @RequestParam(defaultValue = "0") Integer bath,
 			@RequestParam(defaultValue = "All") String amenity, @RequestParam(defaultValue = "All") String category,
-			@RequestParam double centerLat, @RequestParam double centerLng,
+			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
+			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
 			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
+		Location location = locationService.getLocationFromPlaceidAndAddress(placeid, address);
+
 		return searchService.searchHousingPost(keywords, type, costType, minCost, maxCost, guest, bed, parking, bath,
-				amenity, category, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+				amenity, category, location.getLat(), location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
 	}
 
 	@GetMapping("/marketplaces")
@@ -122,14 +143,17 @@ public class FullTextSearchController {
 	public SearchResponse<?> searchMarketplacePost(@RequestParam(defaultValue = "") String keywords,
 			@RequestParam(defaultValue = "All") String condition, @RequestParam(defaultValue = "All") String category,
 			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
-			@RequestParam double centerLat, @RequestParam double centerLng,
+			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
+			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
 			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		return searchService.searchMarketplacePost(keywords, condition, category, minCost, maxCost, centerLat,
-				centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+		Location location = locationService.getLocationFromPlaceidAndAddress(placeid, address);
+		
+		return searchService.searchMarketplacePost(keywords, condition, category, minCost, maxCost, location.getLat(),
+				location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
 	}
 
 	@GetMapping("/reviews")

@@ -32,7 +32,7 @@ public class GoogleGeoAPI {
 
 		try {
 //			api calling
-			results = GeocodingApi.geocode(context, address).await();
+			results = GeocodingApi.geocode(context, address).region("us").await();
 			
 		} catch (ApiException e) {
 			// TODO Auto-generated catch block

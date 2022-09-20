@@ -33,14 +33,11 @@ public class LocationServiceImpl implements LocationService {
 	@Override
 	public Location getLocationFromPlaceidAndAddress(String placeid, String address) {
 
-//		placeid - MUST NOT Empty and NOT Null
-		Assert.isTrue(placeid != null && !placeid.trim().isEmpty(), "Invalid Placeid!");
-
 //		address - MUST NOT Empty and NOT Null
 		Assert.isTrue(address != null && !address.trim().isEmpty(), "Invalid Address!");
 
 //		search location
-		Location location = locationDao.getLocationByEitherPlaceidOrAddress(placeid, address);
+		Location location = locationDao.getLocationByEitherPlaceidOrAddress(placeid == null ? "" : placeid, address);
 
 //		can't find location by placeid -> add new one
 		if (location == null) {
@@ -89,7 +86,7 @@ public class LocationServiceImpl implements LocationService {
 		location.setPlaceid(geoResult.placeId);
 
 //		formattedAddress
-		location.setDescription(geoResult.formattedAddress);
+		location.setAddress(geoResult.formattedAddress);
 
 //		lat
 		location.setLat(Double.valueOf(geoResult.geometry.location.lat));
