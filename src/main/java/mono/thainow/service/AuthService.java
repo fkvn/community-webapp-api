@@ -14,7 +14,7 @@ public interface AuthService {
 	
 	void checkVerificationToken(TokenResponse tokenResponse);
 	
-	Long signupWithThaiNow(UserRequest signUpRequest);
+	Long registerWithThaiNow(UserRequest signUpRequest);
 	
 	JwtResponse signinWithThaiNow(UserRequest request);
 	

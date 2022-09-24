@@ -28,7 +28,7 @@ public interface UserService {
 
 	String encodePassword(String password, boolean validate);
 
-	User getUserFromSignupRequest(UserRequest signUpRequest);
+	User fetchUserFromRegisterRequest(UserRequest signUpRequest);
 
 	User getUserFromGoogleRequest(GoogleRequest request);
 	

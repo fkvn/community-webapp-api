@@ -191,7 +191,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 			apiError.setMessage("Token Verification Failed. Please try again or request a new code!!!");
 		} else {
-			apiError.setMessage("Token Verification Process Error!!!");
+			apiError.setMessage(ex.getCause().getLocalizedMessage());
 		}
 
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());

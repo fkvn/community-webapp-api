@@ -77,16 +77,16 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public Long signupWithThaiNow(UserRequest signUpRequest) {
+	public Long registerWithThaiNow(UserRequest request) {
 
 //		check Type of verification
-		boolean isVerified = Optional.ofNullable(signUpRequest.isVerified()).orElse(false);
+		boolean isVerified = Optional.ofNullable(request.isVerified()).orElse(false);
 
 //		verification is required for users
 		Assert.isTrue(isVerified, "Users must be verified to register!");
 
 //		retrieve user information
-		User user = userService.getUserFromSignupRequest(signUpRequest);
+		User user = userService.fetchUserFromRegisterRequest(request);
 
 //		persist user info into database 
 		user = userService.saveUser(user);

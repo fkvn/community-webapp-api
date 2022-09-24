@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 //	}
 
 	@Override
-	public User getUserFromSignupRequest(UserRequest request) {
+	public User fetchUserFromRegisterRequest(UserRequest request) {
 
 //		signup credential 
 		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();

@@ -66,9 +66,9 @@ public class AuthController {
 		return authService.signinWithThaiNow(request);
 	}
 
-	@PostMapping("/thainow/signup")
+	@PostMapping("/thainow/register")
 	public Long signupUser(@Valid @RequestBody UserRequest request) {
-		Long userId = authService.signupWithThaiNow(request);
+		Long userId = authService.registerWithThaiNow(request);
 		return userId;
 	}
 
