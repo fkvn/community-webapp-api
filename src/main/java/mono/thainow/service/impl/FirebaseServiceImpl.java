@@ -25,8 +25,8 @@ public class FirebaseServiceImpl implements FirebaseService {
 	@Override
 	public String uploadFile(File file, String fileName, String fileType) {
 		
-//		String DOWNLOAD_URL = "https://firebasestorage.googleapis.com/v0/b/mono-thainow.appspot.com/o/thainow-service-worker%%2F%s?alt=media";
-		String DOWNLOAD_URL = "/cdn/image/thainow-service-worker%%2F%s?alt=media";
+		String DOWNLOAD_URL = "https://firebasestorage.googleapis.com/v0/b/mono-thainow.appspot.com/o/thainow-service-worker%%2F%s?alt=media";
+//		String DOWNLOAD_URL = "/cdn/image/thainow-service-worker%%2F%s?alt=media";
 		
 		
 		BlobId blobId = BlobId.of(FirebaseConfig.getSTORAGE_BUCKET_URL(), "thainow-service-worker/" + fileName);
