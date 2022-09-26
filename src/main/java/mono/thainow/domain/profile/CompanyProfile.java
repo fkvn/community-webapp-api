@@ -39,7 +39,7 @@ public class CompanyProfile extends Profile {
 
 	@Override
 	public Object getInfo() {
-		this.getCompany().setProfileId(this.getId());
+//		this.getCompany().setProfileId(this.getId());
 		return this.getCompany();
 	}
 

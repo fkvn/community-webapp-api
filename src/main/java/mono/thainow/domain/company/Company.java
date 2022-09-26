@@ -18,7 +18,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -87,8 +86,6 @@ public class Company implements Serializable {
 	@JsonProperty("picture")
 	private Storage logo;
 
-	@Transient
-	public Long profileId;
 
 	@ManyToOne
 	@JoinColumn(name = "LOCATION_ID")

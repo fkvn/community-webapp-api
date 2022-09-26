@@ -8,7 +8,7 @@ import lombok.Getter;
 public class UserRequest {
 	
 //	Sign UP ONLY  - if false, otp was not verified
-	private boolean isVerified = false;
+	private Boolean isVerified;
 	
 //	Sign IN ONLY  - use to determine sign in by email or phone
 	private String channel;

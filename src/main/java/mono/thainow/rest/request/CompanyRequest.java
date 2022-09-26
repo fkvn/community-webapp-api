@@ -11,7 +11,7 @@ public class CompanyRequest {
 	
 	private String industry;
 	
-	private boolean isInformal = false;
+	private Boolean isInformal;
 	
 	private String address;
 	

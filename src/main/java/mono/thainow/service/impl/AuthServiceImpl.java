@@ -80,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
 	public Long registerWithThaiNow(UserRequest request) {
 
 //		check Type of verification
-		boolean isVerified = Optional.ofNullable(request.isVerified()).orElse(false);
+		Boolean isVerified = Optional.ofNullable(request.getIsVerified()).orElse(false);
 
 //		verification is required for users
 		Assert.isTrue(isVerified, "Users must be verified to register!");

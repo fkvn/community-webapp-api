@@ -76,7 +76,7 @@ public class CompanyServiceImpl implements CompanyService {
 		Company company = new Company();
 
 //		Informal company is a company not having physical address 
-		boolean isInformal = Optional.ofNullable(companyRequest.isInformal()).orElse(false);
+		Boolean isInformal = Optional.ofNullable(companyRequest.getIsInformal()).orElse(false);
 		company.setInformalCompany(isInformal);
 
 //		company name 
@@ -102,8 +102,8 @@ public class CompanyServiceImpl implements CompanyService {
 		String email = Optional.ofNullable(companyRequest.getEmail()).orElse("").trim();
 		if (!email.equals("")) {
 			Assert.isTrue(Util.isValidEmail(email), "Email is not valid");
+			company.setEmail(email);
 		}
-		company.setEmail(email);
 
 //		company phone 
 		String phone = Optional.ofNullable(companyRequest.getPhone()).orElse("").trim();
@@ -111,9 +111,7 @@ public class CompanyServiceImpl implements CompanyService {
 		if (isInformal) {
 			Assert.isTrue(!phone.isEmpty(), "Company phone is required!");
 		}
-		if (!phone.equals("")) {
-			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-		}
+		PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
 		company.setPhone(phone);
 
 //		company website - only add if the website is not empty
@@ -124,10 +122,20 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 
 //		company location is not required for informal company
-		String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("").trim();
-		String address = Optional.ofNullable(companyRequest.getAddress()).orElse("").trim();
-		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-		company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse(null).trim();
+		String address = Optional.ofNullable(companyRequest.getAddress()).orElse(null).trim();
+		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
+				"Invalid Location");
+		if (isInformal) {
+			Assert.isTrue(placeid != null && address != null && !placeid.isEmpty() && !address.isEmpty(),
+					"Invalid Location");
+			company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		} else {
+			if (placeid != null && address != null) {
+				Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
+				company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			}
+		}
 
 //		company status
 		company.setStatus(CompanyStatus.PENDING);
@@ -161,7 +169,7 @@ public class CompanyServiceImpl implements CompanyService {
 		company = saveCompany(company);
 
 //		return company.getLogoUrl();
-		
+
 		return null;
 	}
 
@@ -172,41 +180,52 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public Company getCompanyFromUpdateRequest(Company company,
-			@Valid CompanyRequest request) {
+	public Company getCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request) {
 		
+//		Informal company is a company not having physical address 
+		Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(false);
+		company.setInformalCompany(isInformal);
+
 //		name
 		String name = Optional.ofNullable(request.getName()).orElse(null);
 		if (name != null) {
 			company.setName(name);
 		}
 		Assert.isTrue(!company.getName().isEmpty(), "Company can't be empty!");
-		
+
 //		industry
 		String industry = Optional.ofNullable(request.getIndustry()).orElse(null);
 		if (industry != null) {
 			company.setIndustry(industry);
 		}
 		Assert.isTrue(!company.getIndustry().isEmpty(), "Company can't be empty!");
-		
+
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);
 		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
 				"Invalid Location");
 		if (placeid != null && address != null) {
-			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-			company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			if (company.isInformalCompany()) {
+				if (placeid.isEmpty() && address.isEmpty()) {
+					company.setLocation(null);
+				} else {
+					Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
+					company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+				}
+			} else {
+				Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
+				company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			}
 		}
-		
+
 //		new cover pictures
-		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getCoverPictures())
-				.orElse(null);
+		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getCoverPictures()).orElse(null);
 		List<Storage> coverPictures = storageService.getStoragesFromStorageRequests(coverPictureRequests);
 		if (coverPictures != null) {
 			company.setCoverPictures(coverPictures);
 		}
-		
+
 //		email
 		String email = Optional.ofNullable(request.getEmail()).orElse(null);
 		if (email != null) {
@@ -215,13 +234,13 @@ public class CompanyServiceImpl implements CompanyService {
 			}
 			company.setEmail(email);
 		}
-		
+
 //		public email
 		Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(null);
 		if (isEmailPublic != null) {
 			company.setEmailPublic(isEmailPublic);
 		}
-		
+
 //		phone
 		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
 		if (phone != null) {
@@ -230,13 +249,13 @@ public class CompanyServiceImpl implements CompanyService {
 			}
 			company.setPhone(phone);
 		}
-		
+
 //		public phone
 		Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(null);
 		if (isPhonePublic != null) {
 			company.setPhonePublic(isPhonePublic);
 		}
-		
+
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
@@ -248,11 +267,11 @@ public class CompanyServiceImpl implements CompanyService {
 		if (isDescriptionPublic != null) {
 			company.setDescriptionPublic(isDescriptionPublic);
 		}
-		
+
 //		website
 		String website = Optional.ofNullable(request.getWebsite()).orElse(null);
 		if (website != null) {
-			if(!website.isEmpty()) {
+			if (!website.isEmpty()) {
 				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
 			}
 			company.setWebsite(website);
@@ -263,8 +282,7 @@ public class CompanyServiceImpl implements CompanyService {
 		if (isWebsitePublic != null) {
 			company.setWebsitePublic(isWebsitePublic);
 		}
-		
-		
+
 //		website
 		String size = Optional.ofNullable(request.getSize()).orElse(null);
 		if (size != null) {
@@ -276,7 +294,7 @@ public class CompanyServiceImpl implements CompanyService {
 		if (isSizePublic != null) {
 			company.setSizePublic(isSizePublic);
 		}
-		
+
 		return company;
 	}
 

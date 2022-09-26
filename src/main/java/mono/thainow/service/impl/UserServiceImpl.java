@@ -182,7 +182,7 @@ public class UserServiceImpl implements UserService {
 		user.setUsername(username);
 
 //		if email verified
-		boolean isEmailVerified = Optional.ofNullable(request.isEmail_verified()).orElse(false);
+		Boolean isEmailVerified = Optional.ofNullable(request.getIsEmailVerified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
 
 //		user profile
@@ -229,7 +229,7 @@ public class UserServiceImpl implements UserService {
 		user.setUsername(username);
 
 //		if email verified
-		boolean isEmailVerified = Optional.ofNullable(appleSignupRequest.isEmail_verified()).orElse(false);
+		Boolean isEmailVerified = Optional.ofNullable(appleSignupRequest.getIsEmailVerified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
 
 //		user profile
@@ -264,7 +264,7 @@ public class UserServiceImpl implements UserService {
 		user.setUsername(username);
 
 //		if email verified
-		boolean isEmailVerified = Optional.ofNullable(facebookSignupRequest.isEmail_verified()).orElse(false);
+		Boolean isEmailVerified = Optional.ofNullable(facebookSignupRequest.getIsEmailVerified()).orElse(false);
 		user.setEmailVerified(isEmailVerified);
 
 //		user profile
@@ -368,8 +368,13 @@ public class UserServiceImpl implements UserService {
 		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
 				"Invalid Location");
 		if (placeid != null && address != null) {
-			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-			user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			if (placeid.isEmpty() && address.isEmpty()) {
+				user.setLocation(null);
+			} else {
+				Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
+				user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			}
+
 		}
 
 //		public location
@@ -406,7 +411,7 @@ public class UserServiceImpl implements UserService {
 		if (isEmailPublic != null) {
 			user.setEmailPublic(isEmailPublic);
 		}
-		
+
 //		verify email
 		Boolean isEmailVerified = Optional.ofNullable(userUpdateInfoRequest.getIsEmailVerified()).orElse(null);
 		if (isEmailVerified != null) {
@@ -418,7 +423,7 @@ public class UserServiceImpl implements UserService {
 		if (isPhonePublic != null) {
 			user.setPhonePublic(isPhonePublic);
 		}
-		
+
 //		verify phone
 		Boolean isPhoneVerified = Optional.ofNullable(userUpdateInfoRequest.getIsPhoneVerified()).orElse(null);
 		if (isPhoneVerified != null) {
@@ -440,7 +445,7 @@ public class UserServiceImpl implements UserService {
 //		website
 		String website = Optional.ofNullable(userUpdateInfoRequest.getWebsite()).orElse(null);
 		if (website != null) {
-			if(!website.isEmpty()) {
+			if (!website.isEmpty()) {
 				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
 			}
 			user.setWebsite(website);
