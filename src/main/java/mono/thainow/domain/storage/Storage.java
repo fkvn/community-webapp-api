@@ -23,11 +23,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import mono.thainow.view.View;
 
 @RequiredArgsConstructor
-@ToString
 @EqualsAndHashCode
 @Entity
 @Getter
