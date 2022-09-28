@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.web.multipart.MultipartFile;
 
 import mono.thainow.dao.CompanyDao;
 import mono.thainow.dao.SearchDao;
@@ -16,10 +15,8 @@ import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
-import mono.thainow.repository.CompanyRepository;
 import mono.thainow.rest.request.CompanyRequest;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
@@ -33,9 +30,6 @@ public class CompanyServiceImpl implements CompanyService {
 	private CompanyDao companyDao;
 
 	@Autowired
-	private CompanyRepository companyRepo;
-
-	@Autowired
 	private LocationService locationService;
 
 	@Autowired
@@ -44,22 +38,11 @@ public class CompanyServiceImpl implements CompanyService {
 	@Autowired
 	private SearchDao elasticSearchDao;
 
-	@Override
-	public List<Company> getAllCompanies() {
-		return companyRepo.findAll();
-//		return new ArrayList<>();
-	}
-
-	@Override
-	public Company getCompanyById(Long id) {
-//		return compRepo.getById(id);
-		return companyDao.getCompanyById(id);
-	}
-
+	
 	@Override
 	public Company createCompany(CompanyRequest companyRequest) {
 
-		Company company = getCompanyFromRequest(companyRequest);
+		Company company = fetchCompanyFromRequest(companyRequest);
 
 		company = saveCompany(company);
 
@@ -72,7 +55,7 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public Company getCompanyFromRequest(CompanyRequest companyRequest) {
+	public Company fetchCompanyFromRequest(CompanyRequest companyRequest) {
 		Company company = new Company();
 
 //		Informal company is a company not having physical address 
@@ -93,9 +76,9 @@ public class CompanyServiceImpl implements CompanyService {
 		StorageDefault storageDefault = new StorageDefault();
 		Long profileId = storageDefault.getIndustryLogoUrl().get(company.getIndustry().toUpperCase().trim());
 		if (profileId == null) {
-			profileId = storageDefault.getCompanyProfileDefault();
+			profileId = storageDefault.getBusinessProfileDefault();
 		}
-		Storage profile = storageService.getStorage(profileId);
+		Storage profile = storageService.findStorageById(profileId);
 		company.setLogo(profile);
 
 //		company email 
@@ -129,11 +112,11 @@ public class CompanyServiceImpl implements CompanyService {
 		if (isInformal) {
 			Assert.isTrue(placeid != null && address != null && !placeid.isEmpty() && !address.isEmpty(),
 					"Invalid Location");
-			company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			company.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 		} else {
 			if (placeid != null && address != null) {
 				Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-				company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+				company.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 			}
 		}
 
@@ -148,30 +131,30 @@ public class CompanyServiceImpl implements CompanyService {
 		return companyDao.saveCompany(company);
 	}
 
-	@Override
-	public Storage uploadLogoPicture(Company company, MultipartFile file) {
-		StorageResponse storageResponse = storageService.upload(file);
-
-//		persist storage into database
-		Storage profile = new Storage();
-
-		profile.setName(storageResponse.getName());
-		profile.setType(storageResponse.getType());
-		profile.setUrl(storageResponse.getUrl());
-		profile.setSize(storageResponse.getSize());
-
-		profile = storageService.saveStorage(profile);
-
-//		attach into company
-//		company.setLogoUrl(profile);
-
-//		persist into database
-		company = saveCompany(company);
-
-//		return company.getLogoUrl();
-
-		return null;
-	}
+//	@Override
+//	public Storage uploadLogoPicture(Company company, MultipartFile file) {
+//		StorageResponse storageResponse = storageService.upload(file);
+//
+////		persist storage into database
+//		Storage profile = new Storage();
+//
+//		profile.setName(storageResponse.getName());
+//		profile.setType(storageResponse.getType());
+//		profile.setUrl(storageResponse.getUrl());
+//		profile.setSize(storageResponse.getSize());
+//
+//		profile = storageService.saveStorage(profile);
+//
+////		attach into company
+////		company.setLogoUrl(profile);
+//
+////		persist into database
+//		company = saveCompany(company);
+//
+////		return company.getLogoUrl();
+//
+//		return null;
+//	}
 
 	@Override
 	public void remove(Company company) {
@@ -180,7 +163,7 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public Company getCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request) {
+	public Company fetchCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request) {
 		
 //		Informal company is a company not having physical address 
 		Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(false);
@@ -211,17 +194,17 @@ public class CompanyServiceImpl implements CompanyService {
 					company.setLocation(null);
 				} else {
 					Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-					company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+					company.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 				}
 			} else {
 				Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-				company.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+				company.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 			}
 		}
 
 //		new cover pictures
 		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getCoverPictures()).orElse(null);
-		List<Storage> coverPictures = storageService.getStoragesFromStorageRequests(coverPictureRequests);
+		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
 		if (coverPictures != null) {
 			company.setCoverPictures(coverPictures);
 		}

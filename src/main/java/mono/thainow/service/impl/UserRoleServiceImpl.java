@@ -27,7 +27,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 	}
 
 	@Override
-	public UserRole verifyRoles(String roleName) {
+	public UserRole verifyRoleByName(String roleName) {
 		
 		UserRole result = null;
 		

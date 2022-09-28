@@ -1,7 +1,5 @@
 package mono.thainow.service;
 
-import java.util.List;
-
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.AppleRequest;
 import mono.thainow.rest.request.FacebookRequest;
@@ -10,15 +8,17 @@ import mono.thainow.rest.request.UserRequest;
 
 public interface UserService {
 
-	List<User> getAllUsers();
+//	List<User> getAllUsers();
 
-	User getByUserId(Long id);
+//	User findUserById(Long id);
+	
+	User findActiveUserById(Long id);
 
-	User getActiveUserByEmail(String email);
+	User findActiveUserByEmail(String email);
 
-	User getActiveUserByPhone(String phone);
+	User findActiveUserByPhone(String phone);
 
-	User getActiveUserBySub(String sub);
+	User findActiveUserBySub(String sub);
 
 	boolean isUsernameUnique(String username);
 
@@ -30,17 +30,17 @@ public interface UserService {
 
 	User fetchUserFromRegisterRequest(UserRequest signUpRequest);
 
-	User getUserFromGoogleRequest(GoogleRequest request);
+	User fetchUserFromGoogleRequest(GoogleRequest request);
 	
-	User getUserFromAppleRequest(AppleRequest appleSignupRequest);
+	User fetchUserFromAppleRequest(AppleRequest appleSignupRequest);
 
 	User saveUser(User user);
 
-	User getUserFromFacebookSignupRequest(FacebookRequest facebookSignupRequest);
+	User fetchUserFromFacebookRequest(FacebookRequest facebookSignupRequest);
 
 	void remove(User account);
 
-	User getUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
+	User fetchUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
 
 	
 

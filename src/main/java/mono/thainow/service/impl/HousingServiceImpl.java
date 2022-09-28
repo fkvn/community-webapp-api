@@ -34,7 +34,7 @@ public class HousingServiceImpl implements HousingService {
 	private StorageService storageService;
 
 	@Override
-	public Housing getHousingFromRequest(HousingRequest request) {
+	public Housing fetchHousingFromRequest(HousingRequest request) {
 
 		Housing housing = new Housing();
 
@@ -47,12 +47,12 @@ public class HousingServiceImpl implements HousingService {
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
 		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Housing location is required!");
-		housing.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		housing.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
 		Assert.isTrue(pictureRequests.size() > 0, "Housing picture is required!");
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		Assert.isTrue(pictures.size() > 0, "Housing picture is required!");
 		housing.setPictures(pictures);
 
@@ -130,7 +130,7 @@ public class HousingServiceImpl implements HousingService {
 
 	@Override
 	public Housing createHousing(HousingRequest request) {
-		return saveHousing(getHousingFromRequest(request));
+		return saveHousing(fetchHousingFromRequest(request));
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class HousingServiceImpl implements HousingService {
 	}
 
 	@Override
-	public Housing getHousingFromUpdateRequest(Housing housing, HousingRequest request) {
+	public Housing fetchHousingFromUpdateRequest(Housing housing, HousingRequest request) {
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse(null);
@@ -155,12 +155,12 @@ public class HousingServiceImpl implements HousingService {
 				"Invalid Location");
 		if (placeid != null && address != null) {
 			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Housing location is required!");
-			housing.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			housing.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
 			housing.setPictures(pictures);
 		}
@@ -243,14 +243,14 @@ public class HousingServiceImpl implements HousingService {
 	}
 
 	@Override
-	public void remove(Housing housing) {
+	public void removeHousing(Housing housing) {
 		housing.setStatus(PostStatus.DELETED);
 		saveHousing(housing);
 	}
 
 	@Override
 	public void updateHousing(Housing housing, HousingRequest request) {
-		housing = getHousingFromUpdateRequest(housing, request);
+		housing = fetchHousingFromUpdateRequest(housing, request);
 		saveHousing(housing);
 	}
 

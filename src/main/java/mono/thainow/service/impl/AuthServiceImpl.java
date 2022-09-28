@@ -92,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 		user = userService.saveUser(user);
 
 //		create a account profile with new user
-		profileService.createProfile(user);
+		profileService.createUserProfile(user);
 
 		return user.getId();
 	}
@@ -155,15 +155,15 @@ public class AuthServiceImpl implements AuthService {
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
-			User user = userService.getUserFromGoogleRequest(request);
+			User user = userService.fetchUserFromGoogleRequest(request);
 
 //			persit user
 			user = userService.saveUser(user);
 
 //			create a account profile with new user
-			profileService.createProfile(user);
+			profileService.createUserProfile(user);
 		} else {
-			User user = userService.getActiveUserByEmail(email);
+			User user = userService.findActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals("GOOGLE"), "The email linked with this account has already taken!");
 		}
 		
@@ -185,8 +185,8 @@ public class AuthServiceImpl implements AuthService {
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-		User account = userService.getActiveUserByEmail(userDetails.getEmail());
-		UserProfile profile = profileService.getValidUserProfile(account);
+		User account = userService.findActiveUserByEmail(userDetails.getEmail());
+		UserProfile profile = profileService.findUserProfileByAccount(account);
 
 		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
 		jwtClaims.setProfile(profile);
@@ -204,15 +204,15 @@ public class AuthServiceImpl implements AuthService {
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
-			User user = userService.getUserFromAppleRequest(request);
+			User user = userService.fetchUserFromAppleRequest(request);
 
 //			persit user
 			user = userService.saveUser(user);
 
 //			create a account profile with new user
-			profileService.createProfile(user);
+			profileService.createUserProfile(user);
 		} else {
-			User user = userService.getActiveUserByEmail(email);
+			User user = userService.findActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals("APPLE"), "The email linked with this account has already taken!");
 		}
 		
@@ -229,15 +229,15 @@ public class AuthServiceImpl implements AuthService {
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
-			User user = userService.getUserFromFacebookSignupRequest(request);
+			User user = userService.fetchUserFromFacebookRequest(request);
 
 //			persit user
 			user = userService.saveUser(user);
 
 //			create a account profile with new user
-			profileService.createProfile(user);
+			profileService.createUserProfile(user);
 		} else {
-			User user = userService.getActiveUserByEmail(email);
+			User user = userService.findActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals("FACEBOOK"),
 					"The email linked with this account has already taken!");
 		}

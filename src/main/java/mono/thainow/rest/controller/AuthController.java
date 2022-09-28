@@ -62,12 +62,12 @@ public class AuthController {
 
 	@PostMapping("/thainow/signin")
 	@JsonView(View.Basic.class)
-	public JwtResponse signinUser(@Valid @RequestBody UserRequest request) {
+	public JwtResponse signinWithThaiNow(@Valid @RequestBody UserRequest request) {
 		return authService.signinWithThaiNow(request);
 	}
 
 	@PostMapping("/thainow/register")
-	public Long signupUser(@Valid @RequestBody UserRequest request) {
+	public Long registerWithThaiNow(@Valid @RequestBody UserRequest request) {
 		Long userId = authService.registerWithThaiNow(request);
 		return userId;
 	}

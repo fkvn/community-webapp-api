@@ -13,7 +13,7 @@ import mono.thainow.domain.post.deal.DealPost;
 import mono.thainow.domain.post.housing.HousingPost;
 import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.post.marketplace.MarketplacePost;
-import mono.thainow.domain.profile.CompanyProfile;
+import mono.thainow.domain.profile.BusinessProfile;
 import mono.thainow.domain.review.PostReview;
 import mono.thainow.domain.review.ProfileReview;
 import mono.thainow.rest.response.SearchResponse;
@@ -34,10 +34,10 @@ public class SearchServiceImpl implements SearchService {
 			int limit, int page, String sort, String within, int radius, List<Double> topLeft,
 			List<Double> bottomRight) {
 
-		SearchResult<CompanyProfile> result = searchDao.searchCompanyProfile(keywords, limit, page, centerLat,
+		SearchResult<BusinessProfile> result = searchDao.searchCompanyProfile(keywords, limit, page, centerLat,
 				centerLng, industry, sort, within, radius, topLeft, bottomRight);
 
-		SearchResponse<CompanyProfile> searchRes = new SearchResponse<CompanyProfile>();
+		SearchResponse<BusinessProfile> searchRes = new SearchResponse<BusinessProfile>();
 		searchRes.setTotalCount(result.total().hitCount());
 		searchRes.setTotalPage((searchRes.getTotalCount() / limit) + 1);
 		searchRes.setFetchResult(result.hits());
@@ -46,12 +46,12 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse<?> searchDealPost(String category, String keywords, double centerLat, double centerLng,
-			int limit, int page, String sort, String within, int radius, List<Double> topLeft,
-			List<Double> bottomRight) {
+	public SearchResponse<?> searchDealPost(Long ownerId, String category, String keywords, double centerLat,
+			double centerLng, int limit, int page, String sort, String within, int radius,
+			List<Double> topLeft, List<Double> bottomRight) {
 
-		SearchResult<DealPost> result = searchDao.searchDealPost(keywords, limit, page, centerLat, centerLng, category,
-				sort, within, radius, topLeft, bottomRight);
+		SearchResult<DealPost> result = searchDao.searchDealPost(ownerId, keywords, limit, page, centerLat, centerLng,
+				category, sort, within, radius, topLeft, bottomRight);
 
 		SearchResponse<DealPost> searchRes = new SearchResponse<DealPost>();
 		searchRes.setTotalCount(result.total().hitCount());
@@ -62,12 +62,12 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse<?> searchJobPost(String keywords, String position, String experience, String skills,
-			Boolean remote, double centerLat, double centerLng, int limit, int page, String sort, String within,
-			int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResponse<?> searchJobPost(Long ownerId, String keywords, String position, String experience,
+			String skills, Boolean remote, double centerLat, double centerLng, int limit, int page, String sort,
+			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
-		SearchResult<JobPost> result = searchDao.searchJobPost(keywords, position, experience, skills, remote, limit,
-				page, centerLat, centerLng, sort, within, radius, topLeft, bottomRight);
+		SearchResult<JobPost> result = searchDao.searchJobPost(ownerId, keywords, position, experience, skills, remote,
+				limit, page, centerLat, centerLng, sort, within, radius, topLeft, bottomRight);
 
 		SearchResponse<JobPost> searchRes = new SearchResponse<JobPost>();
 		searchRes.setTotalCount(result.total().hitCount());
@@ -78,14 +78,14 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse<?> searchHousingPost(String keywords, String type, String costType, Double minCost,
-			Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String category,
-			double centerLat, double centerLng, int limit, int page, String sort, String within, int radius,
-			List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResponse<?> searchHousingPost(Long ownerId, String keywords, String type, String costType,
+			Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity,
+			String category, double centerLat, double centerLng, int limit, int page, String sort, String within,
+			int radius, List<Double> topLeft, List<Double> bottomRight) {
 
-		SearchResult<HousingPost> result = searchDao.searchHousingPost(keywords, type, costType, minCost, maxCost,
-				guest, bed, parking, bath, amenity, category, centerLat, centerLng, limit, page, sort, within, radius,
-				topLeft, bottomRight);
+		SearchResult<HousingPost> result = searchDao.searchHousingPost(ownerId, keywords, type, costType, minCost,
+				maxCost, guest, bed, parking, bath, amenity, category, centerLat, centerLng, limit, page, sort, within,
+				radius, topLeft, bottomRight);
 
 		SearchResponse<HousingPost> searchRes = new SearchResponse<HousingPost>();
 		searchRes.setTotalCount(result.total().hitCount());
@@ -96,12 +96,12 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse<?> searchMarketplacePost(String keywords, String condition, String category, Double minCost,
-			Double maxCost, double centerLat, double centerLng, int limit, int page, String sort, String within,
-			int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResponse<?> searchMarketplacePost(Long ownerId, String keywords, String condition, String category,
+			Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page, String sort,
+			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
-		SearchResult<MarketplacePost> result = searchDao.searchMarketplacePost(keywords, condition, category, minCost,
-				maxCost, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
+		SearchResult<MarketplacePost> result = searchDao.searchMarketplacePost(ownerId, keywords, condition, category,
+				minCost, maxCost, centerLat, centerLng, limit, page, sort, within, radius, topLeft, bottomRight);
 
 		SearchResponse<MarketplacePost> searchRes = new SearchResponse<MarketplacePost>();
 		searchRes.setTotalCount(result.total().hitCount());

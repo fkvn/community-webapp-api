@@ -34,7 +34,7 @@ public class DealServiceImpl implements DealService {
 	private StorageService storageService;
 
 	@Override
-	public Deal getDealFromRequest(DealRequest request) {
+	public Deal fetchDealFromRequest(DealRequest request) {
 
 		Deal deal = new Deal();
 
@@ -47,12 +47,12 @@ public class DealServiceImpl implements DealService {
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("");
 		String address = Optional.ofNullable(request.getAddress()).orElse("");
 		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Deal location is required!");
-		deal.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		deal.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
 		Assert.isTrue(pictureRequests.size() > 0, "Deal picture is required!");
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		Assert.isTrue(pictures.size() > 0, "Deal picture is required!");
 		deal.setPictures(pictures);
 
@@ -88,7 +88,7 @@ public class DealServiceImpl implements DealService {
 
 	@Override
 	public Deal createDeal(DealRequest request) {
-		return saveDeal(getDealFromRequest(request));
+		return saveDeal(fetchDealFromRequest(request));
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class DealServiceImpl implements DealService {
 	}
 
 	@Override
-	public Deal getDealFromUpdateRequest(Deal deal, DealRequest request) {
+	public Deal fetchDealFromUpdateRequest(Deal deal, DealRequest request) {
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse(null);
@@ -113,12 +113,12 @@ public class DealServiceImpl implements DealService {
 				"Invalid Location");
 		if (placeid != null && address != null) {
 			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Deal location is required!");
-			deal.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+			deal.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
 			deal.setPictures(pictures);
 		}
@@ -159,7 +159,7 @@ public class DealServiceImpl implements DealService {
 	}
 
 	@Override
-	public void remove(Deal deal) {
+	public void removeDeal(Deal deal) {
 		deal.setStatus(PostStatus.DELETED);
 		saveDeal(deal);
 	}
@@ -172,7 +172,7 @@ public class DealServiceImpl implements DealService {
 
 	@Override
 	public void updateDeal(Deal deal, DealRequest request) {
-		getDealFromUpdateRequest(deal, request);
+		fetchDealFromUpdateRequest(deal, request);
 		saveDeal(deal);
 	}
 

@@ -13,9 +13,9 @@ public interface StorageService {
 
 	StorageResponse upload(MultipartFile file);
 
-	String getFileName(MultipartFile file);
+	String fetchFileName(MultipartFile file);
 	
-	String getExtension(String fileName);
+	String fetchExtension(String fileName);
 	
 	File convertToFile(MultipartFile multipartFile, String fileName);
 	
@@ -23,13 +23,13 @@ public interface StorageService {
 	
 	Storage saveStorage(Storage storage);
 	
-	Storage getStorage(Long id);
+	Storage findStorageById(Long id);
 	
-	Storage getStorage(String fileName);
+	Storage findStorageByName(String fileName);
 
-	Storage getStorageFromUrl(String url);
+	Storage findStorageByUrl(String url);
 
-	Storage getStorageFromStorageRequest(StorageRequest req);
+	Storage fetchStorageFromRequest(StorageRequest req);
 	
-	List<Storage> getStoragesFromStorageRequests(List<StorageRequest> reqs);
+	List<Storage> fetchStoragesFromRequests(List<StorageRequest> reqs);
 }

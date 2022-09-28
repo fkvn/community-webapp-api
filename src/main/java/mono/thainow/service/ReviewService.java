@@ -10,13 +10,13 @@ public interface ReviewService {
 
 	Review createReview(Profile reviewer, ReviewRequest request);
 
-	Review getReviewFromRequest(Review review, ReviewRequest request);
+	Review fetchReviewFromRequest(Review review, ReviewRequest request);
 	
-	Review getReviewFromUpdateRequest(Review review, ReviewRequest request);
+	Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request);
 
 	Review saveReview(Review newReview);
 
-	Review getValidReview(Long reviewId);
+	Review findActiveReviewById(Long reviewId);
 
 	void updateReview(Review review, @Valid ReviewRequest request);
 }

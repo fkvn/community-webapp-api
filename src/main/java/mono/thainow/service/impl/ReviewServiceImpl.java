@@ -43,7 +43,7 @@ public class ReviewServiceImpl implements ReviewService {
 			Long postReviewId = Optional.ofNullable(request.getPostId()).orElse(null);
 			Assert.isTrue(postReviewId != null, "Invalid Reviewee");
 
-			Post reviewee = postService.getPost(postReviewId);
+			Post reviewee = postService.findPostById(postReviewId);
 
 			Assert.isTrue(!reviewee.getOwner().getId().equals(reviewer.getId()),
 					"Post owner can't review their own posts!");
@@ -57,7 +57,7 @@ public class ReviewServiceImpl implements ReviewService {
 			Long profileReviewId = Optional.ofNullable(request.getProfileId()).orElse(null);
 			Assert.isTrue(profileReviewId != null, "Invalid Reviewee");
 
-			Profile reviewee = profileService.getProfile(profileReviewId);
+			Profile reviewee = profileService.findProfileById(profileReviewId);
 			Assert.isTrue(!reviewer.getAccount().getId().equals(reviewee.getAccount().getId()),
 					"User can't review their own profiles!");
 
@@ -69,7 +69,7 @@ public class ReviewServiceImpl implements ReviewService {
 			throw new BadRequest("Invalid Review Type!");
 		}
 
-		review = saveReview(getReviewFromRequest(review, request));
+		review = saveReview(fetchReviewFromRequest(review, request));
 
 		return review;
 	}
@@ -80,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public Review getReviewFromRequest(Review review, ReviewRequest request) {
+	public Review fetchReviewFromRequest(Review review, ReviewRequest request) {
 
 //		rate
 		int rate = Optional.ofNullable(request.getRate()).orElse(5);
@@ -97,7 +97,7 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public Review getReviewFromUpdateRequest(Review review, ReviewRequest request) {
+	public Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request) {
 
 //		rate
 		Integer rate = Optional.ofNullable(request.getRate()).orElse(null);
@@ -115,13 +115,13 @@ public class ReviewServiceImpl implements ReviewService {
 	}
 
 	@Override
-	public Review getValidReview(Long reviewId) {
-		return reviewDao.getValidReview(reviewId);
+	public Review findActiveReviewById(Long reviewId) {
+		return reviewDao.findActiveReviewById(reviewId);
 	}
 
 	@Override
 	public void updateReview(Review review, @Valid ReviewRequest request) {
-		saveReview(getReviewFromUpdateRequest(review, request));
+		saveReview(fetchReviewFromUpdateRequest(review, request));
 	}
 
 //	@Autowired

@@ -31,7 +31,7 @@ public class StorageServiceImpl implements StorageService {
 	@Override
 	public StorageResponse upload(MultipartFile multipartFile) {
 
-		String fileName = getFileName(multipartFile);
+		String fileName = fetchFileName(multipartFile);
 
 		// to convert multipartFile to File
 		File file = convertToFile(multipartFile, fileName);
@@ -53,18 +53,18 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public String getFileName(MultipartFile file) {
+	public String fetchFileName(MultipartFile file) {
 
 		String fileName = file.getOriginalFilename(); // to get original file name
 
 		// generate a unique file name
-		fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
+		fileName = UUID.randomUUID().toString().concat(this.fetchExtension(fileName));
 
 		return fileName;
 	}
 
 	@Override
-	public String getExtension(String fileName) {
+	public String fetchExtension(String fileName) {
 		return fileName.substring(fileName.lastIndexOf("."));
 	}
 
@@ -103,22 +103,22 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public Storage getStorage(Long id) {
-		return storageDao.getStorage(id);
+	public Storage findStorageById(Long id) {
+		return storageDao.findStorageById(id);
 	}
 
 	@Override
-	public Storage getStorage(String fileName) {
-		return storageDao.getStorage(fileName);
+	public Storage findStorageByName(String fileName) {
+		return storageDao.findStorageByName(fileName);
 	}
 
 	@Override
-	public Storage getStorageFromUrl(String url) {
-		return storageDao.getStorageFromUrl(url);
+	public Storage findStorageByUrl(String url) {
+		return storageDao.findStorageByUrl(url);
 	}
 
 	@Override
-	public Storage getStorageFromStorageRequest(StorageRequest req) {
+	public Storage fetchStorageFromRequest(StorageRequest req) {
 		Storage storage = new Storage();
 
 		storage.setName(req.getName());
@@ -130,7 +130,7 @@ public class StorageServiceImpl implements StorageService {
 	}
 
 	@Override
-	public List<Storage> getStoragesFromStorageRequests(List<StorageRequest> reqs) {
+	public List<Storage> fetchStoragesFromRequests(List<StorageRequest> reqs) {
 
 		List<Storage> coverPictures = new ArrayList<>();
 
@@ -138,11 +138,11 @@ public class StorageServiceImpl implements StorageService {
 
 			reqs.forEach(req -> {
 //				check if the image is already existed
-				Storage picture = getStorageFromUrl(req.getUrl());
+				Storage picture = findStorageByUrl(req.getUrl());
 
 //				not existed
 				if (picture == null) {
-					picture = getStorageFromStorageRequest(req);
+					picture = fetchStorageFromRequest(req);
 					picture = saveStorage(picture);
 				}
 

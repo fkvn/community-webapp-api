@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.service.ProfileService;
-import mono.thainow.service.UserService;
 import mono.thainow.util.AuthUtil;
 import mono.thainow.view.View;
 
@@ -25,15 +24,12 @@ public class ProfileController {
 	@Autowired
 	private ProfileService profileService;
 
-	@Autowired
-	private UserService userService;
-
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@AuthenticatedAccess
 	@JsonView(View.Basic.class)
 	public List<Profile> getProfiles() {
-		return profileService.getProfiles(userService.getByUserId(AuthUtil.getAuthenticatedUser().getId()));
+		return profileService.findProfilesByAccountId(AuthUtil.getAuthenticatedUser().getId());
 	}
 
 }

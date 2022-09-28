@@ -10,7 +10,7 @@ import mono.thainow.dao.ProfileDao;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.post.Post;
-import mono.thainow.domain.profile.CompanyProfile;
+import mono.thainow.domain.profile.BusinessProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
@@ -37,29 +37,29 @@ public class ProfileServiceImpl implements ProfileService {
 
 //	==================================================
 
-	@Override
-	public List<Profile> getAllProfiles(User account) {
-		return profileDao.getAllProfiles(account);
-	}
+//	@Override
+//	public List<Profile> findAllProfilesByAccount(User account) {
+//		return profileDao.findAllProfilesByAccount(account);
+//	}
+//
+//	@Override
+//	public List<Profile> findProfilesByAccount(User account) {
+//		return profileDao.findProfilesByAccount(account);
+//	}
 
 	@Override
-	public List<Profile> getProfiles(User account) {
-		return profileDao.getProfiles(account);
+	public List<BusinessProfile> findBusinessProfilesByAccount(User account) {
+		return profileDao.findBusinessProfilesByAccount(account);
 	}
 
-	@Override
-	public List<CompanyProfile> getValidCompanyProfiles(User account) {
-		return profileDao.getValidCompanyProfiles(account);
-	}
+//	@Override
+//	public UserProfile getValidUserProfile(Long id) {
+//		return profileDao.findActiveUserProfileById(id);
+//	}
 
 	@Override
-	public UserProfile getValidUserProfile(Long id) {
-		return profileDao.getValidUserProfile(id);
-	}
-
-	@Override
-	public UserProfile getValidUserProfile(User user) {
-		return profileDao.getValidUserProfile(user);
+	public UserProfile findUserProfileByAccount(User user) {
+		return profileDao.findActiveUserProfileByAccount(user);
 	}
 
 	@Override
@@ -69,31 +69,31 @@ public class ProfileServiceImpl implements ProfileService {
 		userService.remove(profile.getAccount());
 		
 //		remove related post
-		List<Post> posts = postService.getPosts(profile);
+		List<Post> posts = postService.findPostsByProfile(profile);
 		postService.removePosts(posts);
 		
 		if (removeAccount) {
 	//		remove / delete company profiles
-			List<CompanyProfile> profiles = getValidCompanyProfiles(profile.getAccount());
+			List<BusinessProfile> profiles = findBusinessProfilesByAccount(profile.getAccount());
 	
 			profiles.forEach(prof -> {
 	//			disable profile
-				removeProfile(prof);
+				removeBusinessProfile(prof);
 			});
 		}
 
 //		delete user profile
-		profileDao.deleteProfile(profile.getId());
+		profileDao.deleteProfileById(profile.getId());
 	}
 
-	@Override
-	public CompanyProfile getValidCompanyProfile(Long profileId) {
-		return profileDao.getValidCompanyProfile(profileId);
-	}
+//	@Override
+//	public BusinessProfile findRegisteredBusinessProfileById(Long profileId) {
+//		return profileDao.findRegisteredBusinessProfileById(profileId);
+//	}
 
 	@Override
-	public Profile getProfile(Long profileId) {
-		return profileDao.getProfile(profileId);
+	public Profile findProfileById(Long profileId) {
+		return profileDao.findProfileById(profileId);
 	}
 
 	@Override
@@ -102,10 +102,10 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public UserProfile createProfile(User user) {
+	public UserProfile createUserProfile(User user) {
 
 		try {
-			profileDao.getValidUserProfile(user);
+			profileDao.findActiveUserProfileByAccount(user);
 
 //			if no error -> already existed -> one account only can have 1 user profile
 			Assert.isTrue(false, "One account only can have 1 USER_PROFILE!");
@@ -122,34 +122,34 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public CompanyProfile createProfile(User owner, Company company) {
+	public BusinessProfile createBusinessProfile(User owner, Company company) {
 
 //		profile limitation
-		List<CompanyProfile> profiles = getValidCompanyProfiles(owner);
+		List<BusinessProfile> profiles = findBusinessProfilesByAccount(owner);
 		Assert.isTrue(profiles.size() < 5, "Exceed Profile Limitation (Max 5 business profiles for each account)!");
 
 //		create a business profile with new company
-		CompanyProfile profile = new CompanyProfile(owner, company);
+		BusinessProfile profile = new BusinessProfile(owner, company);
 
-		return (CompanyProfile) saveProfile(profile);
+		return (BusinessProfile) saveProfile(profile);
 	}
 
 	@Override
-	public void removeProfile(CompanyProfile companyProfile) {
+	public void removeBusinessProfile(BusinessProfile businessProfile) {
 
 //		remove company
-		companyService.remove(companyProfile.getCompany());
+		companyService.remove(businessProfile.getCompany());
 
 //		remove related post
-		List<Post> posts = postService.getPosts(companyProfile);
+		List<Post> posts = postService.findPostsByProfile(businessProfile);
 		postService.removePosts(posts);
 
 //		delete profile (hard delete)
-		profileDao.deleteProfile(companyProfile.getId());
+		profileDao.deleteProfileById(businessProfile.getId());
 	}
 
 	@Override
-	public CompanyProfile disableProfile(CompanyProfile profile) {
+	public BusinessProfile disableBusinessProfile(BusinessProfile profile) {
 
 //		block company
 		profile.getCompany().setStatus(CompanyStatus.DISABLED);
@@ -159,7 +159,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public UserProfile disableProfile(UserProfile profile) {
+	public UserProfile disableUserProfile(UserProfile profile) {
 
 //		block user
 		profile.getAccount().setStatus(UserStatus.DISABLED);
@@ -170,7 +170,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public CompanyProfile activateProfile(CompanyProfile profile) {
+	public BusinessProfile activateBusinessProfile(BusinessProfile profile) {
 
 //		activate company
 		profile.getCompany().setStatus(CompanyStatus.REGISTERED);
@@ -180,7 +180,7 @@ public class ProfileServiceImpl implements ProfileService {
 	}
 
 	@Override
-	public UserProfile activateProfile(UserProfile profile) {
+	public UserProfile activateUserProfile(UserProfile profile) {
 
 //		activate user
 		profile.getAccount().setStatus(UserStatus.ACTIVATED);
@@ -189,9 +189,23 @@ public class ProfileServiceImpl implements ProfileService {
 		return profile;
 	}
 
+//	@Override
+//	public BusinessProfile getValidCompanyProfile(Company com) {
+//		return profileDao.getValidCompanyProfile(com);
+//	}
+//
+//	@Override
+//	public BusinessProfile findBusinessProfileById(Long profileId) {
+//		return profileDao.findBusinessProfileById(profileId);
+//	}
+
 	@Override
-	public CompanyProfile getValidCompanyProfile(Company com) {
-		return profileDao.getValidCompanyProfile(com);
+	public List<Profile> findProfilesByAccountId(Long id) {
+		return profileDao.findProfilesByAccountId(id);
 	}
 
+//	@Override
+//	public UserProfile findUserProfileById(Long profileId) {
+//		return profileDao.findUserProfileById(profileId);
+//	}
 }

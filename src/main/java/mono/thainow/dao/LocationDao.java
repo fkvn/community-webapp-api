@@ -4,17 +4,17 @@ import mono.thainow.domain.location.Location;
 
 public interface LocationDao {
 	
-	Location getLocationById(Long id);
+//	Location getLocationById(Long id);
 	
-	Location getLocationByPlaceid(String placeid);
+	Location fetchLocationByPlaceid(String placeid);
 	
-	Location getLocationByFormattedAddress(String address);
+//	Location getLocationByFormattedAddress(String address);
 	
-	Location getLocationByEitherPlaceidOrAddress(String placeid, String address);
+	Location findLocationByPlaceidOrAddress(String placeid, String address);
 	
-	Location getLocationByLatLng(String placeid, String lat, String lng);
+//	Location getLocationByLatLng(String placeid, String lat, String lng);
 	
 	Location saveLocation(Location location);
 	
-	void removeLocation(Long id);
+//	void removeLocation(Long id);
 }

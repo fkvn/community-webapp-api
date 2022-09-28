@@ -34,7 +34,7 @@ public class JobServiceImpl implements JobService {
 	private StorageService storageService;
 
 	@Override
-	public Job getJobFromRequest(JobRequest request) {
+	public Job fetchJobFromRequest(JobRequest request) {
 
 		Job job = new Job();
 
@@ -47,12 +47,12 @@ public class JobServiceImpl implements JobService {
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
 		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Job location is required!");
-		job.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		job.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
 		Assert.isTrue(pictureRequests.size() > 0, "Job picture is required!");
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		Assert.isTrue(pictures.size() > 0, "Job picture is required!");
 		job.setPictures(pictures);
 
@@ -111,7 +111,7 @@ public class JobServiceImpl implements JobService {
 
 	@Override
 	public Job createJob(JobRequest request) {
-		return saveJob(getJobFromRequest(request));
+		return saveJob(fetchJobFromRequest(request));
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class JobServiceImpl implements JobService {
 	}
 
 	@Override
-	public Job getJobFromUpdateRequest(Job job, JobRequest request) {
+	public Job fetchJobFromUpdateRequest(Job job, JobRequest request) {
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse(null);
@@ -136,12 +136,12 @@ public class JobServiceImpl implements JobService {
 				"Invalid Location");
 		if (placeid != null && address != null) {
 			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Job location is required!");
-			job.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid.trim(), address.trim()));
+			job.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid.trim(), address.trim()));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
 			job.setPictures(pictures);
 		}
@@ -206,14 +206,14 @@ public class JobServiceImpl implements JobService {
 	}
 
 	@Override
-	public void remove(Job job) {
+	public void removeJob(Job job) {
 		job.setStatus(PostStatus.DELETED);
 		saveJob(job);
 	}
 
 	@Override
 	public void updateJob(Job job, JobRequest request) {
-		job = getJobFromUpdateRequest(job, request);
+		job = fetchJobFromUpdateRequest(job, request);
 		saveJob(job);
 	}
 

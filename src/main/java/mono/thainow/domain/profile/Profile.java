@@ -30,6 +30,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import mono.thainow.domain.post.Post;
 import mono.thainow.domain.review.ProfileReview;
 import mono.thainow.domain.user.User;
 import mono.thainow.view.View;
@@ -54,13 +55,14 @@ public abstract class Profile implements Serializable {
 
 	@Id
 	@GeneratedValue
+	@GenericField(name = "id")
 	@GenericField(name = "revieweeId")
 	@GenericField(name = "reviewerId")
 	private Long id;
 
 	@JsonProperty("type")
-	public String getDecriminatorValue() {
-		return this.getClass().getAnnotation(DiscriminatorValue.class).value();
+	public ProfileType getType() {
+		return ProfileType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
 	}
 
 	public abstract Object getInfo();
@@ -82,6 +84,11 @@ public abstract class Profile implements Serializable {
 	@OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
 	@IndexedEmbedded
 	private Set<ProfileReview> reviews;
+	
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+	private Set<Post> posts;
 
 	public int getTotalReview() {
 		return reviews.size();

@@ -85,6 +85,11 @@ public class User implements Serializable {
 	@JsonView(View.Detail.class)
 	private Date updatedOn = new Date();
 	
+	@ManyToOne
+	@JoinColumn(name = "LOCATION_ID")
+	@JsonView(View.Detail.class)
+	private Location location;
+	
 	@OneToMany
 	@JsonView(View.Detail.class)
 	private List<Storage> coverPictures = new ArrayList<>();
@@ -138,10 +143,6 @@ public class User implements Serializable {
 
 //	Full Detail Information
 	
-	@ManyToOne
-	@JoinColumn(name = "LOCATION_ID")
-	@JsonView(View.FullDetail.class)
-	private Location location;
 	
 	@NotNull(message = "User status can't be null!")
 	@Enumerated(EnumType.STRING)

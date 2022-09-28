@@ -2,32 +2,39 @@ package mono.thainow.dao;
 
 import java.util.List;
 
-import mono.thainow.domain.company.Company;
-import mono.thainow.domain.profile.CompanyProfile;
+import mono.thainow.domain.profile.BusinessProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 
 public interface ProfileDao {
 	
-	List<Profile> getProfiles(User account);
+//	List<Profile> findProfilesByAccount(User account);
 	
-	List<Profile> getAllProfiles(User account);
+//	List<Profile> findAllProfilesByAccount(User account);
 	
-	UserProfile getValidUserProfile(Long id);
+	UserProfile findActiveUserProfileByAccountId(Long id);
 	
-	CompanyProfile getValidCompanyProfile(Long profileId);
+//	BusinessProfile findRegisteredBusinessProfileById(Long profileId);
 
 	Profile saveProfile(Profile profile);
 
-	UserProfile getValidUserProfile(User user);
+	UserProfile findActiveUserProfileByAccount(User user);
 
-	List<CompanyProfile> getValidCompanyProfiles(User account);
+	List<BusinessProfile> findBusinessProfilesByAccount(User account);
 	
-	void deleteProfile(Long profileId);
+	List<BusinessProfile> findBusinessProfilesByAccountId(Long id);
+	
+	void deleteProfileById(Long profileId);
 
-	Profile getProfile(Long profileId);
+	Profile findProfileById(Long profileId);
 
-	CompanyProfile getValidCompanyProfile(Company com);
+//	BusinessProfile getValidCompanyProfile(Company com);
+
+//	BusinessProfile findBusinessProfileById(Long profileId);
+
+	List<Profile> findProfilesByAccountId(Long id);
+
+//	UserProfile findUserProfileById(Long profileId);
 
 }

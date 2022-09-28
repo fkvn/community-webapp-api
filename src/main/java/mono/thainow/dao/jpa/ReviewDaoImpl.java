@@ -23,7 +23,7 @@ public class ReviewDaoImpl implements ReviewDao {
 	}
 
 	@Override
-	public Review getValidReview(Long reviewId) {
+	public Review findActiveReviewById(Long reviewId) {
 		return entityManager.createQuery("from Review where id =:id and status =:status", Review.class)
 		.setParameter("status", ReviewStatus.ACTIVATED)
 		.setParameter("id", reviewId).getSingleResult();

@@ -14,9 +14,9 @@ public interface LocationService {
 	
 	Location createLocationByAddress(String address);
 	
-	Location getLocationFromPlaceidAndAddress(String placeid, String address);
+	Location fetchLocationByPlaceidAndAddress(String placeid, String address);
 	
-	Location getLocationFromGeocodingResult(GeocodingResult geoResult);
+	Location fetchLocationFromGeocodingResult(GeocodingResult geoResult);
 	
-	Location updateLocationFromAddressComponent(Location location, AddressComponent[] addressComponent);
+	Location fetchLocationFromAddressComponent(Location location, AddressComponent[] addressComponent);
 }

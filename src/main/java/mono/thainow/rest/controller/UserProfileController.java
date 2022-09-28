@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +23,7 @@ import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.request.UserRequest;
 import mono.thainow.service.ProfileService;
@@ -49,7 +51,11 @@ public class UserProfileController {
 	@JsonView(View.Detail.class)
 	public UserProfile getUserProfile(@PathVariable Long profileId) {
 
-		UserProfile profile = profileService.getValidUserProfile(profileId);
+		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
+		
+		if (!AuthUtil.isAdminAuthenticated()) {
+			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
+		}
 
 //		anonymousUser -> public request
 		if (AuthUtil.getAuthenticatedUser() == null) {
@@ -78,22 +84,30 @@ public class UserProfileController {
 	@AuthenticatedAccess
 	public void updateUserProfile(@PathVariable Long profileId, @Valid @RequestBody UserRequest request) {
 
-		UserProfile profile = profileService.getValidUserProfile(profileId);
+		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
+		
+		if (!AuthUtil.isAdminAuthenticated()) {
+			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
+		}
 
 		AuthUtil.authorizedAccess(profile, true);
 
 //		update user
 		User account = profile.getAccount();
-		account = userService.getUserFromUpdateRequest(account, request);
+		account = userService.fetchUserFromUpdateRequest(account, request);
 		account = userService.saveUser(account);
 	}
 
 	@DeleteMapping
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void removeUserProfile(@PathVariable Long profileId, @RequestParam(required = false) boolean removeAccount) {
+	public void removeUserProfile(@PathVariable Long profileId, @RequestParam(required = true) boolean removeAccount) {
 
-		UserProfile profile = profileService.getValidUserProfile(profileId);
+		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
+		
+		if (!AuthUtil.isAdminAuthenticated()) {
+			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
+		}
 
 		AuthUtil.authorizedAccess(profile, true);
 
@@ -107,11 +121,16 @@ public class UserProfileController {
 	public Storage uploadProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
 
 //		get profile
-		UserProfile profile = profileService.getValidUserProfile(profileId);
+		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
+		
+		if (!AuthUtil.isAdminAuthenticated()) {
+			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
+		}
+
 		AuthUtil.authorizedAccess(profile, true);
 
 //		get storage
-		Storage picture = storageService.getStorageFromStorageRequest(newPicture);
+		Storage picture = storageService.fetchStorageFromRequest(newPicture);
 		picture = storageService.saveStorage(picture);
 
 //		update account
@@ -129,21 +148,21 @@ public class UserProfileController {
 	@PatchMapping("/activate")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public void activateCompanyProfile(@PathVariable Long profileId) {
+	public void activateUserProfile(@PathVariable Long profileId) {
 
-		UserProfile profile = (UserProfile) profileService.getProfile(profileId);
+		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
 
-		profileService.activateProfile(profile);
+		profileService.activateUserProfile(profile);
 	}
 
 	@PatchMapping("/disable")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public void disableCompanyProfile(@PathVariable Long profileId) {
+	public void disableUserProfile(@PathVariable Long profileId) {
 
-		UserProfile profile = (UserProfile) profileService.getProfile(profileId);
+		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
 
-		profileService.disableProfile(profile);
+		profileService.disableUserProfile(profile);
 
 	}
 }

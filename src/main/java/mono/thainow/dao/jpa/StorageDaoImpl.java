@@ -1,17 +1,13 @@
 package mono.thainow.dao.jpa;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import mono.thainow.dao.StorageDao;
 import mono.thainow.domain.storage.Storage;
-import mono.thainow.repository.StorageRepository;
 
 @Repository
 public class StorageDaoImpl implements StorageDao {
@@ -19,18 +15,15 @@ public class StorageDaoImpl implements StorageDao {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@Autowired
-	private StorageRepository storageRepository;
-
 //	======================================================
 
-	@Override
-	public List<Storage> getAllStorages() {
-		return storageRepository.findAll();
-	}
+//	@Override
+//	public List<Storage> getAllStorages() {
+//		return storageRepository.findAll();
+//	}
 
 	@Override
-	public Storage getStorage(long id) {
+	public Storage findStorageById(long id) {
 		return entityManager.find(Storage.class, id);
 	}
 
@@ -48,7 +41,7 @@ public class StorageDaoImpl implements StorageDao {
 	}
 
 	@Override
-	public Storage getStorage(String fileName) {
+	public Storage findStorageByName(String fileName) {
 		try {
 			Storage storage = entityManager.createQuery("from Storage where name =:name ", Storage.class)
 					.setParameter("name", fileName).getSingleResult();
@@ -61,7 +54,7 @@ public class StorageDaoImpl implements StorageDao {
 
 	
 	@Override
-	public Storage getStorageFromUrl(String url) {
+	public Storage findStorageByUrl(String url) {
 		try {
 			Storage storage = entityManager.createQuery("from Storage where url =:url ", Storage.class)
 					.setParameter("url", url).getSingleResult();

@@ -9,19 +9,19 @@ import mono.thainow.rest.request.PostRequest;
 
 public interface PostService {
 	
-	List<Post> getPosts(Profile profile);
+	List<Post> findPostsByProfile(Profile profile);
 	
-	List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest);
+//	List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest);
 
 	void removePosts(List<Post> posts);
 	
-	void disablePost(List<Post> posts);
+//	void disablePost(List<Post> posts);
 	
 //	============================================
 	
-	Post getPost(Long postId);
+	Post findPostById(Long postId);
 	
-	Post getValidPost(Long postId, PostType type);
+	Post findValidPost(Long postId, PostType type);
 
 	Post activatePost(Post post);
 
@@ -35,7 +35,7 @@ public interface PostService {
 	
 	Post savePost(Post post);
 
-	Post getPost(PostType type, Object entity);
+//	Post getPost(PostType type, Object entity);
 
 	
 

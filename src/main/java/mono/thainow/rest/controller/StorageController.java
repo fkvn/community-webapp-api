@@ -53,7 +53,7 @@ public class StorageController {
 	@PostMapping("/save")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Long saveStorage(@RequestBody StorageRequest storageRequest) {
-		return storageService.saveStorage(storageService.getStorageFromStorageRequest(storageRequest)).getId();
+		return storageService.saveStorage(storageService.fetchStorageFromRequest(storageRequest)).getId();
 	}
 
 	@PostMapping("/save/multiple")
@@ -63,7 +63,7 @@ public class StorageController {
 		List<Long> results = new ArrayList<>();
 
 		storageRequests.stream().forEach(storageRequest -> {
-			Storage storage = storageService.getStorageFromStorageRequest(storageRequest);
+			Storage storage = storageService.fetchStorageFromRequest(storageRequest);
 			results.add(storageService.saveStorage(storage).getId());
 		});
 

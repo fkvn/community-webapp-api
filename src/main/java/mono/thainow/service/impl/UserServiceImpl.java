@@ -47,31 +47,36 @@ public class UserServiceImpl implements UserService {
 
 //	=============================================================
 
+//	@Override
+//	public List<User> getAllUsers() {
+//		return userDao.getAllUsers();
+//	}
+
 	@Override
-	public List<User> getAllUsers() {
-		return userDao.getAllUsers();
+	public User findActiveUserByEmail(String email) {
+		return userDao.findActiveUserByEmail(email);
 	}
 
 	@Override
-	public User getActiveUserByEmail(String email) {
-		return userDao.getActiveUserByEmail(email);
+	public User findActiveUserByPhone(String phone) {
+		return userDao.findActiveUserByPhone(phone);
 	}
 
 	@Override
-	public User getActiveUserByPhone(String phone) {
-		return userDao.getActiveUserByPhone(phone);
+	public User findActiveUserBySub(String sub) {
+		return userDao.findActiveUserBySub(sub);
 	}
+
+//	@Override
+//	public User findUserById(Long id) {
+//		return userDao.findUserById(id);
+//	}
 
 	@Override
-	public User getActiveUserBySub(String sub) {
-		return userDao.getActiveUserBySub(sub);
+	public User findActiveUserById(Long id) {
+		return userDao.findActiveUserById(id);
 	}
-
-	@Override
-	public User getByUserId(Long id) {
-		return userDao.getUserById(id);
-	}
-
+	
 	@Override
 	public User saveUser(User user) {
 		return userDao.saveUser(user);
@@ -147,7 +152,7 @@ public class UserServiceImpl implements UserService {
 
 //		user profile
 		StorageDefault storageDefault = new StorageDefault();
-		Storage picture = storageService.getStorage(storageDefault.getUserProfileDefault());
+		Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault());
 		user.setPicture(picture);
 
 //		set status
@@ -157,7 +162,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromGoogleRequest(GoogleRequest request) {
+	public User fetchUserFromGoogleRequest(GoogleRequest request) {
 
 		User user = new User();
 
@@ -186,17 +191,9 @@ public class UserServiceImpl implements UserService {
 		user.setEmailVerified(isEmailVerified);
 
 //		user profile
-		String pictureUrl = Optional.ofNullable(request.getPicture()).orElse("").trim();
-		Storage picture = null;
-
-		if (pictureUrl.equals("")) {
-//			add default picture
-			StorageDefault storageDefault = new StorageDefault();
-			picture = storageService.getStorage(storageDefault.getUserProfileDefault());
-		} else {
-			picture = new Storage();
-			picture.setUrl(pictureUrl);
-		}
+		StorageDefault storageDefault = new StorageDefault();
+		Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault());
+		user.setPicture(picture);
 
 //		persist picture
 		picture = storageService.saveStorage(picture);
@@ -213,7 +210,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromAppleRequest(AppleRequest appleSignupRequest) {
+	public User fetchUserFromAppleRequest(AppleRequest appleSignupRequest) {
 		User user = new User();
 
 		String password = Optional.ofNullable(appleSignupRequest.getSub().trim()).orElse("");
@@ -234,7 +231,7 @@ public class UserServiceImpl implements UserService {
 
 //		user profile
 		StorageDefault storageDefault = new StorageDefault();
-		Storage picture = storageService.getStorage(storageDefault.getUserProfileDefault());
+		Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault());
 		user.setPicture(picture);
 
 //		set provider
@@ -247,7 +244,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromFacebookSignupRequest(FacebookRequest facebookSignupRequest) {
+	public User fetchUserFromFacebookRequest(FacebookRequest facebookSignupRequest) {
 
 		User user = new User();
 
@@ -268,17 +265,9 @@ public class UserServiceImpl implements UserService {
 		user.setEmailVerified(isEmailVerified);
 
 //		user profile
-		String pictureUrl = Optional.ofNullable(facebookSignupRequest.getPicture()).orElse("").trim();
-		Storage picture = null;
-
-		if (pictureUrl.equals("")) {
-//			add default picture
-			StorageDefault storageDefault = new StorageDefault();
-			picture = storageService.getStorage(storageDefault.getUserProfileDefault());
-		} else {
-			picture = new Storage();
-			picture.setUrl(pictureUrl);
-		}
+		StorageDefault storageDefault = new StorageDefault();
+		Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault());
+		user.setPicture(picture);
 
 //		persist picture
 		picture = storageService.saveStorage(picture);
@@ -333,7 +322,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest) {
+	public User fetchUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest) {
 
 //		username
 		String username = Optional.ofNullable(userUpdateInfoRequest.getUsername()).orElse(null);
@@ -357,7 +346,7 @@ public class UserServiceImpl implements UserService {
 //		new cover pictures
 		List<StorageRequest> coverPictureRequests = Optional.ofNullable(userUpdateInfoRequest.getCoverPictures())
 				.orElse(null);
-		List<Storage> coverPictures = storageService.getStoragesFromStorageRequests(coverPictureRequests);
+		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
 		if (coverPictures != null) {
 			user.setCoverPictures(coverPictures);
 		}
@@ -372,7 +361,7 @@ public class UserServiceImpl implements UserService {
 				user.setLocation(null);
 			} else {
 				Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Invalid Location");
-				user.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+				user.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 			}
 
 		}
@@ -459,5 +448,7 @@ public class UserServiceImpl implements UserService {
 
 		return user;
 	}
+
+
 
 }

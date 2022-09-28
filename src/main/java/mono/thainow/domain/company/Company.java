@@ -44,7 +44,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.location.Location;
-import mono.thainow.domain.profile.CompanyProfile;
+import mono.thainow.domain.profile.BusinessProfile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.view.View;
 
@@ -188,7 +188,7 @@ public class Company implements Serializable {
 	
 	@OneToOne(mappedBy = "company", fetch = FetchType.LAZY)
 	@JsonIgnore
-	private CompanyProfile profile;
+	private BusinessProfile profile;
 
 //	
 //	@Latitude

@@ -8,17 +8,18 @@ import mono.thainow.domain.profile.Profile;
 
 public interface PostDao {
 
-	public List<Post> getPosts(Profile profile);
+	public List<Post> findPostsByProfile(Profile profile);
 
-	public Post getPost(long id);
+	public Post findPostById(long id);
 
-	public Post getValidPost(Long postId, PostType type);
+	public Post findValidPost(Long postId, PostType type);
 
 	public Post savePost(Post post);
 
-	public void deletePost(long id);
+	public void deletePostById(long id);
 
-	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest);
+//	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest);
 
-	public Post getPost(PostType type, Object entity);
+//	public Post getPost(PostType type, Object entity);
+
 }

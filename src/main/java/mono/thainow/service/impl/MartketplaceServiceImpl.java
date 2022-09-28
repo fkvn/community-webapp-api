@@ -34,7 +34,7 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 	private StorageService storageService;
 
 	@Override
-	public Marketplace getMarketplaceFromRequest(MarketplaceRequest request) {
+	public Marketplace fetchMarketplaceFromRequest(MarketplaceRequest request) {
 
 		Marketplace marketplace = new Marketplace();
 
@@ -47,12 +47,12 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
 		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Marketplace location is required!");
-		marketplace.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid, address));
+		marketplace.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
 		Assert.isTrue(pictureRequests.size() > 0, "Marketplace picture is required!");
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		Assert.isTrue(pictures.size() > 0, "Marketplace picture is required!");
 		marketplace.setPictures(pictures);
 		
@@ -99,7 +99,7 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 
 	@Override
 	public Marketplace createMarketplace(MarketplaceRequest request) {
-		return saveMarketplace(getMarketplaceFromRequest(request));
+		return saveMarketplace(fetchMarketplaceFromRequest(request));
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 	}
 
 	@Override
-	public Marketplace getMarketplaceFromUpdateRequest(Marketplace marketplace, MarketplaceRequest request) {
+	public Marketplace fetchMarketplaceFromUpdateRequest(Marketplace marketplace, MarketplaceRequest request) {
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse(null);
@@ -124,12 +124,12 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 				"Invalid Location");
 		if (placeid != null && address != null) {
 			Assert.isTrue(!placeid.trim().isEmpty() && !address.trim().isEmpty(), "Marketplace location is required!");
-			marketplace.setLocation(locationService.getLocationFromPlaceidAndAddress(placeid.trim(), address.trim()));
+			marketplace.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid.trim(), address.trim()));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> pictures = storageService.getStoragesFromStorageRequests(pictureRequests);
+		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
 			marketplace.setPictures(pictures);
 		}
@@ -182,14 +182,14 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 	}
 
 	@Override
-	public void remove(Marketplace marketplace) {
+	public void removeMarketplace(Marketplace marketplace) {
 		marketplace.setStatus(PostStatus.DELETED);
 		saveMarketplace(marketplace);
 	}
 
 	@Override
 	public void updateMarketplace(Marketplace marketplace, MarketplaceRequest request) {
-		marketplace = getMarketplaceFromUpdateRequest(marketplace, request);
+		marketplace = fetchMarketplaceFromUpdateRequest(marketplace, request);
 		saveMarketplace(marketplace);
 	}
 

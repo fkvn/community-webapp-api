@@ -33,7 +33,7 @@ import mono.thainow.domain.post.job.Job;
 import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.post.marketplace.Marketplace;
 import mono.thainow.domain.post.marketplace.MarketplacePost;
-import mono.thainow.domain.profile.CompanyProfile;
+import mono.thainow.domain.profile.BusinessProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.review.PostReview;
 import mono.thainow.domain.review.ProfileReview;
@@ -483,7 +483,7 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<DealPost> searchDealPost(String keywords, int limit, int page, double centerLat,
+	public SearchResult<DealPost> searchDealPost(Long ownerId, String keywords, int limit, int page, double centerLat,
 			double centerLng, String category, String sort, String within, int radius, List<Double> topLeft,
 			List<Double> bottomRight) {
 
@@ -493,14 +493,23 @@ public class SearchDaoImpl implements SearchDao {
 
 		SearchResult<DealPost> deals = searchSession.search(DealPost.class).where(f -> f.bool(b -> {
 
+			if (ownerId > 0) {
+//				owner
+				b.must(f.match().field("owner.id").matching(ownerId));
+
+//				status
+				b.must(f.terms().field("deal.status").matchingAny(PostStatus.AVAILABLE, PostStatus.PRIVATE,
+						PostStatus.DISABLED));
+			} else {
+//				status
+				b.must(f.terms().field("deal.status").matchingAny(PostStatus.AVAILABLE));
+			}
+
 //			keywords
 			if (!keywords.isEmpty()) {
 				b.must(f.match().field("deal.title").boost(3.0f).field("deal.category_search").boost(2.0f)
 						.field("deal.description").boost(1.0f).matching(keywords));
 			}
-
-//			status
-			b.must(f.terms().field("deal.status").matchingAny(PostStatus.AVAILABLE));
 //
 //			category filter
 			if (!category.isEmpty() && !category.equals("All")) {
@@ -543,10 +552,10 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<HousingPost> searchHousingPost(String keywords, String type, String costType, Double minCost,
-			Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String category,
-			double centerLat, double centerLng, int limit, int page, String sort, String within, int radius,
-			List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResult<HousingPost> searchHousingPost(Long ownerId, String keywords, String type, String costType,
+			Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity,
+			String category, double centerLat, double centerLng, int limit, int page, String sort, String within,
+			int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -554,15 +563,24 @@ public class SearchDaoImpl implements SearchDao {
 
 		SearchResult<HousingPost> housings = searchSession.search(HousingPost.class).where(f -> f.bool(b -> {
 
+			if (ownerId > 0) {
+//				owner
+				b.must(f.match().field("owner.id").matching(ownerId));
+
+//				status
+				b.must(f.terms().field("housing.status").matchingAny(PostStatus.AVAILABLE, PostStatus.PRIVATE,
+						PostStatus.DISABLED));
+			} else {
+//				status
+				b.must(f.terms().field("housing.status").matchingAny(PostStatus.AVAILABLE));
+			}
+
 //			keywords
 			if (!keywords.isEmpty()) {
 				b.must(f.match().field("housing.title").boost(2.0f).field("housing.category_search").boost(4.0f)
 						.field("housing.type_search").boost(3.0f).field("housing.description").boost(1.0f)
 						.matching(keywords));
 			}
-
-//			status
-			b.must(f.terms().field("housing.status").matchingAny(PostStatus.AVAILABLE));
 
 //			guess filter
 			if (guest > 0) {
@@ -657,9 +675,9 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<JobPost> searchJobPost(String keywords, String position, String experience, String skills,
-			Boolean remote, int limit, int page, double centerLat, double centerLng, String sort, String within,
-			int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResult<JobPost> searchJobPost(Long ownerId, String keywords, String position, String experience,
+			String skills, Boolean remote, int limit, int page, double centerLat, double centerLng, String sort,
+			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -667,14 +685,23 @@ public class SearchDaoImpl implements SearchDao {
 
 		SearchResult<JobPost> jobs = searchSession.search(JobPost.class).where(f -> f.bool(b -> {
 
+			if (ownerId > 0) {
+//				owner
+				b.must(f.match().field("owner.id").matching(ownerId));
+
+//				status
+				b.must(f.terms().field("job.status").matchingAny(PostStatus.AVAILABLE, PostStatus.PRIVATE,
+						PostStatus.DISABLED));
+			} else {
+//				status
+				b.must(f.terms().field("job.status").matchingAny(PostStatus.AVAILABLE));
+			}
+
 //			keywords
 			if (!keywords.isEmpty()) {
 				b.must(f.match().field("job.title").boost(3.0f).field("job.positions").boost(2.0f)
 						.field("job.description").boost(1.0f).matching(keywords));
 			}
-
-//			status
-			b.must(f.terms().field("job.status").matchingAny(PostStatus.AVAILABLE));
 
 //			position filter
 			if (!position.isEmpty() && !position.equals("All")) {
@@ -735,9 +762,9 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<MarketplacePost> searchMarketplacePost(String keywords, String condition, String category,
-			Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page, String sort,
-			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResult<MarketplacePost> searchMarketplacePost(Long ownerId, String keywords, String condition,
+			String category, Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page,
+			String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -746,32 +773,41 @@ public class SearchDaoImpl implements SearchDao {
 		SearchResult<MarketplacePost> marketplaces = searchSession.search(MarketplacePost.class)
 				.where(f -> f.bool(b -> {
 
-//			keywords
+					if (ownerId > 0) {
+//						owner
+						b.must(f.match().field("owner.id").matching(ownerId));
+
+//						status
+						b.must(f.terms().field("marketplace.status").matchingAny(PostStatus.AVAILABLE,
+								PostStatus.PRIVATE, PostStatus.DISABLED));
+					} else {
+//						status
+						b.must(f.terms().field("marketplace.status").matchingAny(PostStatus.AVAILABLE));
+					}
+
+//					keywords
 					if (!keywords.isEmpty()) {
 						b.must(f.match().field("marketplace.title").boost(2.0f).field("marketplace.category_search")
 								.boost(4.0f).field("marketplace.condition_search").boost(3.0f)
 								.field("marketplace.description").boost(1.0f).matching(keywords));
 					}
 
-//			status
-					b.must(f.terms().field("marketplace.status").matchingAny(PostStatus.AVAILABLE));
-
-//			costType filter
+//					costType filter
 					Double maxCostRange = maxCost > 0 ? maxCost : null;
 					Double minCostRange = minCost > 0 ? minCost : null;
 					b.filter(f.range().field("marketplace.cost").between(minCostRange, maxCostRange));
 
-//			amenity filter
+//					amenity filter
 					if (!condition.isEmpty() && !condition.equals("All")) {
 						b.filter(f.match().field("marketplace.condition").matching(condition));
 					}
 
-//			category filter
+//					category filter
 					if (!category.isEmpty() && !category.equals("All")) {
 						b.filter(f.match().field("marketplace.category").matching(category));
 					}
 
-//			radius default 20 miles
+//					radius default 20 miles
 					switch (within) {
 					case "circle":
 						b.must(f.spatial().within().field("marketplace.location").circle(center, radius,
@@ -799,7 +835,7 @@ public class SearchDaoImpl implements SearchDao {
 						b.add(f.distance("marketplace.location", center));
 						break;
 					default:
-//				default, score, or other qualities
+//						default, score, or other qualities
 						b.add(f.field("marketplace.updatedOn").desc());
 						break;
 					}
@@ -809,7 +845,7 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<CompanyProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
+	public SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
 			double centerLng, String industry, String sort, String within, int radius, List<Double> topLeft,
 			List<Double> bottomRight) {
 
@@ -817,7 +853,7 @@ public class SearchDaoImpl implements SearchDao {
 
 		GeoPoint center = GeoPoint.of(centerLat, centerLng);
 
-		SearchResult<CompanyProfile> companies = searchSession.search(CompanyProfile.class).where(f -> f.bool(b -> {
+		SearchResult<BusinessProfile> companies = searchSession.search(BusinessProfile.class).where(f -> f.bool(b -> {
 //			keywords
 			if (!keywords.isEmpty()) {
 				b.must(f.match().field("company.name").boost(3.0f).field("company.industry").boost(2.0f)
@@ -884,7 +920,6 @@ public class SearchDaoImpl implements SearchDao {
 
 //			status
 			b.must(f.terms().field("status").matchingAny(ReviewStatus.ACTIVATED));
-
 
 		})).aggregation(aggregationKey, f -> f.terms().field("rate", Integer.class)).sort(f -> f.composite(b -> {
 			switch (sort) {

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
@@ -24,60 +25,65 @@ public class PostDaoImpl implements PostDao {
 //	===========================================
 
 	@Override
-	public List<Post> getPosts(Profile profile) {
+	public List<Post> findPostsByProfile(Profile profile) {
 		return entityManager.createQuery("from Post where owner =: owner", Post.class).setParameter("owner", profile)
 				.getResultList();
 	}
 
+//	@Override
+//	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit,
+//			boolean ownerRequest) {
+//
+//		String sql = "";
+//		String entity = "";
+//
+////		type
+//		switch (postType) {
+//		case DEAL_POST:
+//			entity = "deal";
+//			break;
+//		case JOB_POST:
+//			entity = "job";
+//			break;
+//		case HOUSING_POST:
+//			entity = "housing";
+//			break;
+//		case MARKETPLACE_POST:
+//			entity = "marketplace";
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		sql = "from Post where owner =: owner and " + entity + ".status IN (:status)";
+//
+////		sort
+//		switch (sort) {
+//		default:
+//			sql += " ORDER BY " + entity + ".updatedOn DESC";
+//			break;
+//		}
+//
+//		List<PostStatus> validPostStatus = ownerRequest ? Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE)
+//				: Arrays.asList(PostStatus.AVAILABLE);
+//
+//		return entityManager.createQuery(sql, Post.class).setParameter("status", validPostStatus)
+//				.setParameter("owner", postOwner).setFirstResult((page - 1) * limit).setMaxResults(limit)
+//				.getResultList();
+//	}
+
 	@Override
-	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit,
-			boolean ownerRequest) {
+	public Post findPostById(long id) {
+		Post post = entityManager.find(Post.class, id);
 
-		String sql = "";
-		String entity = "";
+		if (post == null)
+			throw new NoResultException();
 
-//		type
-		switch (postType) {
-		case DEAL_POST:
-			entity = "deal";
-			break;
-		case JOB_POST:
-			entity = "job";
-			break;
-		case HOUSING_POST:
-			entity = "housing";
-			break;
-		case MARKETPLACE_POST:
-			entity = "marketplace";
-			break;
-		default:
-			break;
-		}
-
-		sql = "from Post where owner =: owner and " + entity + ".status IN (:status)";
-
-//		sort
-		switch (sort) {
-		default:
-			sql += " ORDER BY " + entity + ".updatedOn DESC";
-			break;
-		}
-
-		List<PostStatus> validPostStatus = ownerRequest ? Arrays.asList(PostStatus.AVAILABLE, PostStatus.PRIVATE)
-				: Arrays.asList(PostStatus.AVAILABLE);
-
-		return entityManager.createQuery(sql, Post.class).setParameter("status", validPostStatus)
-				.setParameter("owner", postOwner).setFirstResult((page - 1) * limit).setMaxResults(limit)
-				.getResultList();
+		return post;
 	}
 
 	@Override
-	public Post getPost(long id) {
-		return entityManager.find(Post.class, id);
-	}
-
-	@Override
-	public Post getValidPost(Long postId, PostType type) {
+	public Post findValidPost(Long postId, PostType type) {
 
 		String sql = "";
 
@@ -113,33 +119,33 @@ public class PostDaoImpl implements PostDao {
 
 	@Override
 	@Transactional
-	public void deletePost(long id) {
+	public void deletePostById(long id) {
 		Post post = entityManager.find(Post.class, id);
 		entityManager.remove(post);
 	}
 
-	@Override
-	public Post getPost(PostType type, Object entity) {
-		String sql = "";
-
-		switch (type) {
-		case DEAL_POST:
-			sql = "from Post where deal =:entity";
-			break;
-		case JOB_POST:
-			sql = "from Post where job =:entity";
-			break;
-		case HOUSING_POST:
-			sql = "from Post where housing =:entity";
-			break;
-		case MARKETPLACE_POST:
-			sql = "from Post where marketplace =:entity";
-			break;
-		default:
-			break;
-		}
-
-		return entityManager.createQuery(sql, Post.class).setParameter("entity", entity).getSingleResult();
-	}
+//	@Override
+//	public Post getPost(PostType type, Object entity) {
+//		String sql = "";
+//
+//		switch (type) {
+//		case DEAL_POST:
+//			sql = "from Post where deal =:entity";
+//			break;
+//		case JOB_POST:
+//			sql = "from Post where job =:entity";
+//			break;
+//		case HOUSING_POST:
+//			sql = "from Post where housing =:entity";
+//			break;
+//		case MARKETPLACE_POST:
+//			sql = "from Post where marketplace =:entity";
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		return entityManager.createQuery(sql, Post.class).setParameter("entity", entity).getSingleResult();
+//	}
 
 }

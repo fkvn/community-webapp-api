@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.maps.model.AddressComponent;
 import com.google.maps.model.GeocodingResult;
 
@@ -31,13 +29,13 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public Location getLocationFromPlaceidAndAddress(String placeid, String address) {
+	public Location fetchLocationByPlaceidAndAddress(String placeid, String address) {
 
 //		address - MUST NOT Empty and NOT Null
 		Assert.isTrue(address != null && !address.trim().isEmpty(), "Invalid Address!");
 
 //		search location
-		Location location = locationDao.getLocationByEitherPlaceidOrAddress(placeid == null ? "" : placeid, address);
+		Location location = locationDao.findLocationByPlaceidOrAddress(placeid == null ? "" : placeid, address);
 
 //		can't find location by placeid -> add new one
 		if (location == null) {
@@ -62,13 +60,13 @@ public class LocationServiceImpl implements LocationService {
 		GeocodingResult geoResult = geoCode.getLocationResultFromAddress(address);
 
 //		double-check if the placeId exists
-		Location location = locationDao.getLocationByPlaceid(geoResult.placeId);
+		Location location = locationDao.fetchLocationByPlaceid(geoResult.placeId);
 
 //		new location
 		if (location == null) {
 
 //			extract location new information
-			location = getLocationFromGeocodingResult(geoResult);
+			location = fetchLocationFromGeocodingResult(geoResult);
 
 //			persist into database
 			location = locationDao.saveLocation(location);
@@ -78,7 +76,7 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public Location getLocationFromGeocodingResult(GeocodingResult geoResult) {
+	public Location fetchLocationFromGeocodingResult(GeocodingResult geoResult) {
 
 		Location location = new Location();
 
@@ -98,16 +96,16 @@ public class LocationServiceImpl implements LocationService {
 		location.setType(geoResult.geometry.locationType.toString());
 
 //		location address component
-		location = updateLocationFromAddressComponent(location, geoResult.addressComponents);
+		location = fetchLocationFromAddressComponent(location, geoResult.addressComponents);
 
 		return location;
 	}
 
 	@Override
-	public Location updateLocationFromAddressComponent(Location location, AddressComponent[] addressComponents) {
+	public Location fetchLocationFromAddressComponent(Location location, AddressComponent[] addressComponents) {
 
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		System.out.println(gson.toJson(addressComponents));
+//		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//		System.out.println(gson.toJson(addressComponents));
 
 //		address components
 		Arrays.asList(addressComponents).stream().forEach(field -> {
@@ -146,7 +144,7 @@ public class LocationServiceImpl implements LocationService {
 			}
 		});
 
-		System.out.println(gson.toJson(location));
+//		System.out.println(gson.toJson(location));
 
 		return location;
 	}

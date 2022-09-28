@@ -38,6 +38,14 @@ public class AuthUtil {
 
 		return authorizedAccess;
 	}
+	
+	
+	public static boolean isAdminAuthenticated() {
+		UserDetailsImpl userDetails = getAuthenticatedUser();
+
+		return userDetails.getRole() != UserRole.ADMIN
+				|| userDetails.getRole() != UserRole.SUPERADMIN; 
+	}
 
 	public static boolean authorizedAccess(Profile postOwner, Post post, boolean throwError) {
 

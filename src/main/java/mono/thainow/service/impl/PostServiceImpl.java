@@ -50,14 +50,14 @@ public class PostServiceImpl implements PostService {
 //	=============================================================
 
 	@Override
-	public List<Post> getPosts(Profile profile) {
-		return postDao.getPosts(profile);
+	public List<Post> findPostsByProfile(Profile profile) {
+		return postDao.findPostsByProfile(profile);
 	}
 
-	@Override
-	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest) {
-		return postDao.getPosts(postOwner, postType, sort, page, limit, ownerRequest);
-	}
+//	@Override
+//	public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page, int limit, boolean ownerRequest) {
+//		return postDao.getPosts(postOwner, postType, sort, page, limit, ownerRequest);
+//	}
 
 	@Override
 	public void removePosts(List<Post> posts) {
@@ -66,27 +66,27 @@ public class PostServiceImpl implements PostService {
 		});
 	}
 
-	@Override
-	public void disablePost(List<Post> posts) {
-		posts.forEach(post -> {
-			disablePost(post);
-		});
-	}
+//	@Override
+//	public void disablePost(List<Post> posts) {
+//		posts.forEach(post -> {
+//			disablePost(post);
+//		});
+//	}
 //	=============================================================
 
 	@Override
-	public Post getPost(Long postId) {
-		return postDao.getPost(postId);
+	public Post findPostById(Long postId) {
+		return postDao.findPostById(postId);
 	}
 
-	@Override
-	public Post getPost(PostType type, Object entity) {
-		return postDao.getPost(type, entity);
-	}
+//	@Override
+//	public Post getPost(PostType type, Object entity) {
+//		return postDao.getPost(type, entity);
+//	}
 
 	@Override
-	public Post getValidPost(Long postId, PostType type) {
-		return postDao.getValidPost(postId, type);
+	public Post findValidPost(Long postId, PostType type) {
+		return postDao.findValidPost(postId, type);
 	}
 
 	@Override
@@ -159,23 +159,23 @@ public class PostServiceImpl implements PostService {
 //		remove related entity
 		switch (post.getType()) {
 		case DEAL_POST:
-			dealService.remove(((DealPost) post).getDeal());
+			dealService.removeDeal(((DealPost) post).getDeal());
 			break;
 		case JOB_POST:
-			jobService.remove(((JobPost) post).getJob());
+			jobService.removeJob(((JobPost) post).getJob());
 			break;
 		case HOUSING_POST:
-			housingService.remove(((HousingPost) post).getHousing());
+			housingService.removeHousing(((HousingPost) post).getHousing());
 			break;
 		case MARKETPLACE_POST:
-			marketplaceService.remove(((MarketplacePost) post).getMarketplace());
+			marketplaceService.removeMarketplace(((MarketplacePost) post).getMarketplace());
 			break;
 		default:
 			break;
 		}
 
 //		delete post
-		postDao.deletePost(post.getId());
+		postDao.deletePostById(post.getId());
 
 	}
 

@@ -8,7 +8,7 @@ public interface UserRoleService {
 	
 	UserRole findByName(String roleName);
 	
-	UserRole verifyRoles(String roleName);
+	UserRole verifyRoleByName(String roleName);
 	
 	Set<UserRole> verifyRoles(Set<String> roles);
 }
