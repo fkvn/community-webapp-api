@@ -84,14 +84,17 @@ public abstract class Profile implements Serializable {
 	@OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
 	@IndexedEmbedded
 	private Set<ProfileReview> reviews;
-	
-	
+
 	@JsonIgnore
 	@OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
 	private Set<Post> posts;
 
 	public int getTotalReview() {
-		return reviews.size();
+		try {
+			return reviews.size();
+		} catch (Exception e) {
+			return 0;
+		}
 	}
 
 	public Double getAvgRating() {

@@ -55,18 +55,25 @@ public class BusinessProfileController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	@JsonView(View.Basic.class)
-	public Profile addBusinessProfile(@Valid @RequestBody CompanyRequest companyRequest) {
+	public void addBusinessProfile(@Valid @RequestBody CompanyRequest companyRequest) {
 
 		Company company = companyService.createCompany(companyRequest);
 
 		User account = userService.findActiveUserById(AuthUtil.getAuthenticatedUser().getId());
 
-		if (account.getRole() == UserRole.CLASSIC) {
-			account.setRole(UserRole.BUSINESS);
-			account = userService.saveUser(account);
+		try {
+			profileService.createBusinessProfile(account, company);
+
+			if (account.getRole() == UserRole.CLASSIC) {
+				account.setRole(UserRole.BUSINESS);
+				account = userService.saveUser(account);
+			}
+
+		} catch (Exception e) {
+			companyService.remove(company);
+			throw e;
 		}
 
-		return profileService.createBusinessProfile(account, company);
 	}
 
 	@GetMapping("/{profileId}")
