@@ -56,7 +56,7 @@ public class FullTextSearchController {
 		return companyService.searchCompanyByNameOnly(keywords, fetchAll, fetchLimit);
 	}
 
-	@GetMapping("/companies")
+	@GetMapping("/business")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> SearchCompanies(@RequestParam(defaultValue = "") String keywords,
