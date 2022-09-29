@@ -22,7 +22,6 @@ import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.profile.BusinessProfile;
-import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
