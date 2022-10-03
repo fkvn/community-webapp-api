@@ -2,10 +2,10 @@ package mono.thainow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +17,8 @@ import mono.thainow.domain.post.marketplace.Marketplace;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.rest.request.MarketplaceRequest;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.service.MarketplaceService;
 import mono.thainow.service.LocationService;
+import mono.thainow.service.MarketplaceService;
 import mono.thainow.service.StorageService;
 
 @Service
@@ -40,49 +40,49 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
-		Assert.isTrue(!title.isEmpty(), "Marketplace title is required!");
+		Assert.isTrue(!title.isBlank(), "Invalid title!");
 		marketplace.setTitle(title);
 
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
 		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
-		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Marketplace location is required!");
-		marketplace.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
+		Assert.isTrue(!address.isBlank(), "Invalid address");
+		marketplace.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
-		Assert.isTrue(pictureRequests.size() > 0, "Marketplace picture is required!");
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
-		Assert.isTrue(pictures.size() > 0, "Marketplace picture is required!");
+		Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 		marketplace.setPictures(pictures);
-		
+
 //		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new HashMap<>());
-		Assert.isTrue(contactInfo.size() > 0, "Job contact information is required!");
+		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
+				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+		Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 		marketplace.setContactInfo(contactInfo);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
-			marketplace.setDescription(description.trim());
+			marketplace.setDescription(description);
 		}
-		
+
 //		cost
 		Double cost = Optional.ofNullable(request.getCost()).orElse(null);
 		if (cost != null) {
 			marketplace.setCost(cost);
 		}
-		
+
 //		condition
-		String condition = Optional.ofNullable(request.getCondition()).orElse(null);
+		String condition = Optional.ofNullable(request.getCondition()).orElse(null).trim();
 		if (condition != null) {
-			marketplace.setCondition(condition.trim());
+			marketplace.setCondition(condition);
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
+		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
 		if (category != null) {
-			marketplace.setCategory(category.trim());
+			marketplace.setCategory(category);
 		}
 
 //		expiration Date
@@ -111,58 +111,57 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 	public Marketplace fetchMarketplaceFromUpdateRequest(Marketplace marketplace, MarketplaceRequest request) {
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null);
+		String title = Optional.ofNullable(request.getTitle()).orElse(null).trim();
 		if (title != null) {
+			Assert.isTrue(!title.isBlank(), "Invalid Title");
 			marketplace.setTitle(title.trim());
 		}
-		Assert.isTrue(!marketplace.getTitle().isEmpty(), "Marketplace title is required!");
 
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
-				"Invalid Location");
-		if (placeid != null && address != null) {
-			Assert.isTrue(!placeid.trim().isEmpty() && !address.trim().isEmpty(), "Marketplace location is required!");
-			marketplace.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid.trim(), address.trim()));
+		if (address != null) {
+			Assert.isTrue(!address.isBlank(), "Invalid Location!");
+			marketplace.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
+			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 			marketplace.setPictures(pictures);
 		}
-		Assert.isTrue(marketplace.getPictures().size() > 0, "Marketplace picture is required!");
-		
+
 //		contact information
 		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
-		if (contactInfo != null && contactInfo.size() > 0) {
+		if (contactInfo != null) {
+			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 			marketplace.setContactInfo(contactInfo);
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
-			marketplace.setDescription(description.trim());
+			marketplace.setDescription(description);
 		}
-		
+
 //		cost
 		Double cost = Optional.ofNullable(request.getCost()).orElse(null);
 		if (cost != null) {
 			marketplace.setCost(cost);
 		}
-		
+
 //		condition
-		String condition = Optional.ofNullable(request.getCondition()).orElse(null);
+		String condition = Optional.ofNullable(request.getCondition()).orElse(null).trim();
 		if (condition != null) {
-			marketplace.setCondition(condition.trim());
+			marketplace.setCondition(condition);
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
+		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
 		if (category != null) {
-			marketplace.setCategory(category.trim());
+			marketplace.setCategory(category);
 		}
 
 //		expiration Date
@@ -174,7 +173,7 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 //		marketplace status
 		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
 		if (status != null) {
-			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Post Status");
+			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
 			marketplace.setStatus(status);
 		}
 

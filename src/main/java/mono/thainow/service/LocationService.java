@@ -14,7 +14,7 @@ public interface LocationService {
 	
 	Location createLocationByAddress(String address);
 	
-	Location fetchLocationByPlaceidAndAddress(String placeid, String address);
+	Location findLocationByPlaceidOrAddress(String placeid, String address);
 	
 	Location fetchLocationFromGeocodingResult(GeocodingResult geoResult);
 	

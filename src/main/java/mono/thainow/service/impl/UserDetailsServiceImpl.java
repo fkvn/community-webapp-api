@@ -27,8 +27,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		
 //		sign-in case
 		if (splitQuery.length == 2) {
-			String loginValue = query.split(",")[1];
-			String loginType = query.split(",")[0];
+			String loginValue = query.split(",")[1].trim();
+			String loginType = query.split(",")[0].trim();
 
 			switch (loginType) {
 			case "email-login":

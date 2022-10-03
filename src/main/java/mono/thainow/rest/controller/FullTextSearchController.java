@@ -67,7 +67,7 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		Location location = locationService.fetchLocationByPlaceidAndAddress(placeid, address);
+		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		SearchResponse<?> res = searchService.searchCompany(industry, keywords, location.getLat(), location.getLng(),
 				limit, page, sort, within, radius, topLeft, bottomRight);
@@ -89,7 +89,7 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		Location location = locationService.fetchLocationByPlaceidAndAddress(placeid, address);
+		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		return searchService.searchDealPost(ownerId, category, keywords, location.getLat(), location.getLng(), limit, page,
 				sort, within, radius, topLeft, bottomRight);
@@ -109,7 +109,7 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		Location location = locationService.fetchLocationByPlaceidAndAddress(placeid, address);
+		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		return searchService.searchJobPost(ownerId, keywords, position, experience, skills, remote, location.getLat(),
 				location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
@@ -131,7 +131,7 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		Location location = locationService.fetchLocationByPlaceidAndAddress(placeid, address);
+		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		return searchService.searchHousingPost(ownerId, keywords, type, costType, minCost, maxCost, guest, bed, parking,
 				bath, amenity, category, location.getLat(), location.getLng(), limit, page, sort, within, radius,
@@ -151,7 +151,7 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
-		Location location = locationService.fetchLocationByPlaceidAndAddress(placeid, address);
+		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		return searchService.searchMarketplacePost(ownerId, keywords, condition, category, minCost, maxCost,
 				location.getLat(), location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);

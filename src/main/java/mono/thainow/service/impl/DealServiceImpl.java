@@ -39,37 +39,36 @@ public class DealServiceImpl implements DealService {
 		Deal deal = new Deal();
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse("");
-		Assert.isTrue(!title.isEmpty(), "Deal title is required!");
+		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
+		Assert.isTrue(!title.isBlank(), "Invalid title!");
 		deal.setTitle(title);
 
 //		location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("");
-		String address = Optional.ofNullable(request.getAddress()).orElse("");
-		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Deal location is required!");
-		deal.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
+		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
+		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
+		Assert.isTrue(!address.isBlank(), "Invalid address");
+		deal.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
-		Assert.isTrue(pictureRequests.size() > 0, "Deal picture is required!");
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
-		Assert.isTrue(pictures.size() > 0, "Deal picture is required!");
+		Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 		deal.setPictures(pictures);
 
 //		contact information
 		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
 				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-		Assert.isTrue(contactInfo.size() > 0, "Deal contact information is required!");
+		Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 		deal.setContactInfo(contactInfo);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
 			deal.setDescription(description);
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
+		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
 		if (category != null) {
 			deal.setCategory(category);
 		}
@@ -100,44 +99,44 @@ public class DealServiceImpl implements DealService {
 	public Deal fetchDealFromUpdateRequest(Deal deal, DealRequest request) {
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null);
+		String title = Optional.ofNullable(request.getTitle()).orElse(null).trim();
 		if (title != null) {
+			Assert.isTrue(!title.isBlank(), "Invalid Title");
 			deal.setTitle(title);
 		}
-		Assert.isTrue(!deal.getTitle().isEmpty(), "Deal title is required!");
+		
 
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
-				"Invalid Location");
-		if (placeid != null && address != null) {
-			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Deal location is required!");
-			deal.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
+		if (address != null) {
+			Assert.isTrue(!address.isBlank(), "Invalid Location!");
+			deal.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
+			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 			deal.setPictures(pictures);
 		}
-		Assert.isTrue(deal.getPictures().size() > 0, "Deal picture is required!");
-
+		
 //		contact information
 		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
-		if (contactInfo != null && contactInfo.size() > 0) {
+		if (contactInfo != null) {
+			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 			deal.setContactInfo(contactInfo);
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
 			deal.setDescription(description);
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
+		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
 		if (category != null) {
 			deal.setCategory(category);
 		}
@@ -151,7 +150,7 @@ public class DealServiceImpl implements DealService {
 //		deal status
 		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
 		if (status != null) {
-			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Post Status");
+			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
 			deal.setStatus(status);
 		}
 

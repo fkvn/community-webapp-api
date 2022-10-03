@@ -87,7 +87,7 @@ public class ReviewServiceImpl implements ReviewService {
 		review.setRate(rate);
 
 //		comment
-		String comment = Optional.ofNullable(request.getComment()).orElse("");
+		String comment = Optional.ofNullable(request.getComment()).orElse("").trim();
 		review.setComment(comment);
 
 //		review status
@@ -106,7 +106,7 @@ public class ReviewServiceImpl implements ReviewService {
 		}
 
 //		comment
-		String comment = Optional.ofNullable(request.getComment()).orElse(null);
+		String comment = Optional.ofNullable(request.getComment()).orElse(null).trim();
 		if (comment != null) {
 			review.setComment(comment);
 		}

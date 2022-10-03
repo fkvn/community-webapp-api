@@ -31,7 +31,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 		
 		UserRole result = null;
 		
-		result = findByName(roleName);
+		result = findByName(roleName.trim());
 		
 		Assert.isTrue(result != null, "Role " + roleName + " is not found.");
 		

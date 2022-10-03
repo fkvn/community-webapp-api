@@ -21,7 +21,7 @@ public class LocationDaoImpl implements LocationDao {
 //	}
 	
 	@Override
-	public Location fetchLocationByPlaceid(String placeid) {
+	public Location findLocationByPlaceid(String placeid) {
 		try {
 			return entityManager
 					.createQuery("from Location where placeid =:placeid", Location.class)

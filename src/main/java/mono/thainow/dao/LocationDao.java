@@ -6,7 +6,7 @@ public interface LocationDao {
 	
 //	Location getLocationById(Long id);
 	
-	Location fetchLocationByPlaceid(String placeid);
+	Location findLocationByPlaceid(String placeid);
 	
 //	Location getLocationByFormattedAddress(String address);
 	

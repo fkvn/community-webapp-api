@@ -32,7 +32,7 @@ public class TwilioServiceImpl implements TwilioService {
 		switch (channel) {
 		case "email": {
 //			email is required
-			Assert.isTrue(email != null && !email.equals(""), "Email is required for the verification process!");
+			Assert.isTrue(!email.isBlank(), "Email is required for the verification process!");
 
 //			update receiver
 			receiver = email;
@@ -42,7 +42,7 @@ public class TwilioServiceImpl implements TwilioService {
 
 		case "sms": {
 //			phone number is required
-			Assert.isTrue(phone != null && !phone.equals(""), "Phone number is required for the verification process!");
+			Assert.isTrue(!phone.isBlank(), "Phone number is required for the verification process!");
 
 //			update receiver
 			receiver = PhoneUtil.getPhoneNumberWithRegionCode(phone, region);
@@ -69,7 +69,7 @@ public class TwilioServiceImpl implements TwilioService {
 	@Override
 	public void checkVerficationToken(String phone, String region, String email, String channel, String token) {
 //		token is required
-		Assert.isTrue(!token.isEmpty(), "Token can't be empty!");
+		Assert.isTrue(!token.isBlank(), "Token can't be empty!");
 
 //		validate receiver process
 		String receiver = "";
@@ -78,7 +78,7 @@ public class TwilioServiceImpl implements TwilioService {
 
 		case "email": {
 //			email is required
-			Assert.isTrue(email != null && !email.equals(""), "Email is required for the verification process!");
+			Assert.isTrue(!email.isBlank(), "Email is required for the verification process!");
 
 //			update receiver
 			receiver = email;
@@ -87,7 +87,7 @@ public class TwilioServiceImpl implements TwilioService {
 
 		case "sms": {
 //			phone number is required
-			Assert.isTrue(phone != null && !phone.equals(""), "Phone number is required for the verification process!");
+			Assert.isTrue(!phone.isBlank(), "Phone number is required for the verification process!");
 
 //			update receiver
 			receiver = PhoneUtil.getPhoneNumberWithRegionCode(phone, region);
@@ -99,7 +99,7 @@ public class TwilioServiceImpl implements TwilioService {
 		}
 
 //		assert the receiver is not empty
-		Assert.isTrue(!receiver.isEmpty(), "Missing receiver!");
+		Assert.isTrue(!receiver.isBlank(), "Missing receiver!");
 
 //		validate token
 		VerificationCheck verificationCheck = VerificationCheck.creator(twilioVerification.getServiceID(), token)

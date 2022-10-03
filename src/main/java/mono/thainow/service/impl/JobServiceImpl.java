@@ -40,25 +40,24 @@ public class JobServiceImpl implements JobService {
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
-		Assert.isTrue(!title.isEmpty(), "Job title is required!");
+		Assert.isTrue(!title.isBlank(), "Invalid title!");
 		job.setTitle(title);
 
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
 		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
-		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Job location is required!");
-		job.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
+		Assert.isTrue(!address.isBlank(), "Invalid address");
+		job.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
-		Assert.isTrue(pictureRequests.size() > 0, "Job picture is required!");
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
-		Assert.isTrue(pictures.size() > 0, "Job picture is required!");
+		Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 		job.setPictures(pictures);
 
 //		contact information
 		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-		Assert.isTrue(contactInfo.size() > 0, "Job contact information is required!");
+		Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 		job.setContactInfo(contactInfo);
 		
 //		remote job
@@ -68,9 +67,9 @@ public class JobServiceImpl implements JobService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
-			job.setDescription(description.trim());
+			job.setDescription(description);
 		}
 
 //		positions
@@ -80,21 +79,21 @@ public class JobServiceImpl implements JobService {
 		}
 
 //		experience
-		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
+		String experience = Optional.ofNullable(request.getExperience()).orElse(null).trim();
 		if (experience != null) {
-			job.setExperience(experience.trim());
+			job.setExperience(experience);
 		}
 
 //		salary
-		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
+		String salary = Optional.ofNullable(request.getSalary()).orElse(null).trim();
 		if (salary != null) {
-			job.setSalary(salary.trim());
+			job.setSalary(salary);
 		}
 
 //		skills
-		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
+		String skills = Optional.ofNullable(request.getSkills()).orElse(null).trim();
 		if (skills != null) {
-			job.setSkills(skills.trim());
+			job.setSkills(skills);
 		}
 
 //		expiration Date
@@ -123,33 +122,32 @@ public class JobServiceImpl implements JobService {
 	public Job fetchJobFromUpdateRequest(Job job, JobRequest request) {
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null);
+		String title = Optional.ofNullable(request.getTitle()).orElse(null).trim();
 		if (title != null) {
-			job.setTitle(title.trim());
+			Assert.isTrue(!title.isBlank(), "Invalid Title");
+			job.setTitle(title);
 		}
-		Assert.isTrue(!job.getTitle().isEmpty(), "Job title is required!");
 
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
-				"Invalid Location");
-		if (placeid != null && address != null) {
-			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Job location is required!");
-			job.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid.trim(), address.trim()));
+		if (address != null) {
+			Assert.isTrue(!address.isBlank(), "Invalid Location!");
+			job.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
+			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 			job.setPictures(pictures);
 		}
-		Assert.isTrue(job.getPictures().size() > 0, "Job picture is required!");
 
 //		contact information
 		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
-		if (contactInfo != null && contactInfo.size() > 0) {
+		if (contactInfo != null) {
+			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 			job.setContactInfo(contactInfo);
 		}
 		
@@ -160,9 +158,9 @@ public class JobServiceImpl implements JobService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
-			job.setDescription(description.trim());
+			job.setDescription(description);
 		}
 
 //		positions
@@ -172,21 +170,21 @@ public class JobServiceImpl implements JobService {
 		}
 
 //		experience
-		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
+		String experience = Optional.ofNullable(request.getExperience()).orElse(null).trim();
 		if (experience != null) {
-			job.setExperience(experience.trim());
+			job.setExperience(experience);
 		}
 
 //		salary
-		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
+		String salary = Optional.ofNullable(request.getSalary()).orElse(null).trim();
 		if (salary != null) {
-			job.setSalary(salary.trim());
+			job.setSalary(salary);
 		}
 
 //		skills
-		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
+		String skills = Optional.ofNullable(request.getSkills()).orElse(null).trim();
 		if (skills != null) {
-			job.setSkills(skills.trim());
+			job.setSkills(skills);
 		}
 
 //		expiration Date
@@ -198,7 +196,7 @@ public class JobServiceImpl implements JobService {
 //		job status
 		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
 		if (status != null) {
-			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Post Status");
+			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
 			job.setStatus(status);
 		}
 

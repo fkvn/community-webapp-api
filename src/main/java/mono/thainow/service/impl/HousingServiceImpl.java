@@ -3,6 +3,7 @@ package mono.thainow.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -40,26 +41,25 @@ public class HousingServiceImpl implements HousingService {
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
-		Assert.isTrue(!title.isEmpty(), "Housing title is required!");
+		Assert.isTrue(!title.isBlank(), "Invalid title!");
 		housing.setTitle(title);
 
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
 		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
-		Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Housing location is required!");
-		housing.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
+		Assert.isTrue(!address.isBlank(), "Invalid address");
+		housing.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 
 //		cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
-		Assert.isTrue(pictureRequests.size() > 0, "Housing picture is required!");
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
-		Assert.isTrue(pictures.size() > 0, "Housing picture is required!");
+		Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 		housing.setPictures(pictures);
 
 //		contact information
-		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
+		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
 				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-		Assert.isTrue(contactInfo.size() > 0, "Housing contact information is required!");
+		Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 		housing.setContactInfo(contactInfo);
 
 //		interior information
@@ -75,9 +75,9 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		type
-		String type = Optional.ofNullable(request.getType()).orElse(null);
+		String type = Optional.ofNullable(request.getType()).orElse(null).trim();
 		if (type != null) {
-			housing.setType(type.trim());
+			housing.setType(type);
 		}
 
 //		daily cost
@@ -105,15 +105,15 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
-			housing.setDescription(description.trim());
+			housing.setDescription(description);
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
+		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
 		if (category != null) {
-			housing.setCategory(category.trim());
+			housing.setCategory(category);
 		}
 
 //		expiration Date
@@ -142,33 +142,32 @@ public class HousingServiceImpl implements HousingService {
 	public Housing fetchHousingFromUpdateRequest(Housing housing, HousingRequest request) {
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null);
+		String title = Optional.ofNullable(request.getTitle()).orElse(null).trim();
 		if (title != null) {
+			Assert.isTrue(!title.isBlank(), "Invalid Title");
 			housing.setTitle(title);
 		}
-		Assert.isTrue(!housing.getTitle().isEmpty(), "Housing title is required!");
-
+		
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-		Assert.isTrue(address != null ? placeid != null ? true : false : placeid == null ? true : false,
-				"Invalid Location");
-		if (placeid != null && address != null) {
-			Assert.isTrue(!placeid.isEmpty() && !address.isEmpty(), "Housing location is required!");
-			housing.setLocation(locationService.fetchLocationByPlaceidAndAddress(placeid, address));
+		if (address != null) {
+			Assert.isTrue(!address.isBlank(), "Invalid Location!");
+			housing.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 		}
 
 //		new cover pictures
 		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
 		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
 		if (pictures != null) {
+			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
 			housing.setPictures(pictures);
 		}
-		Assert.isTrue(housing.getPictures().size() > 0, "Housing picture is required!");
 
 //		contact information
 		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
-		if (contactInfo != null && contactInfo.size() > 0) {
+		if (contactInfo != null) {
+			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 			housing.setContactInfo(contactInfo);
 		}
 
@@ -185,9 +184,9 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		type
-		String type = Optional.ofNullable(request.getType()).orElse(null);
+		String type = Optional.ofNullable(request.getType()).orElse(null).trim();
 		if (type != null) {
-			housing.setType(type.trim());
+			housing.setType(type);
 		}
 
 //		daily cost
@@ -215,15 +214,15 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
 		if (description != null) {
-			housing.setDescription(description.trim());
+			housing.setDescription(description);
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
+		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
 		if (category != null) {
-			housing.setCategory(category.trim());
+			housing.setCategory(category);
 		}
 
 //		expiration Date
@@ -235,7 +234,7 @@ public class HousingServiceImpl implements HousingService {
 //		housing status
 		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
 		if (status != null) {
-			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Post Status");
+			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
 			housing.setStatus(status);
 		}
 

@@ -2,6 +2,7 @@ package mono.thainow.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,15 +30,17 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public Location fetchLocationByPlaceidAndAddress(String placeid, String address) {
+	public Location findLocationByPlaceidOrAddress(String placeid, String address) {
 
 //		address - MUST NOT Empty and NOT Null
 		Assert.isTrue(address != null && !address.trim().isEmpty(), "Invalid Address!");
 
-//		search location
-		Location location = locationDao.findLocationByPlaceidOrAddress(placeid == null ? "" : placeid, address);
+		placeid = Optional.ofNullable(placeid).orElse("");
 
-//		can't find location by placeid -> add new one
+//		search location
+		Location location = locationDao.findLocationByPlaceidOrAddress(placeid.trim(), address.trim());
+
+//		can't find location -> add new one
 		if (location == null) {
 
 //			create location
@@ -60,7 +63,7 @@ public class LocationServiceImpl implements LocationService {
 		GeocodingResult geoResult = geoCode.getLocationResultFromAddress(address);
 
 //		double-check if the placeId exists
-		Location location = locationDao.fetchLocationByPlaceid(geoResult.placeId);
+		Location location = locationDao.findLocationByPlaceid(geoResult.placeId);
 
 //		new location
 		if (location == null) {

@@ -121,9 +121,9 @@ public class StorageServiceImpl implements StorageService {
 	public Storage fetchStorageFromRequest(StorageRequest req) {
 		Storage storage = new Storage();
 
-		storage.setName(req.getName());
-		storage.setType(req.getType());
-		storage.setUrl(req.getUrl());
+		storage.setName(req.getName().trim());
+		storage.setType(req.getType().trim());
+		storage.setUrl(req.getUrl().trim());
 		storage.setSize(req.getSize());
 
 		return storage;
