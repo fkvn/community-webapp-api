@@ -150,9 +150,12 @@ public class BusinessProfileController {
 
 //		if no company profiles relates to the account
 		if (profileService.findBusinessProfilesByAccount(profile.getAccount()).size() == 0) {
+
 //			update role
-			profile.getAccount().setRole(UserRole.CLASSIC);
-			userService.saveUser(profile.getAccount());
+			if (profile.getAccount().getRole() == UserRole.BUSINESS) {
+				profile.getAccount().setRole(UserRole.CLASSIC);
+				userService.saveUser(profile.getAccount());
+			}
 		}
 	}
 
@@ -183,28 +186,24 @@ public class BusinessProfileController {
 	}
 
 	@PatchMapping("/{profileId}/activate")
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public BusinessProfile activateBusinessProfile(@PathVariable Long profileId) {
+	public void activateBusinessProfile(@PathVariable Long profileId) {
 
 		BusinessProfile profile = (BusinessProfile) profileService.findProfileById(profileId);
 
 		profile = profileService.activateBusinessProfile(profile);
 
-		return profile;
-
 	}
 
 	@PatchMapping("/{profileId}/disable")
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
-	public BusinessProfile disableBusinessProfile(@PathVariable Long profileId) {
+	public void disableBusinessProfile(@PathVariable Long profileId) {
 
 		BusinessProfile profile = (BusinessProfile) profileService.findProfileById(profileId);
 
 		profile = profileService.disableBusinessProfile(profile);
-
-		return profile;
 
 	}
 }
