@@ -31,10 +31,10 @@ public class UserDaoImpl implements UserDao {
 //		return null;
 //	}
 //
-//	@Override
-//	public User findUserById(long id) {
-//		return entityManager.find(User.class, id);
-//	}
+	@Override
+	public User findUserById(long id) {
+		return entityManager.find(User.class, id);
+	}
 	
 	@Override
 	public User findActiveUserById(long id) {

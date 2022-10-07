@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.AppleRequest;
@@ -92,9 +93,9 @@ public class AuthServiceImpl implements AuthService {
 		user = userService.saveUser(user);
 
 //		create a account profile with new user
-		profileService.createUserProfile(user);
+		Profile userProfile = profileService.createUserProfile(user);
 
-		return user.getId();
+		return userProfile.getId();
 	}
 
 	@Override

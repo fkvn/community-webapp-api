@@ -9,8 +9,8 @@ import mono.thainow.rest.request.UserRequest;
 public interface UserService {
 
 //	List<User> getAllUsers();
-
-//	User findUserById(Long id);
+	
+	User findUserById(Long userId);
 	
 	User findActiveUserById(Long id);
 
@@ -41,6 +41,12 @@ public interface UserService {
 	void remove(User account);
 
 	User fetchUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
+
+	User activateUserById(Long userId);
+
+	User activateUser(User user);
+
+
 
 	
 

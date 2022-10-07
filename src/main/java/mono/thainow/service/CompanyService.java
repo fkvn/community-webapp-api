@@ -27,4 +27,8 @@ public interface CompanyService {
 
 	Company fetchCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request);
 
+	Company findCompanyById(Long companyId);
+
+	Company activateCompany(Company company);
+
 }

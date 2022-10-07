@@ -67,16 +67,29 @@ public class UserServiceImpl implements UserService {
 		return userDao.findActiveUserBySub(sub);
 	}
 
-//	@Override
-//	public User findUserById(Long id) {
-//		return userDao.findUserById(id);
-//	}
+	@Override
+	public User findUserById(Long id) {
+		return userDao.findUserById(id);
+	}
 
 	@Override
 	public User findActiveUserById(Long id) {
 		return userDao.findActiveUserById(id);
 	}
 
+	@Override
+	public User activateUser(User user) {
+		user.setStatus(UserStatus.ACTIVATED);
+		return saveUser(user);
+	}
+	
+	@Override
+	public User activateUserById(Long userId) {
+		User user = findUserById(userId);
+		user.setStatus(UserStatus.ACTIVATED);
+		return saveUser(user);
+	}
+	
 	@Override
 	public User saveUser(User user) {
 		return userDao.saveUser(user);
@@ -445,5 +458,9 @@ public class UserServiceImpl implements UserService {
 
 		return user;
 	}
+
+
+
+
 
 }

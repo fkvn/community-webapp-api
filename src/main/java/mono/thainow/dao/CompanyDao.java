@@ -9,6 +9,8 @@ public interface CompanyDao {
 //	Company getCompany(String name, Location location);
 	
 	Company saveCompany(Company company);
+
+	Company findCompanyById(Long companyId);
 	
 //	boolean isEmailUnique(String email);
 	

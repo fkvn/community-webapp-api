@@ -8,7 +8,7 @@ public interface UserDao {
 
 //	List<User> getAllActiveUser();
 
-//	User findUserById(long id);
+	User findUserById(long id);
 
 	User findActiveUserById(long id);
 

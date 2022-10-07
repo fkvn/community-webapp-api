@@ -39,6 +39,11 @@ public class CompanyServiceImpl implements CompanyService {
 	private SearchDao elasticSearchDao;
 
 	@Override
+	public Company findCompanyById(Long companyId) {
+		return companyDao.findCompanyById(companyId);
+	}
+	
+	@Override
 	public Company createCompany(CompanyRequest companyRequest) {
 
 		Company company = fetchCompanyFromRequest(companyRequest);
@@ -288,6 +293,15 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 
 		return company;
+	}
+
+	
+
+
+	@Override
+	public Company activateCompany(Company company) {
+		company.setStatus(CompanyStatus.REGISTERED);
+		return saveCompany(company);
 	}
 
 }

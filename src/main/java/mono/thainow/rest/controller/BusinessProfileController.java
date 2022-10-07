@@ -75,6 +75,7 @@ public class BusinessProfileController {
 
 	}
 
+
 	@GetMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)

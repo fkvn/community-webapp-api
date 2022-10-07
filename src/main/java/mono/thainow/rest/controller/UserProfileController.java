@@ -20,12 +20,17 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
+import mono.thainow.domain.company.Company;
+import mono.thainow.domain.company.CompanyStatus;
+import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.request.UserRequest;
+import mono.thainow.service.CompanyService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.StorageService;
 import mono.thainow.service.UserService;
@@ -34,7 +39,7 @@ import mono.thainow.view.View;
 
 @RestController
 //@PreAuthorize("hasAnyAuthority('USER_MANAGE')")
-@RequestMapping("/api/profiles/users/{profileId}")
+@RequestMapping("/api/profiles/users")
 public class UserProfileController {
 
 	@Autowired
@@ -46,13 +51,17 @@ public class UserProfileController {
 	@Autowired
 	private StorageService storageService;
 
+	
+	@Autowired
+	private CompanyService companyService;
+	
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
 	public UserProfile getUserProfile(@PathVariable Long profileId) {
 
 		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
-		
+
 		if (!AuthUtil.isAdminAuthenticated()) {
 			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
 		}
@@ -78,14 +87,31 @@ public class UserProfileController {
 		return profile;
 	}
 
-	@PatchMapping
+	
+	@PostMapping("/{userId}")
+	@ResponseStatus(HttpStatus.CREATED)
+	@AdminAndSAdminAccess
+	@JsonView(View.Basic.class)
+	public Long createUserProfileByUserId(@PathVariable Long userId) {
+		User user = userService.findUserById(userId);
+		
+		Assert.isTrue(user.getStatus() == UserStatus.DELETED, "The account has existed!");
+		
+		user = userService.activateUser(user);
+		
+		Profile userProfile = profileService.createUserProfile(user);
+		
+		return userProfile.getId();
+	}
+	
+	@PatchMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@JsonView(View.Basic.class)
 	@AuthenticatedAccess
 	public void updateUserProfile(@PathVariable Long profileId, @Valid @RequestBody UserRequest request) {
 
 		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
-		
+
 		if (!AuthUtil.isAdminAuthenticated()) {
 			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
 		}
@@ -98,13 +124,14 @@ public class UserProfileController {
 		account = userService.saveUser(account);
 	}
 
-	@DeleteMapping
+	@DeleteMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AuthenticatedAccess
-	public void removeUserProfile(@PathVariable Long profileId, @RequestParam(required = true) boolean removeAccount) {
+	public void removeUserProfile(@PathVariable Long profileId,
+			@RequestParam(defaultValue = "true") boolean removeAccount) {
 
 		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
-		
+
 		if (!AuthUtil.isAdminAuthenticated()) {
 			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
 		}
@@ -115,14 +142,14 @@ public class UserProfileController {
 
 	}
 
-	@PostMapping("/picture")
+	@PostMapping("(/{profileId}/picture")
 	@ResponseStatus(HttpStatus.CREATED)
 	@AuthenticatedAccess
 	public Storage uploadProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
 
 //		get profile
 		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
-		
+
 		if (!AuthUtil.isAdminAuthenticated()) {
 			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
 		}
@@ -145,7 +172,7 @@ public class UserProfileController {
 		return picture;
 	}
 
-	@PatchMapping("/activate")
+	@PatchMapping("/{profileId}/activate")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
 	public void activateUserProfile(@PathVariable Long profileId) {
@@ -155,7 +182,7 @@ public class UserProfileController {
 		profileService.activateUserProfile(profile);
 	}
 
-	@PatchMapping("/disable")
+	@PatchMapping("/{profileId}/disable")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@AdminAndSAdminAccess
 	public void disableUserProfile(@PathVariable Long profileId) {
@@ -165,4 +192,35 @@ public class UserProfileController {
 		profileService.disableUserProfile(profile);
 
 	}
+
+
+	@PostMapping("/{profileId}/business/{companyId}")
+	@ResponseStatus(HttpStatus.CREATED)
+	@AdminAndSAdminAccess
+	@JsonView(View.Basic.class)
+	public void addBusinessProfileByCompany(@PathVariable Long profileId, @PathVariable Long companyId) {
+
+		Company company = companyService.findCompanyById(companyId);
+		
+		Assert.isTrue(company.getStatus() == CompanyStatus.REJECTED, "This business is existed!");
+		
+		company = companyService.activateCompany(company);
+
+		User account = profileService.findProfileById(profileId).getAccount();
+
+		try {
+			profileService.createBusinessProfile(account, company);
+
+			if (account.getRole() == UserRole.CLASSIC) {
+				account.setRole(UserRole.BUSINESS);
+				account = userService.saveUser(account);
+			}
+
+		} catch (Exception e) {
+			companyService.remove(company);
+			throw e;
+		}
+
+	}
+
 }

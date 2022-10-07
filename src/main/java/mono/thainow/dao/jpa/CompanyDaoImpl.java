@@ -15,10 +15,10 @@ public class CompanyDaoImpl implements CompanyDao {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-//	@Override
-//	public Company getCompanyById(Long id) {
-//		return entityManager.find(Company.class, id);
-//	}
+	@Override
+	public Company findCompanyById(Long id) {
+		return entityManager.find(Company.class, id);
+	}
 
 	@Override
 	@Transactional
