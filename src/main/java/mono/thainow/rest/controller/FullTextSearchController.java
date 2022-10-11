@@ -58,7 +58,7 @@ public class FullTextSearchController {
 
 	@GetMapping("/business")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@JsonView(View.Basic.class)
+	@JsonView(View.Detail.class)
 	public SearchResponse<?> SearchCompanies(@RequestParam(defaultValue = "") String keywords,
 			@RequestParam(defaultValue = "All") String industry, @RequestParam(defaultValue = "") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,

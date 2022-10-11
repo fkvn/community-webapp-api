@@ -78,7 +78,7 @@ public class LocationDaoImpl implements LocationDao {
 	public Location findLocationByPlaceidOrAddress(String placeid, String address) {
 		try {
 			return entityManager
-					.createQuery("from Location where placeid =:placeid or description =:address ", Location.class)
+					.createQuery("from Location where placeid =:placeid or address =:address ", Location.class)
 					.setParameter("placeid", placeid).setParameter("address", address)
 					.getSingleResult();
 		} catch (Exception ex) {
