@@ -19,9 +19,9 @@ public class JobRequest extends PostRequest {
 	
 	private List<StorageRequest> pictures;
 	
-	private TreeMap<String, String> contactInfo = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	private TreeMap<String, String> contactInfo = null;
 	
-	private TreeSet<String> positions = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+	private TreeSet<String> positions = null;
 	
 	private Boolean isRemote;
 	

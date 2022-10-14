@@ -58,7 +58,7 @@ public class FullTextSearchController {
 
 	@GetMapping("/business")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@JsonView(View.Detail.class)
+	@JsonView(View.Basic.class)
 	public SearchResponse<?> SearchCompanies(@RequestParam(defaultValue = "") String keywords,
 			@RequestParam(defaultValue = "All") String industry, @RequestParam(defaultValue = "") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
@@ -90,9 +90,13 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-
-		return searchService.searchDealPost(ownerId, category, keywords, location.getLat(), location.getLng(), limit, page,
+		
+		SearchResponse<?> res = searchService.searchDealPost(ownerId, category, keywords, location.getLat(), location.getLng(), limit, page,
 				sort, within, radius, topLeft, bottomRight);
+
+		res.setLocation(location);
+
+		return res;
 	}
 
 	@GetMapping("/jobs")
@@ -110,9 +114,14 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-
-		return searchService.searchJobPost(ownerId, keywords, position, experience, skills, remote, location.getLat(),
+		
+		SearchResponse<?> res = searchService.searchJobPost(ownerId, keywords, position, experience, skills, remote, location.getLat(),
 				location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
+
+		res.setLocation(location);
+
+
+		return res;
 	}
 
 	@GetMapping("/housings")
@@ -132,10 +141,14 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-
-		return searchService.searchHousingPost(ownerId, keywords, type, costType, minCost, maxCost, guest, bed, parking,
+		
+		SearchResponse<?> res = searchService.searchHousingPost(ownerId, keywords, type, costType, minCost, maxCost, guest, bed, parking,
 				bath, amenity, category, location.getLat(), location.getLng(), limit, page, sort, within, radius,
 				topLeft, bottomRight);
+
+		res.setLocation(location);
+
+		return res;
 	}
 
 	@GetMapping("/marketplaces")
@@ -152,9 +165,13 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-
-		return searchService.searchMarketplacePost(ownerId, keywords, condition, category, minCost, maxCost,
+		
+		SearchResponse<?> res = searchService.searchMarketplacePost(ownerId, keywords, condition, category, minCost, maxCost,
 				location.getLat(), location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
+
+		res.setLocation(location);
+
+		return res;
 	}
 
 	@GetMapping("/reviews")

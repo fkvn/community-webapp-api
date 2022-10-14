@@ -75,9 +75,9 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		type
-		String type = Optional.ofNullable(request.getType()).orElse(null).trim();
+		String type = Optional.ofNullable(request.getType()).orElse(null);
 		if (type != null) {
-			housing.setType(type);
+			housing.setType(type.trim());
 		}
 
 //		daily cost
@@ -105,15 +105,15 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			housing.setDescription(description);
+			housing.setDescription(description.trim());
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
+		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			housing.setCategory(category);
+			housing.setCategory(category.trim());
 		}
 
 //		expiration Date
@@ -142,10 +142,10 @@ public class HousingServiceImpl implements HousingService {
 	public Housing fetchHousingFromUpdateRequest(Housing housing, HousingRequest request) {
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null).trim();
+		String title = Optional.ofNullable(request.getTitle()).orElse(null);
 		if (title != null) {
 			Assert.isTrue(!title.isBlank(), "Invalid Title");
-			housing.setTitle(title);
+			housing.setTitle(title.trim());
 		}
 		
 //		location
@@ -184,9 +184,9 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		type
-		String type = Optional.ofNullable(request.getType()).orElse(null).trim();
+		String type = Optional.ofNullable(request.getType()).orElse(null);
 		if (type != null) {
-			housing.setType(type);
+			housing.setType(type.trim());
 		}
 
 //		daily cost
@@ -214,15 +214,15 @@ public class HousingServiceImpl implements HousingService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			housing.setDescription(description);
+			housing.setDescription(description.trim());
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
+		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			housing.setCategory(category);
+			housing.setCategory(category.trim());
 		}
 
 //		expiration Date

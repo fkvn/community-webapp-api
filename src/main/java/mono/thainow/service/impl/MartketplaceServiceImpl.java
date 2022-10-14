@@ -62,9 +62,9 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 		marketplace.setContactInfo(contactInfo);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			marketplace.setDescription(description);
+			marketplace.setDescription(description.trim());
 		}
 
 //		cost
@@ -74,15 +74,15 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 		}
 
 //		condition
-		String condition = Optional.ofNullable(request.getCondition()).orElse(null).trim();
+		String condition = Optional.ofNullable(request.getCondition()).orElse(null);
 		if (condition != null) {
-			marketplace.setCondition(condition);
+			marketplace.setCondition(condition.trim());
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
+		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			marketplace.setCategory(category);
+			marketplace.setCategory(category.trim());
 		}
 
 //		expiration Date
@@ -111,7 +111,7 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 	public Marketplace fetchMarketplaceFromUpdateRequest(Marketplace marketplace, MarketplaceRequest request) {
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null).trim();
+		String title = Optional.ofNullable(request.getTitle()).orElse(null);
 		if (title != null) {
 			Assert.isTrue(!title.isBlank(), "Invalid Title");
 			marketplace.setTitle(title.trim());
@@ -141,9 +141,9 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			marketplace.setDescription(description);
+			marketplace.setDescription(description.trim());
 		}
 
 //		cost
@@ -153,15 +153,15 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 		}
 
 //		condition
-		String condition = Optional.ofNullable(request.getCondition()).orElse(null).trim();
+		String condition = Optional.ofNullable(request.getCondition()).orElse(null);
 		if (condition != null) {
-			marketplace.setCondition(condition);
+			marketplace.setCondition(condition.trim());
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
+		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			marketplace.setCategory(category);
+			marketplace.setCategory(category.trim());
 		}
 
 //		expiration Date

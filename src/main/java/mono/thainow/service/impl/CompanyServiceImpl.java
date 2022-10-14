@@ -213,7 +213,7 @@ public class CompanyServiceImpl implements CompanyService {
 		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getCoverPictures()).orElse(null);
 		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
 		if (coverPictures != null) {
-			company.setCoverPictures(coverPictures);
+			company.setPictures(coverPictures);
 		}
 
 //		email

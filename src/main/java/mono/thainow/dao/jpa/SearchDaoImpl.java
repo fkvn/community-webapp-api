@@ -795,7 +795,11 @@ public class SearchDaoImpl implements SearchDao {
 //					costType filter
 					Double maxCostRange = maxCost > 0 ? maxCost : null;
 					Double minCostRange = minCost > 0 ? minCost : null;
-					b.filter(f.range().field("marketplace.cost").between(minCostRange, maxCostRange));
+					
+					if (minCostRange != null || maxCostRange != null) {
+						b.filter(f.range().field("marketplace.cost").between(minCostRange, maxCostRange));	
+					}
+					
 
 //					amenity filter
 					if (!condition.isEmpty() && !condition.equals("All")) {

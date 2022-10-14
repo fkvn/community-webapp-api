@@ -19,11 +19,11 @@ public class HousingRequest extends PostRequest {
 
 	private List<StorageRequest> pictures;
 
-	private TreeMap<String, String> contactInfo = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	private TreeMap<String, String> contactInfo = null;
 
-	private TreeMap<String, Integer> interior = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	private TreeMap<String, Integer> interior = null;
 
-	private TreeSet<String> amenities = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+	private TreeSet<String> amenities = null;
 
 	private String type;
 

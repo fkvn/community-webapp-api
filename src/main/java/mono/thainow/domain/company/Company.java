@@ -98,6 +98,9 @@ public class Company implements Serializable {
 	@Column(name = "COMPANY_STATUS")
 	@KeywordField
 	private CompanyStatus status = CompanyStatus.UNREGISTERED;
+	
+	@OneToMany
+	private List<Storage> pictures = new ArrayList<>();
 
 	@UpdateTimestamp
 	@Column(name = "COMPANY_UPDATED_ON")
@@ -106,10 +109,6 @@ public class Company implements Serializable {
 	private Date updatedOn = new Date();
 
 //	Public Detail Information
-
-	@OneToMany
-	@JsonView(View.Detail.class)
-	private List<Storage> coverPictures = new ArrayList<>();
 	
 	@Lob
 	@Column(name = "COMPANY_DESCRIPTION")

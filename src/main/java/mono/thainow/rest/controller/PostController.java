@@ -80,12 +80,10 @@ public class PostController {
 	private void updatePostFromRequest(Long postId, PostRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		Assert.isTrue(profileId != null, "Missing profile information!");
+		Profile postOwner = profileId != null ? profileService.findProfileById(profileId): null;
 
 		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
 		Assert.isTrue(type != null, "Invalid Post Type!");
-
-		Profile postOwner = profileService.findProfileById(profileId);
 
 //		valid post includes either available or private post
 		Post post = postService.findValidPost(postId, type);

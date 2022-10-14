@@ -62,15 +62,15 @@ public class DealServiceImpl implements DealService {
 		deal.setContactInfo(contactInfo);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			deal.setDescription(description);
+			deal.setDescription(description.trim());
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
+		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			deal.setCategory(category);
+			deal.setCategory(category.trim());
 		}
 
 //		expiration Date
@@ -99,10 +99,10 @@ public class DealServiceImpl implements DealService {
 	public Deal fetchDealFromUpdateRequest(Deal deal, DealRequest request) {
 
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null).trim();
+		String title = Optional.ofNullable(request.getTitle()).orElse(null);
 		if (title != null) {
 			Assert.isTrue(!title.isBlank(), "Invalid Title");
-			deal.setTitle(title);
+			deal.setTitle(title.trim());
 		}
 		
 
@@ -130,15 +130,15 @@ public class DealServiceImpl implements DealService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			deal.setDescription(description);
+			deal.setDescription(description.trim());
 		}
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null).trim();
+		String category = Optional.ofNullable(request.getCategory()).orElse(null);
 		if (category != null) {
-			deal.setCategory(category);
+			deal.setCategory(category.trim());
 		}
 
 //		expiration Date
