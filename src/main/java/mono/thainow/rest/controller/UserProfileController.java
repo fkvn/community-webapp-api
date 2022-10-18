@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,37 +54,37 @@ public class UserProfileController {
 	@Autowired
 	private CompanyService companyService;
 	
-	@GetMapping
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@JsonView(View.Detail.class)
-	public UserProfile getUserProfile(@PathVariable Long profileId) {
-
-		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
-
-		if (!AuthUtil.isAdminAuthenticated()) {
-			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
-		}
-
-//		anonymousUser -> public request
-		if (AuthUtil.getAuthenticatedUser() == null) {
-
-			User user = profile.getAccount();
-
-			if (!user.isEmailPublic())
-				user.setEmail(null);
-			if (!user.isPhonePublic())
-				user.setPhone(null);
-			if (!user.isDescriptionPublic())
-				user.setDescription(null);
-			if (!user.isWebsitePublic())
-				user.setWebsite(null);
-
-			profile.setAccount(user);
-
-		}
-
-		return profile;
-	}
+//	@GetMapping
+//	@ResponseStatus(HttpStatus.ACCEPTED)
+//	@JsonView(View.Detail.class)
+//	public UserProfile getUserProfile(@PathVariable Long profileId) {
+//
+//		UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
+//
+//		if (!AuthUtil.isAdminAuthenticated()) {
+//			Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
+//		}
+//
+////		anonymousUser -> public request
+//		if (AuthUtil.getAuthenticatedUser() == null) {
+//
+//			User user = profile.getAccount();
+//
+//			if (!user.isEmailPublic())
+//				user.setEmail(null);
+//			if (!user.isPhonePublic())
+//				user.setPhone(null);
+//			if (!user.isDescriptionPublic())
+//				user.setDescription(null);
+//			if (!user.isWebsitePublic())
+//				user.setWebsite(null);
+//
+//			profile.setAccount(user);
+//
+//		}
+//
+//		return profile;
+//	}
 
 	
 	@PostMapping("/{userId}")

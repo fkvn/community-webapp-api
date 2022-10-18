@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -76,39 +75,39 @@ public class BusinessProfileController {
 	}
 
 
-	@GetMapping("/{profileId}")
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@JsonView(View.Detail.class)
-	public BusinessProfile findBusinessProfile(@PathVariable Long profileId) {
-
-		BusinessProfile profile = (BusinessProfile) profileService.findProfileById(profileId);
-
-		if (!AuthUtil.isAdminAuthenticated()) {
-			Assert.isTrue(profile.getCompany().getStatus() == CompanyStatus.REGISTERED, "Profile is NOT registered!");
-		}
-
-//		anonymousUser -> public request
-		if (AuthUtil.getAuthenticatedUser() == null) {
-
-			Company company = profile.getCompany();
-
-			if (!company.isEmailPublic())
-				company.setEmail(null);
-			if (!company.isPhonePublic())
-				company.setPhone(null);
-			if (!company.isDescriptionPublic())
-				company.setDescription(null);
-			if (!company.isWebsitePublic())
-				company.setWebsite(null);
-			if (!company.isSizePublic())
-				company.setSize(null);
-
-			profile.setCompany(company);
-
-		}
-
-		return profile;
-	}
+//	@GetMapping("/{profileId}")
+//	@ResponseStatus(HttpStatus.ACCEPTED)
+//	@JsonView(View.Detail.class)
+//	public BusinessProfile findBusinessProfile(@PathVariable Long profileId) {
+//
+//		BusinessProfile profile = (BusinessProfile) profileService.findProfileById(profileId);
+//
+//		if (!AuthUtil.isAdminAuthenticated()) {
+//			Assert.isTrue(profile.getCompany().getStatus() == CompanyStatus.REGISTERED, "Profile is NOT registered!");
+//		}
+//
+////		anonymousUser -> public request
+//		if (AuthUtil.getAuthenticatedUser() == null) {
+//
+//			Company company = profile.getCompany();
+//
+//			if (!company.isEmailPublic())
+//				company.setEmail(null);
+//			if (!company.isPhonePublic())
+//				company.setPhone(null);
+//			if (!company.isDescriptionPublic())
+//				company.setDescription(null);
+//			if (!company.isWebsitePublic())
+//				company.setWebsite(null);
+//			if (!company.isSizePublic())
+//				company.setSize(null);
+//
+//			profile.setCompany(company);
+//
+//		}
+//
+//		return profile;
+//	}
 
 	@PatchMapping("/{profileId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
