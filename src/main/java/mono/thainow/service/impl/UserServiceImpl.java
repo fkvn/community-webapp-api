@@ -362,7 +362,7 @@ public class UserServiceImpl implements UserService {
 		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getCoverPictures()).orElse(null);
 		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
 		if (coverPictures != null) {
-			user.setCoverPictures(coverPictures);
+			user.setPictures(coverPictures);
 		}
 
 //		location

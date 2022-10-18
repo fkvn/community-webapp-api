@@ -92,7 +92,7 @@ public class User implements Serializable {
 	
 	@OneToMany
 	@JsonView(View.Detail.class)
-	private List<Storage> coverPictures = new ArrayList<>();
+	private List<Storage> pictures = new ArrayList<>();
 	
 	@Lob
 	@Column(name = "USER_DESCRIPTION")
