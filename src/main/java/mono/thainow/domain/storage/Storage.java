@@ -59,12 +59,12 @@ public class Storage implements Serializable {
 	private Long size = (long) 0;
 
 	@CreationTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "STORAGE_CREATED_ON")
 	private Date createdOn = new Date();
 
 	@UpdateTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "STORAGE_UPDATED_ON")
 	private Date updatedOn = new Date();
 

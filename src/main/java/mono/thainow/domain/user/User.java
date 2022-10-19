@@ -73,14 +73,14 @@ public class User implements Serializable {
 	private Storage picture;
 	
 	@CreationTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "USER_CREATED_ON")
 	private Date createdOn = new Date();
 	
 //  Detail Information
 	
 	@UpdateTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "USER_UPDATED_ON")
 	@JsonView(View.Detail.class)
 	private Date updatedOn = new Date();

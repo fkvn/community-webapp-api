@@ -104,7 +104,7 @@ public class Company implements Serializable {
 
 	@UpdateTimestamp
 	@Column(name = "COMPANY_UPDATED_ON")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
 
@@ -167,7 +167,7 @@ public class Company implements Serializable {
 
 	@CreationTimestamp
 	@Column(name = "COMPANY_CREATED_ON")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@JsonView(View.FullDetail.class)
 	private Date createdOn = new Date();
 

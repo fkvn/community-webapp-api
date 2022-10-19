@@ -71,7 +71,7 @@ public class Review implements Serializable {
 	private Profile reviewer;
 
 	@UpdateTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "REVIEW_UPDATED_ON")
 	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
@@ -99,7 +99,7 @@ public class Review implements Serializable {
 
 //	Full Detail Information
 	@CreationTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@JsonView(View.FullDetail.class)
 	@Column(name = "REVIEW_CREATED_ON")
 	private Date createdOn = new Date();

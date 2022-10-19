@@ -77,7 +77,7 @@ public class Job implements Serializable {
 	private String title;
 
 	@UpdateTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "JOB_UPDATED_ON")
 	@GenericField(sortable = Sortable.YES)
 	private Date updatedOn = new Date();
@@ -96,7 +96,7 @@ public class Job implements Serializable {
 	@OneToMany
 	private List<Storage> pictures = new ArrayList<>();
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "JOB_EXPIRED_ON")
 	private Date expiredOn;
 
@@ -142,7 +142,7 @@ public class Job implements Serializable {
 
 //	Full Detail Information
 	@CreationTimestamp
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@JsonView(View.FullDetail.class)
 	@Column(name = "JOB_CREATED_ON")
 	private Date createdOn = new Date();
