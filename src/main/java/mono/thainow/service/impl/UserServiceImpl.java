@@ -379,7 +379,7 @@ public class UserServiceImpl implements UserService {
 //		public location
 		Boolean isLocationPublic = Optional.ofNullable(request.getIsLocationPublic()).orElse(null);
 		if (isLocationPublic != null) {
-			user.setLocationPublic(isLocationPublic);
+			user.setLocationPublic(isLocationPublic); 
 		}
 
 //		email

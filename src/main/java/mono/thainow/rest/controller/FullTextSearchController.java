@@ -62,15 +62,16 @@ public class FullTextSearchController {
 	public SearchResponse<?> SearchCompanies(@RequestParam(defaultValue = "") String keywords,
 			@RequestParam(defaultValue = "All") String industry, @RequestParam(defaultValue = "") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
-			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
-			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		SearchResponse<?> res = searchService.searchCompany(industry, keywords, location.getLat(), location.getLng(),
-				limit, page, sort, within, radius, topLeft, bottomRight);
+				limit, page, sort, sortOrder, within, radius, topLeft, bottomRight);
 
 		res.setLocation(location);
 
@@ -84,15 +85,16 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "") String keywords, @RequestParam(defaultValue = "All") String category,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
-			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
-			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-		
-		SearchResponse<?> res = searchService.searchDealPost(ownerId, category, keywords, location.getLat(), location.getLng(), limit, page,
-				sort, within, radius, topLeft, bottomRight);
+
+		SearchResponse<?> res = searchService.searchDealPost(ownerId, category, keywords, location.getLat(),
+				location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft, bottomRight);
 
 		res.setLocation(location);
 
@@ -108,18 +110,19 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "false") Boolean remote,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
-			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
-			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-		
-		SearchResponse<?> res = searchService.searchJobPost(ownerId, keywords, position, experience, skills, remote, location.getLat(),
-				location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
+
+		SearchResponse<?> res = searchService.searchJobPost(ownerId, keywords, position, experience, skills, remote,
+				location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft,
+				bottomRight);
 
 		res.setLocation(location);
-
 
 		return res;
 	}
@@ -127,24 +130,26 @@ public class FullTextSearchController {
 	@GetMapping("/housings")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
-	public SearchResponse<?> searchHousingPost(@RequestParam(defaultValue = "-1") Long ownerId, @RequestParam(defaultValue = "") String keywords,
-			@RequestParam(defaultValue = "All") String type, @RequestParam(defaultValue = "All") String costType,
-			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
-			@RequestParam(defaultValue = "0") Integer guest, @RequestParam(defaultValue = "0") Integer bed,
-			@RequestParam(defaultValue = "0") Integer parking, @RequestParam(defaultValue = "0") Integer bath,
-			@RequestParam(defaultValue = "All") String amenity, @RequestParam(defaultValue = "All") String category,
+	public SearchResponse<?> searchHousingPost(@RequestParam(defaultValue = "-1") Long ownerId,
+			@RequestParam(defaultValue = "") String keywords, @RequestParam(defaultValue = "All") String type,
+			@RequestParam(defaultValue = "All") String costType, @RequestParam(defaultValue = "0") Double minCost,
+			@RequestParam(defaultValue = "0") Double maxCost, @RequestParam(defaultValue = "0") Integer guest,
+			@RequestParam(defaultValue = "0") Integer bed, @RequestParam(defaultValue = "0") Integer parking,
+			@RequestParam(defaultValue = "0") Integer bath, @RequestParam(defaultValue = "All") String amenity,
+			@RequestParam(defaultValue = "All") String category,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
-			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
-			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-		
-		SearchResponse<?> res = searchService.searchHousingPost(ownerId, keywords, type, costType, minCost, maxCost, guest, bed, parking,
-				bath, amenity, category, location.getLat(), location.getLng(), limit, page, sort, within, radius,
-				topLeft, bottomRight);
+
+		SearchResponse<?> res = searchService.searchHousingPost(ownerId, keywords, type, costType, minCost, maxCost,
+				guest, bed, parking, bath, amenity, category, location.getLat(), location.getLng(), limit, page, sort,
+				sortOrder, within, radius, topLeft, bottomRight);
 
 		res.setLocation(location);
 
@@ -154,20 +159,23 @@ public class FullTextSearchController {
 	@GetMapping("/marketplaces")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
-	public SearchResponse<?> searchMarketplacePost(@RequestParam(defaultValue = "-1") Long ownerId, @RequestParam(defaultValue = "") String keywords,
-			@RequestParam(defaultValue = "All") String condition, @RequestParam(defaultValue = "All") String category,
-			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
+	public SearchResponse<?> searchMarketplacePost(@RequestParam(defaultValue = "-1") Long ownerId,
+			@RequestParam(defaultValue = "") String keywords, @RequestParam(defaultValue = "All") String condition,
+			@RequestParam(defaultValue = "All") String category, @RequestParam(defaultValue = "0") Double minCost,
+			@RequestParam(defaultValue = "0") Double maxCost,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
-			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "20") int limit, @RequestParam(defaultValue = "circle") String within,
-			@RequestParam(defaultValue = "20") int radius, @RequestParam(defaultValue = "0,0") List<Double> topLeft,
+			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
+			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit,
+			@RequestParam(defaultValue = "circle") String within, @RequestParam(defaultValue = "20") int radius,
+			@RequestParam(defaultValue = "0,0") List<Double> topLeft,
 			@RequestParam(defaultValue = "0, 0") List<Double> bottomRight) {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
-		
-		SearchResponse<?> res = searchService.searchMarketplacePost(ownerId, keywords, condition, category, minCost, maxCost,
-				location.getLat(), location.getLng(), limit, page, sort, within, radius, topLeft, bottomRight);
+
+		SearchResponse<?> res = searchService.searchMarketplacePost(ownerId, keywords, condition, category, minCost,
+				maxCost, location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft,
+				bottomRight);
 
 		res.setLocation(location);
 
@@ -179,13 +187,14 @@ public class FullTextSearchController {
 	@JsonView(View.Basic.class)
 	public SearchReviewResponse<?> searchReview(@RequestParam(defaultValue = "-1") Long reviewerId,
 			@RequestParam ReviewType type, @RequestParam Long id, @RequestParam(defaultValue = "Date") String sort,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int limit) {
+			@RequestParam(defaultValue = "desc") String sortOrder, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "20") int limit) {
 
 		switch (type) {
 		case POST_REVIEW:
-			return searchService.searchPostReview(id, sort, limit, page, reviewerId);
+			return searchService.searchPostReview(id, sort, sortOrder, limit, page, reviewerId);
 		case PROFILE_REVIEW:
-			return searchService.serachProfileReview(id, sort, limit, page);
+			return searchService.serachProfileReview(id, sort, sortOrder, limit, page);
 		default:
 			throw new BadRequest("invalid review type request!");
 		}

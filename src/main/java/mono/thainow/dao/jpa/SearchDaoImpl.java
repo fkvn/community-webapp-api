@@ -482,10 +482,81 @@ public class SearchDaoImpl implements SearchDao {
 		return marketplace;
 	}
 
+//	=======================================================================================
+	
+	
+	@Override
+	public SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
+			double centerLng, String industry, String sort, String sortOrder, String within, int radius,
+			List<Double> topLeft, List<Double> bottomRight) {
+
+		SearchSession searchSession = Search.session(entityManager);
+
+		GeoPoint center = GeoPoint.of(centerLat, centerLng);
+
+		SearchResult<BusinessProfile> companies = searchSession.search(BusinessProfile.class).where(f -> f.bool(b -> {
+//			keywords
+			if (!keywords.isEmpty()) {
+				b.must(f.match().field("company.name").boost(3.0f).field("company.industry").boost(2.0f)
+						.field("company.description").boost(1.0f).matching(keywords));
+			}
+
+//			status
+			b.must(f.terms().field("company.status").matchingAny(CompanyStatus.REGISTERED, CompanyStatus.UNREGISTERED));
+
+//			industry filter
+			if (!industry.isEmpty() && !industry.equals("All")) {
+				b.filter(f.match().field("company.industry").matching(industry));
+			}
+
+//			radius default 20 miles
+			switch (within) {
+			case "circle":
+				b.must(f.spatial().within().field("company.location").circle(center, radius, DistanceUnit.MILES));
+				break;
+			case "box": {
+				GeoBoundingBox box = GeoBoundingBox.of(topLeft.get(0), topLeft.get(1), bottomRight.get(0),
+						bottomRight.get(1));
+
+				b.must(f.spatial().within().field("company.location").boundingBox(box));
+			}
+				break;
+			default:
+				b.must(f.spatial().within().field("company.location").circle(center, radius, DistanceUnit.MILES));
+				break;
+			}
+
+		})).sort(f -> f.composite(b -> {
+			switch (sort) {
+			case "Date": {
+				if (sortOrder.equals("desc")) {
+					b.add(f.field("company.updatedOn").desc());
+				} else {
+					b.add(f.field("company.updatedOn").asc());
+				}
+			}
+				break;
+			case "Distance":
+				b.add(f.distance("company.location", center));
+				break;
+			case "Rating":
+				b.add(f.field("reviews.rate").mode(SortMode.AVG));
+				break;
+			default:
+//				score, or other qualities
+				b.add(f.field("company.updatedOn").desc());
+				break;
+			}
+
+		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
+
+		return companies;
+	}
+	
 	@Override
 	public SearchResult<DealPost> searchDealPost(Long ownerId, String keywords, int limit, int page, double centerLat,
-			double centerLng, String category, String sort, String within, int radius, List<Double> topLeft,
-			List<Double> bottomRight) {
+			double centerLng, String category, String sort, String sortOrder, String within, int radius,
+			List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -535,8 +606,13 @@ public class SearchDaoImpl implements SearchDao {
 
 		})).sort(f -> f.composite(b -> {
 			switch (sort) {
-			case "Date":
-				b.add(f.field("deal.updatedOn").desc());
+			case "Date": {
+				if (sortOrder.equals("desc")) {
+					b.add(f.field("deal.updatedOn").desc());
+				} else {
+					b.add(f.field("deal.updatedOn").asc());
+				}
+			}
 				break;
 			case "Distance":
 				b.add(f.distance("deal.location", center));
@@ -554,8 +630,8 @@ public class SearchDaoImpl implements SearchDao {
 	@Override
 	public SearchResult<HousingPost> searchHousingPost(Long ownerId, String keywords, String type, String costType,
 			Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity,
-			String category, double centerLat, double centerLng, int limit, int page, String sort, String within,
-			int radius, List<Double> topLeft, List<Double> bottomRight) {
+			String category, double centerLat, double centerLng, int limit, int page, String sort, String sortOrder,
+			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -658,8 +734,13 @@ public class SearchDaoImpl implements SearchDao {
 
 		})).sort(f -> f.composite(b -> {
 			switch (sort) {
-			case "Date":
-				b.add(f.field("housing.updatedOn").desc());
+			case "Date": {
+				if (sortOrder.equals("desc")) {
+					b.add(f.field("housing.updatedOn").desc());
+				} else {
+					b.add(f.field("housing.updatedOn").asc());
+				}
+			}
 				break;
 			case "Distance":
 				b.add(f.distance("housing.location", center));
@@ -677,7 +758,7 @@ public class SearchDaoImpl implements SearchDao {
 	@Override
 	public SearchResult<JobPost> searchJobPost(Long ownerId, String keywords, String position, String experience,
 			String skills, Boolean remote, int limit, int page, double centerLat, double centerLng, String sort,
-			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -742,8 +823,13 @@ public class SearchDaoImpl implements SearchDao {
 
 		})).sort(f -> f.composite(b -> {
 			switch (sort) {
-			case "Date":
-				b.add(f.field("job.updatedOn").desc());
+			case "Date": {
+				if (sortOrder.equals("desc")) {
+					b.add(f.field("job.updatedOn").desc());
+				} else {
+					b.add(f.field("job.updatedOn").asc());
+				}
+			}
 				break;
 			case "Distance":
 				b.add(f.distance("job.location", center));
@@ -764,7 +850,7 @@ public class SearchDaoImpl implements SearchDao {
 	@Override
 	public SearchResult<MarketplacePost> searchMarketplacePost(Long ownerId, String keywords, String condition,
 			String category, Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page,
-			String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -795,11 +881,10 @@ public class SearchDaoImpl implements SearchDao {
 //					costType filter
 					Double maxCostRange = maxCost > 0 ? maxCost : null;
 					Double minCostRange = minCost > 0 ? minCost : null;
-					
+
 					if (minCostRange != null || maxCostRange != null) {
-						b.filter(f.range().field("marketplace.cost").between(minCostRange, maxCostRange));	
+						b.filter(f.range().field("marketplace.cost").between(minCostRange, maxCostRange));
 					}
-					
 
 //					amenity filter
 					if (!condition.isEmpty() && !condition.equals("All")) {
@@ -832,8 +917,13 @@ public class SearchDaoImpl implements SearchDao {
 
 				})).sort(f -> f.composite(b -> {
 					switch (sort) {
-					case "Date":
-						b.add(f.field("marketplace.updatedOn").desc());
+					case "Date": {
+						if (sortOrder.equals("desc")) {
+							b.add(f.field("marketplace.updatedOn").desc());
+						} else {
+							b.add(f.field("marketplace.updatedOn").asc());
+						}
+					}
 						break;
 					case "Distance":
 						b.add(f.distance("marketplace.location", center));
@@ -848,72 +938,11 @@ public class SearchDaoImpl implements SearchDao {
 		return marketplaces;
 	}
 
-	@Override
-	public SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
-			double centerLng, String industry, String sort, String within, int radius, List<Double> topLeft,
-			List<Double> bottomRight) {
 
-		SearchSession searchSession = Search.session(entityManager);
-
-		GeoPoint center = GeoPoint.of(centerLat, centerLng);
-
-		SearchResult<BusinessProfile> companies = searchSession.search(BusinessProfile.class).where(f -> f.bool(b -> {
-//			keywords
-			if (!keywords.isEmpty()) {
-				b.must(f.match().field("company.name").boost(3.0f).field("company.industry").boost(2.0f)
-						.field("company.description").boost(1.0f).matching(keywords));
-			}
-
-//			status
-			b.must(f.terms().field("company.status").matchingAny(CompanyStatus.REGISTERED, CompanyStatus.UNREGISTERED));
-
-//			industry filter
-			if (!industry.isEmpty() && !industry.equals("All")) {
-				b.filter(f.match().field("company.industry").matching(industry));
-			}
-
-//			radius default 20 miles
-			switch (within) {
-			case "circle":
-				b.must(f.spatial().within().field("company.location").circle(center, radius, DistanceUnit.MILES));
-				break;
-			case "box": {
-				GeoBoundingBox box = GeoBoundingBox.of(topLeft.get(0), topLeft.get(1), bottomRight.get(0),
-						bottomRight.get(1));
-
-				b.must(f.spatial().within().field("company.location").boundingBox(box));
-			}
-				break;
-			default:
-				b.must(f.spatial().within().field("company.location").circle(center, radius, DistanceUnit.MILES));
-				break;
-			}
-
-		})).sort(f -> f.composite(b -> {
-			switch (sort) {
-			case "Date":
-				b.add(f.field("company.updatedOn").desc());
-				break;
-			case "Distance":
-				b.add(f.distance("company.location", center));
-				break;
-			case "Rating":
-				b.add(f.field("reviews.rate").mode(SortMode.AVG));
-				break;
-			default:
-//				score, or other qualities
-				b.add(f.field("company.updatedOn").desc());
-				break;
-			}
-
-		})).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
-
-		return companies;
-	}
 
 	@Override
-	public SearchResult<PostReview> searchPostReview(Long postId, String sort, int limit, int page,
-			AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId) {
+	public SearchResult<PostReview> searchPostReview(Long postId, String sort, String sortOrder, int limit,
+			int page, AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -927,8 +956,13 @@ public class SearchDaoImpl implements SearchDao {
 
 		})).aggregation(aggregationKey, f -> f.terms().field("rate", Integer.class)).sort(f -> f.composite(b -> {
 			switch (sort) {
-			case "Date":
-				b.add(f.field("updatedOn").desc());
+			case "Date": {
+				if (sortOrder.equals("desc")) {
+					b.add(f.field("updatedOn").desc());
+				} else {
+					b.add(f.field("updatedOn").asc());
+				}
+			}
 				break;
 			case "Rating":
 				b.add(f.field("rate").desc());
@@ -945,8 +979,8 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, int limit, int page,
-			AggregationKey<Map<Integer, Long>> aggregationKey) {
+	public SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, String sortOrder, int limit,
+			int page, AggregationKey<Map<Integer, Long>> aggregationKey) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -960,8 +994,13 @@ public class SearchDaoImpl implements SearchDao {
 
 		})).aggregation(aggregationKey, f -> f.terms().field("rate", Integer.class)).sort(f -> f.composite(b -> {
 			switch (sort) {
-			case "Date":
-				b.add(f.field("updatedOn").desc());
+			case "Date": {
+				if (sortOrder.equals("desc")) {
+					b.add(f.field("updatedOn").desc());
+				} else {
+					b.add(f.field("updatedOn").asc());
+				}
+			}
 				break;
 			case "Rating":
 				b.add(f.field("rate").desc());

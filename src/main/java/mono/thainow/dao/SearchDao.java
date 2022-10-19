@@ -44,26 +44,26 @@ public interface SearchDao {
 			int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<DealPost> searchDealPost(Long ownerId, String keywords, int limit, int page, double centerLat,
-			double centerLng, String category, String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+			double centerLng, String category, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<HousingPost> searchHousingPost(Long ownerId, String keywords, String type, String costType,
 			Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity,
-			String category, double centerLat, double centerLng, int limit, int page, String sort, String within,
-			int radius, List<Double> topLeft, List<Double> bottomRight);
+			String category, double centerLat, double centerLng, int limit, int page, String sort, String sortOrder,
+			String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<JobPost> searchJobPost(Long ownerId, String keywords, String position, String experience,
 			String skills, Boolean remote, int limit, int page, double centerLat, double centerLng, String sort,
-			String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<MarketplacePost> searchMarketplacePost(Long ownerId, String keywords, String condition,
 			String category, Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page,
-			String sort, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
-			double centerLng, String industry, String sort, String within, int radius, List<Double> topLeft,
-			List<Double> bottomRight);
+			double centerLng, String industry, String sort, String sortOrder, String within, int radius,
+			List<Double> topLeft, List<Double> bottomRight);
 	
-	SearchResult<PostReview> searchPostReview(Long postId, String sort, int limit, int page, AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId);
+	SearchResult<PostReview> searchPostReview(Long postId, String sort, String sortOrder, int limit, int page, AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId);
 	
-	SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, int limit, int page, AggregationKey<Map<Integer, Long>> countsByRateKey);
+	SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, String sortOrder, int limit, int page, AggregationKey<Map<Integer, Long>> countsByRateKey);
 }
