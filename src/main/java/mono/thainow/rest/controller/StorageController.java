@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.storage.FirebaseRealtime;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.rest.request.StorageRequest;
@@ -21,8 +22,8 @@ import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.StorageService;
 
 @RestController
-//@PreAuthorize("hasAnyAuthority('ALL_STORAGE_MANAGE')")
 @RequestMapping("/api/storages")
+@AuthenticatedAccess
 public class StorageController {
 
 	@Autowired
