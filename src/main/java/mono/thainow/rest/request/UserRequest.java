@@ -21,7 +21,7 @@ public class UserRequest {
 	
 	private String lastname;
 	
-	private List<StorageRequest> coverPictures;
+	private List<StorageRequest> pictures;
 	
 	private String address;
 	

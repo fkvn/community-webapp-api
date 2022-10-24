@@ -17,7 +17,7 @@ public class CompanyRequest {
 	
 	private String placeid;
 	
-	private List<StorageRequest> coverPictures;
+	private List<StorageRequest> pictures;
 	
 	private String email;
 	

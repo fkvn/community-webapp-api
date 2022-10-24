@@ -42,7 +42,7 @@ public class CompanyServiceImpl implements CompanyService {
 	public Company findCompanyById(Long companyId) {
 		return companyDao.findCompanyById(companyId);
 	}
-	
+
 	@Override
 	public Company createCompany(CompanyRequest companyRequest) {
 
@@ -178,17 +178,17 @@ public class CompanyServiceImpl implements CompanyService {
 			company.setInformalCompany(isInformal);
 
 //		name
-		String name = Optional.ofNullable(request.getName()).orElse(null).trim();
+		String name = Optional.ofNullable(request.getName()).orElse(null);
 		if (name != null) {
 			Assert.isTrue(!name.isBlank(), "Invalid Name!");
-			company.setName(name);
+			company.setName(name.trim());
 		}
 
 //		industry
-		String industry = Optional.ofNullable(request.getIndustry()).orElse(null).trim();
+		String industry = Optional.ofNullable(request.getIndustry()).orElse(null);
 		if (industry != null) {
 			Assert.isTrue(!company.getIndustry().isBlank(), "Invalid Industry!");
-			company.setIndustry(industry);
+			company.setIndustry(industry.trim());
 		}
 
 //		company location
@@ -210,15 +210,16 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 
 //		new cover pictures
-		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getCoverPictures()).orElse(null);
+		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
 		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
 		if (coverPictures != null) {
 			company.setPictures(coverPictures);
 		}
 
 //		email
-		String email = Optional.ofNullable(request.getEmail()).orElse(null).trim();
+		String email = Optional.ofNullable(request.getEmail()).orElse(null);
 		if (email != null) {
+			email = email.trim();
 			if (!email.isBlank()) {
 				Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
 			}
@@ -232,15 +233,16 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 
 //		company phone 
-		String phone = Optional.ofNullable(request.getPhone()).orElse(null).trim();
+		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
 //		required for informal company
-		if (isInformal) {
+		if (company.isInformalCompany()) {
 			Assert.isTrue(!phone.isBlank(), "Invalid Phone!");
 			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
 			company.setPhone(phone);
 		}
 //		phone is optional for formal company
 		else if (phone != null) {
+			phone = phone.trim();
 			if (!phone.isBlank()) {
 				PhoneUtil.validatePhoneNumberWithGoogleAPI(phone.trim(), "US");
 			}
@@ -254,9 +256,9 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			company.setDescription(description);
+			company.setDescription(description.trim());
 		}
 
 //		public description
@@ -266,9 +268,10 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 
 //		website
-		String website = Optional.ofNullable(request.getWebsite()).orElse(null).trim();
+		String website = Optional.ofNullable(request.getWebsite()).orElse(null);
 		if (website != null) {
-			if (!website.isEmpty()) {
+			website =  website.trim();
+			if (!website.isBlank()) {
 				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
 			}
 			company.setWebsite(website);
@@ -281,9 +284,9 @@ public class CompanyServiceImpl implements CompanyService {
 		}
 
 //		size
-		String size = Optional.ofNullable(request.getSize()).orElse(null).trim();
+		String size = Optional.ofNullable(request.getSize()).orElse(null);
 		if (size != null) {
-			company.setSize(size);
+			company.setSize(size.trim());
 		}
 
 //		public size
@@ -294,9 +297,6 @@ public class CompanyServiceImpl implements CompanyService {
 
 		return company;
 	}
-
-	
-
 
 	@Override
 	public Company activateCompany(Company company) {

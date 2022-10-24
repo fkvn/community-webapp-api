@@ -148,11 +148,10 @@ public class AuthServiceImpl implements AuthService {
 
 	}
 
-
 	@Override
 	public JwtResponse accessWithGoogle(GoogleRequest request) {
 
-		String email = Optional.ofNullable(request.getEmail().trim()).orElse("");
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
@@ -169,7 +168,7 @@ public class AuthServiceImpl implements AuthService {
 		}
 		
 		String username = "email-login," + email;
-		String password = Optional.ofNullable(request.getSub().trim()).orElse("");
+		String password = Optional.ofNullable(request.getSub()).orElse("").trim();
 
 		return signedJWTAuth(username, password);
 	}
@@ -201,8 +200,9 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public JwtResponse accessWithApple(AppleRequest request) {
 
-		String email = Optional.ofNullable(request.getEmail().trim()).orElse("");
-
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+		
+		
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
 			User user = userService.fetchUserFromAppleRequest(request);
@@ -218,7 +218,7 @@ public class AuthServiceImpl implements AuthService {
 		}
 		
 		String username = "email-login," + email;
-		String password = Optional.ofNullable(request.getSub().trim()).orElse("");
+		String password = Optional.ofNullable(request.getSub()).orElse("").trim();
 
 		return signedJWTAuth(username, password);
 	}
@@ -226,7 +226,7 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public JwtResponse accessWithFacebook(FacebookRequest request) {
 
-		String email = Optional.ofNullable(request.getEmail().trim()).orElse("");
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
 
 //		email is unique -> new user -> sign up
 		if (userService.isEmailUnique(email)) {
@@ -244,7 +244,7 @@ public class AuthServiceImpl implements AuthService {
 		}
 		
 		String username = "email-login," + email;
-		String password = Optional.ofNullable(request.getId().trim()).orElse("");
+		String password = Optional.ofNullable(request.getId()).orElse("").trim();
 
 		return signedJWTAuth(username, password);
 	}

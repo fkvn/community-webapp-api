@@ -122,22 +122,27 @@ public class User implements Serializable {
 	private String lastName = "";
 	
 	@Column(name = "IS_USER_DESCRIPTION_PUBLIC")
+	@JsonProperty("isDescriptionPublic")
 	@JsonView(View.Detail.class)
 	private boolean descriptionPublic = false;
 
 	@Column(name = "IS_USER_EMAIL_PUBLIC")
+	@JsonProperty("isEmailPublic")
 	@JsonView(View.Detail.class)
 	private boolean emailPublic = false;
 
 	@Column(name = "IS_USER_PHONE_PUBLIC")
+	@JsonProperty("isPhonePublic")
 	@JsonView(View.Detail.class)
 	private boolean phonePublic = false;
 
 	@Column(name = "IS_USER_LOCATION_PUBLIC")
+	@JsonProperty("isLocationPublic")
 	@JsonView(View.Detail.class)
 	private boolean locationPublic = false;
 	
 	@Column(name = "IS_USER_WEBSITE_PUBLIC")
+	@JsonProperty("isWebsitePublic")
 	@JsonView(View.Detail.class)
 	private boolean websitePublic = false;
 

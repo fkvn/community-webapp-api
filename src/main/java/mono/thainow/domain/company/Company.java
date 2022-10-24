@@ -144,22 +144,27 @@ public class Company implements Serializable {
 //	Private Detail Information
 
 	@Column(name = "IS_COMPANY_DESCRIPTION_PUBLIC")
+	@JsonProperty("isDescriptionPublic")
 	@JsonView(View.Detail.class)
 	private boolean descriptionPublic = true;
 
 	@Column(name = "IS_COMPANY_EMAIL_PUBLIC")
+	@JsonProperty("isEmailPublic")
 	@JsonView(View.Detail.class)
 	private boolean emailPublic = true;
 
 	@Column(name = "IS_COMPANY_PHONE_PUBLIC")
+	@JsonProperty("isPhonePublic")
 	@JsonView(View.Detail.class)
 	private boolean phonePublic = true;
 
 	@Column(name = "IS_COMPANY_WEBSITE_PUBLIC")
+	@JsonProperty("isWebsitePublic")
 	@JsonView(View.Detail.class)
 	private boolean websitePublic = true;
 
 	@Column(name = "IS_COMPANY_SIZE_PUBLIC")
+	@JsonProperty("isSizePublic")
 	@JsonView(View.Detail.class)
 	private boolean sizePublic = true;
 

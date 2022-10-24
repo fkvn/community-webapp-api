@@ -340,26 +340,26 @@ public class UserServiceImpl implements UserService {
 	public User fetchUserFromUpdateRequest(User user, UserRequest request) {
 
 //		username
-		String username = Optional.ofNullable(request.getUsername()).orElse(null).trim();
+		String username = Optional.ofNullable(request.getUsername()).orElse(null);
 		if (username != null) {
 			Assert.isTrue(!username.isBlank(), "Invalid Name!");
-			user.setUsername(username);
+			user.setUsername(username.trim());
 		}
 
 //		first name
-		String firstname = Optional.ofNullable(request.getFirstname()).orElse(null).trim();
+		String firstname = Optional.ofNullable(request.getFirstname()).orElse(null);
 		if (firstname != null) {
-			user.setFirstName(firstname);
+			user.setFirstName(firstname.trim());
 		}
 
 //		last name
-		String lastname = Optional.ofNullable(request.getLastname()).orElse(null).trim();
+		String lastname = Optional.ofNullable(request.getLastname()).orElse(null);
 		if (lastname != null) {
-			user.setLastName(lastname);
+			user.setLastName(lastname.trim());
 		}
 
 //		new cover pictures
-		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getCoverPictures()).orElse(null);
+		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
 		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
 		if (coverPictures != null) {
 			user.setPictures(coverPictures);
@@ -383,8 +383,9 @@ public class UserServiceImpl implements UserService {
 		}
 
 //		email
-		String email = Optional.ofNullable(request.getEmail()).orElse(null).trim();
+		String email = Optional.ofNullable(request.getEmail()).orElse(null);
 		if (email != null && !email.equals(user.getEmail())) {
+			email = email.trim();
 			if (!email.isBlank()) {
 				Assert.isTrue(isEmailUnique(email), "Email has already been taken.");
 				Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
@@ -393,8 +394,9 @@ public class UserServiceImpl implements UserService {
 		}
 
 //		phone
-		String phone = Optional.ofNullable(request.getPhone()).orElse(null).trim();
+		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
 		if (phone != null && !phone.equals(user.getPhone())) {
+			phone = phone.trim();
 			if (!phone.isBlank()) {
 				Assert.isTrue(isPhoneUnique(phone), "Phone has already been taken.");
 				PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
@@ -430,9 +432,9 @@ public class UserServiceImpl implements UserService {
 		}
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null).trim();
+		String description = Optional.ofNullable(request.getDescription()).orElse(null);
 		if (description != null) {
-			user.setDescription(description);
+			user.setDescription(description.trim());
 		}
 
 //		public description
@@ -442,12 +444,12 @@ public class UserServiceImpl implements UserService {
 		}
 
 //		website
-		String website = Optional.ofNullable(request.getWebsite()).orElse(null).trim();
+		String website = Optional.ofNullable(request.getWebsite()).orElse(null);
 		if (website != null) {
 			if (!website.isEmpty()) {
 				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
 			}
-			user.setWebsite(website);
+			user.setWebsite(website.trim());
 		}
 
 //		public website
