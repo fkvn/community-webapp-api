@@ -55,7 +55,8 @@ public class PostController {
 	private Long createPostFromRequest(PostRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		Assert.isTrue(profileId != null, "Missing profile information!");
+		if (profileId == null) profileId = AuthUtil.getAuthenticatedUser().getId();
+		if (profileId == null) throw new AccessForbidden();
 
 		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
 		Assert.isTrue(type != null, "Invalid Post Type!");
@@ -64,11 +65,11 @@ public class PostController {
 		Profile postOwner = profileService.findProfileById(profileId);
 		if (postOwner.getType() == ProfileType.USER_PROFILE) {
 			Assert.isTrue(postOwner.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile" );
+		} else if (postOwner.getType() == ProfileType.BUSINESS_PROFILE) {
+			Assert.isTrue(((BusinessProfile) postOwner).getCompany().getStatus() == CompanyStatus.REGISTERED,
+					"Invalid Profile");
 		}
-		else if (postOwner.getType() == ProfileType.BUSINESS_PROFILE) {
-			Assert.isTrue(((BusinessProfile) postOwner).getCompany().getStatus() == CompanyStatus.REGISTERED, "Invalid Profile" );
-		}
-		
+
 		AuthUtil.authorizedAccess(postOwner, true);
 
 		Post newPost = postService.createPost(postOwner, request);
@@ -80,7 +81,7 @@ public class PostController {
 	private void updatePostFromRequest(Long postId, PostRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		Profile postOwner = profileId != null ? profileService.findProfileById(profileId): null;
+		Profile postOwner = profileId != null ? profileService.findProfileById(profileId) : null;
 
 		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
 		Assert.isTrue(type != null, "Invalid Post Type!");
@@ -111,15 +112,15 @@ public class PostController {
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
-	public Post getPost(@PathVariable Long postId, @RequestParam(required = false) Long profileId,
+	public Post findPost(@PathVariable Long postId, @RequestParam(required = false) Long profileId,
 			@RequestParam PostType type) {
-		
+
 		if (AuthUtil.isAdminAuthenticated()) {
 			return postService.findPostById(postId);
 		}
 
 		Post post = postService.findValidPost(postId, type);
-
+		
 		if (post.getStatus() == PostStatus.PRIVATE) {
 			if (profileId == null) throw new AccessForbidden();
 			Profile postOwner = profileService.findProfileById(profileId);
@@ -127,7 +128,6 @@ public class PostController {
 		}
 
 		return post;
-
 	}
 
 	@PostMapping("/deals")

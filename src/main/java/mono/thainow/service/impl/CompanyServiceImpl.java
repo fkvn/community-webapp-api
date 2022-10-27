@@ -236,7 +236,7 @@ public class CompanyServiceImpl implements CompanyService {
 		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
 //		required for informal company
 		if (company.isInformalCompany()) {
-			Assert.isTrue(!phone.isBlank(), "Invalid Phone!");
+			Assert.isTrue(!phone.isBlank(), "Phone number is required when a business doesn't have physical location!");
 			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
 			company.setPhone(phone);
 		}

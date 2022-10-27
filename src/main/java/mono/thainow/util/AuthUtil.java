@@ -24,8 +24,9 @@ public class AuthUtil {
 
 		UserDetailsImpl userDetails = getAuthenticatedUser();
 
-		boolean adminAuthorized = userDetails.getRole() != UserRole.ADMIN
-				|| userDetails.getRole() != UserRole.SUPERADMIN;
+		boolean adminAuthorized = userDetails != null
+				&& (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
+
 
 		boolean validRequester = userDetails != null && profile != null
 				&& profile.getAccount().getId().equals(userDetails.getId());
@@ -38,26 +39,27 @@ public class AuthUtil {
 
 		return authorizedAccess;
 	}
-	
-	
+
 	public static boolean isAdminAuthenticated() {
 		UserDetailsImpl userDetails = getAuthenticatedUser();
 
-		return userDetails.getRole() != UserRole.ADMIN
-				|| userDetails.getRole() != UserRole.SUPERADMIN; 
+		if (userDetails == null)
+			return false;
+
+		return userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN;
 	}
 
 	public static boolean authorizedAccess(Profile postOwner, Post post, boolean throwError) {
 
 		UserDetailsImpl userDetails = getAuthenticatedUser();
 
-		boolean adminAuthorized = userDetails.getRole() != UserRole.ADMIN
-				|| userDetails.getRole() != UserRole.SUPERADMIN;
+		boolean adminAuthorized = userDetails != null
+				&& (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
 
 		boolean validRequester = userDetails != null && postOwner != null
 				&& postOwner.getAccount().getId().equals(userDetails.getId());
 
-		boolean validPostOwner = validRequester && post != null && post.getOwner().getId().equals(postOwner.getId());
+		boolean validPostOwner = validRequester && post != null && post.getOwner().getId().equals(userDetails.getId());
 
 		boolean authorizedAccess = adminAuthorized || (validRequester && validPostOwner);
 
@@ -72,8 +74,9 @@ public class AuthUtil {
 
 		UserDetailsImpl userDetails = getAuthenticatedUser();
 
-		boolean adminAuthorized = userDetails.getRole() != UserRole.ADMIN
-				|| userDetails.getRole() != UserRole.SUPERADMIN;
+		boolean adminAuthorized = userDetails != null
+				&& (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
+
 
 		boolean validRequester = userDetails != null && review != null
 				&& review.getReviewer().getId().equals(userDetails.getId());
