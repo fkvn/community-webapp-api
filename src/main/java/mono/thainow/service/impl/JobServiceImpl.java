@@ -61,46 +61,32 @@ public class JobServiceImpl implements JobService {
 		job.setContactInfo(contactInfo);
 		
 //		remote job
-		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(null);
-		if (isRemote != null) {
-			job.setRemote(isRemote);
-		}
+		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(false);
+		job.setRemote(isRemote);
 
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			job.setDescription(description.trim());
-		}
+		job.setDescription(description !=null ?  description.trim() : null);
 
 //		positions
 		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
-		if (positions != null && positions.size() > 0) {
-			job.setPositions(positions);
-		}
+		job.setPositions(positions != null && positions.size() > 0 ? positions : null);
 
 //		experience
 		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
-		if (experience != null) {
-			job.setExperience(experience.trim());
-		}
+		job.setExperience(experience != null ? experience.trim(): null);
 
 //		salary
 		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
-		if (salary != null) {
-			job.setSalary(salary.trim());
-		}
+		job.setSalary(salary != null ? salary.trim(): null);
 
 //		skills
 		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
-		if (skills != null) {
-			job.setSkills(skills.trim());
-		}
+		job.setSkills(skills != null ? skills.trim() : null);
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		if (expiredOn != null) {
-			job.setExpiredOn(expiredOn);
-		}
+		job.setExpiredOn(expiredOn);
 
 //		job status
 		job.setStatus(PostStatus.AVAILABLE);
@@ -159,39 +145,27 @@ public class JobServiceImpl implements JobService {
 
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			job.setDescription(description.trim());
-		}
+		job.setDescription(description !=null ?  description.trim() : null);
 
 //		positions
 		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
-		if (positions != null && positions.size() > 0) {
-			job.setPositions(positions);
-		}
+		job.setPositions(positions != null && positions.size() > 0 ? positions : null);
 
 //		experience
 		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
-		if (experience != null) {
-			job.setExperience(experience.trim());
-		}
+		job.setExperience(experience != null ? experience.trim(): null);
 
 //		salary
 		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
-		if (salary != null) {
-			job.setSalary(salary.trim());
-		}
+		job.setSalary(salary != null ? salary.trim(): null);
 
 //		skills
 		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
-		if (skills != null) {
-			job.setSkills(skills.trim());
-		}
+		job.setSkills(skills != null ? skills.trim() : null);
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		if (expiredOn != null) {
-			job.setExpiredOn(expiredOn);
-		}
+		job.setExpiredOn(expiredOn);
 
 //		job status
 		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);

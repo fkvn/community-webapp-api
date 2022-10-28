@@ -105,8 +105,6 @@ public class DealServiceImpl implements DealService {
 			deal.setTitle(title.trim());
 		}
 		
-		
-
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);

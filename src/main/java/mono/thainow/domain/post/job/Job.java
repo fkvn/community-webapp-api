@@ -39,6 +39,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordFie
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.Getter;
@@ -111,6 +112,7 @@ public class Job implements Serializable {
 
 	@Column(name = "IS_JOB_REMOTE")
 	@JsonView(View.Detail.class)
+	@JsonProperty("isRemote")
 	@GenericField
 	private boolean remote = false;
 
