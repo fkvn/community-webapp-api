@@ -101,9 +101,10 @@ public class DealServiceImpl implements DealService {
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse(null);
 		if (title != null) {
-			Assert.isTrue(!title.isBlank(), "Invalid Title");
+			Assert.isTrue(!deal.getTitle().isBlank(), "Invalid Title");
 			deal.setTitle(title.trim());
 		}
+		
 		
 
 //		location
@@ -131,21 +132,15 @@ public class DealServiceImpl implements DealService {
 
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			deal.setDescription(description.trim());
-		}
+		deal.setDescription(description !=null ?  description.trim() : null);
 
 //		category
 		String category = Optional.ofNullable(request.getCategory()).orElse(null);
-		if (category != null) {
-			deal.setCategory(category.trim());
-		}
+		deal.setCategory(category != null ? category.trim() : null);
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		if (expiredOn != null) {
-			deal.setExpiredOn(expiredOn);
-		}
+		deal.setExpiredOn(expiredOn);
 
 //		deal status
 		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);

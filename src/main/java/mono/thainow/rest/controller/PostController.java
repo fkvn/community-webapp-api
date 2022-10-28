@@ -81,7 +81,10 @@ public class PostController {
 	private void updatePostFromRequest(Long postId, PostRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		Profile postOwner = profileId != null ? profileService.findProfileById(profileId) : null;
+		if (profileId == null) profileId = AuthUtil.getAuthenticatedUser().getId();
+		if (profileId == null) throw new AccessForbidden();
+		
+		Profile postOwner =  profileService.findProfileById(profileId);
 
 		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
 		Assert.isTrue(type != null, "Invalid Post Type!");
