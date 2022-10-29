@@ -35,14 +35,16 @@ public class HousingServiceImpl implements HousingService {
 	private StorageService storageService;
 
 	@Override
-	public Housing fetchHousingFromRequest(HousingRequest request) {
+	public Housing fetchHousingFromRequest(HousingRequest request, Housing housing) {
 
-		Housing housing = new Housing();
+		if (housing == null) {
+			housing = new Housing();
+		}
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
-		Assert.isTrue(!title.isBlank(), "Invalid title!");
 		housing.setTitle(title);
+		Assert.isTrue(!housing.getTitle().isBlank(), "Invalid title!");
 
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
@@ -63,64 +65,46 @@ public class HousingServiceImpl implements HousingService {
 		housing.setContactInfo(contactInfo);
 
 //		interior information
-		TreeMap<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
-		if (interior != null && interior.size() > 0) {
-			housing.setInterior(interior);
-		}
+		TreeMap<String, Integer> interior = Optional.ofNullable(request.getInterior())
+				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+		housing.setInterior(interior);
 
 //		amenities
-		TreeSet<String> amenities = Optional.ofNullable(request.getAmenities()).orElse(null);
-		if (amenities != null && amenities.size() > 0) {
-			housing.setAmenities(amenities);
-		}
+		TreeSet<String> amenities = Optional.ofNullable(request.getAmenities())
+				.orElse(new TreeSet<>(String.CASE_INSENSITIVE_ORDER));
+		housing.setAmenities(amenities);
 
 //		type
-		String type = Optional.ofNullable(request.getType()).orElse(null);
-		if (type != null) {
-			housing.setType(type.trim());
-		}
+		String type = Optional.ofNullable(request.getType()).orElse("").trim();
+		housing.setType(type);
 
 //		daily cost
 		Double dailyCost = Optional.ofNullable(request.getDailyCost()).orElse(null);
-		if (dailyCost != null) {
-			housing.setDailyCost(dailyCost);
-		}
+		housing.setDailyCost(dailyCost);
 
 //		monthly cost
 		Double monthlyCost = Optional.ofNullable(request.getMonthlyCost()).orElse(null);
-		if (monthlyCost != null) {
-			housing.setMonthlyCost(monthlyCost);
-		}
+		housing.setMonthlyCost(monthlyCost);
 
 //		annual cost
 		Double annualCost = Optional.ofNullable(request.getAnnualCost()).orElse(null);
-		if (annualCost != null) {
-			housing.setAnnualCost(annualCost);
-		}
+		housing.setAnnualCost(annualCost);
 
 //		deposit cost
 		Double depositCost = Optional.ofNullable(request.getDepositCost()).orElse(null);
-		if (depositCost != null) {
-			housing.setDepositCost(depositCost);
-		}
+		housing.setDepositCost(depositCost);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			housing.setDescription(description.trim());
-		}
+		String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
+		housing.setDescription(description.trim());
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
-		if (category != null) {
-			housing.setCategory(category.trim());
-		}
+		String category = Optional.ofNullable(request.getCategory()).orElse("").trim();
+		housing.setCategory(category);
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		if (expiredOn != null) {
-			housing.setExpiredOn(expiredOn);
-		}
+		housing.setExpiredOn(expiredOn);
 
 //		housing status
 		housing.setStatus(PostStatus.AVAILABLE);
@@ -130,7 +114,7 @@ public class HousingServiceImpl implements HousingService {
 
 	@Override
 	public Housing createHousing(HousingRequest request) {
-		return saveHousing(fetchHousingFromRequest(request));
+		return saveHousing(fetchHousingFromRequest(request, null));
 	}
 
 	@Override
@@ -147,7 +131,7 @@ public class HousingServiceImpl implements HousingService {
 			Assert.isTrue(!title.isBlank(), "Invalid Title");
 			housing.setTitle(title.trim());
 		}
-		
+
 //		location
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);
@@ -173,15 +157,11 @@ public class HousingServiceImpl implements HousingService {
 
 //		interior information
 		TreeMap<String, Integer> interior = Optional.ofNullable(request.getInterior()).orElse(null);
-		if (interior != null && interior.size() > 0) {
-			housing.setInterior(interior);
-		}
+		housing.setInterior(interior != null ? interior : new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
 
 //		amenities
 		TreeSet<String> amenities = Optional.ofNullable(request.getAmenities()).orElse(null);
-		if (amenities != null && amenities.size() > 0) {
-			housing.setAmenities(amenities);
-		}
+		housing.setAmenities(amenities != null ? amenities : new TreeSet<>(String.CASE_INSENSITIVE_ORDER));
 
 //		type
 		String type = Optional.ofNullable(request.getType()).orElse(null);
@@ -192,25 +172,41 @@ public class HousingServiceImpl implements HousingService {
 //		daily cost
 		Double dailyCost = Optional.ofNullable(request.getDailyCost()).orElse(null);
 		if (dailyCost != null) {
-			housing.setDailyCost(dailyCost);
+			if (dailyCost < 0) {
+				housing.setDailyCost(null);
+			} else {
+				housing.setDailyCost(dailyCost);
+			}
 		}
 
 //		monthly cost
 		Double monthlyCost = Optional.ofNullable(request.getMonthlyCost()).orElse(null);
 		if (monthlyCost != null) {
-			housing.setMonthlyCost(monthlyCost);
+			if (monthlyCost < 0) {
+				housing.setMonthlyCost(null);
+			} else {
+				housing.setMonthlyCost(monthlyCost);
+			}
 		}
 
 //		annual cost
 		Double annualCost = Optional.ofNullable(request.getAnnualCost()).orElse(null);
 		if (annualCost != null) {
-			housing.setAnnualCost(annualCost);
+			if (annualCost < 0) {
+				housing.setAnnualCost(null);
+			} else {
+				housing.setAnnualCost(annualCost);
+			}
 		}
 
 //		deposit cost
 		Double depositCost = Optional.ofNullable(request.getDepositCost()).orElse(null);
 		if (depositCost != null) {
-			housing.setDepositCost(depositCost);
+			if (depositCost < 0) {
+				housing.setDepositCost(null);
+			} else {
+				housing.setDepositCost(depositCost);
+			}
 		}
 
 //		description
@@ -227,9 +223,7 @@ public class HousingServiceImpl implements HousingService {
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		if (expiredOn != null) {
-			housing.setExpiredOn(expiredOn);
-		}
+		housing.setExpiredOn(expiredOn);
 
 //		housing status
 		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
@@ -249,7 +243,7 @@ public class HousingServiceImpl implements HousingService {
 
 	@Override
 	public void updateHousing(Housing housing, HousingRequest request) {
-		housing = fetchHousingFromUpdateRequest(housing, request);
+		housing = fetchHousingFromRequest(request, housing);
 		saveHousing(housing);
 	}
 

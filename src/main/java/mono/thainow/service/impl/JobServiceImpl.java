@@ -56,29 +56,30 @@ public class JobServiceImpl implements JobService {
 		job.setPictures(pictures);
 
 //		contact information
-		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
+				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
 		Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 		job.setContactInfo(contactInfo);
-		
+
 //		remote job
 		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(false);
 		job.setRemote(isRemote);
 
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		job.setDescription(description !=null ?  description.trim() : null);
+		job.setDescription(description != null ? description.trim() : null);
 
 //		positions
 		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
-		job.setPositions(positions != null && positions.size() > 0 ? positions : null);
+		job.setPositions(positions);
 
 //		experience
 		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
-		job.setExperience(experience != null ? experience.trim(): null);
+		job.setExperience(experience != null ? experience.trim() : null);
 
 //		salary
 		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
-		job.setSalary(salary != null ? salary.trim(): null);
+		job.setSalary(salary != null ? salary.trim() : null);
 
 //		skills
 		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
@@ -136,7 +137,7 @@ public class JobServiceImpl implements JobService {
 			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
 			job.setContactInfo(contactInfo);
 		}
-		
+
 //		remote job
 		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(null);
 		if (isRemote != null) {
@@ -145,23 +146,33 @@ public class JobServiceImpl implements JobService {
 
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		job.setDescription(description !=null ?  description.trim() : null);
+		if (description != null) {
+			job.setDescription(description.trim());
+		}
 
 //		positions
 		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
-		job.setPositions(positions != null && positions.size() > 0 ? positions : null);
+		if (positions != null && positions.size() > 0) {
+			job.setPositions(positions);
+		}
 
 //		experience
 		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
-		job.setExperience(experience != null ? experience.trim(): null);
+		if (experience != null) {
+			job.setExperience(experience.trim());
+		}
 
 //		salary
 		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
-		job.setSalary(salary != null ? salary.trim(): null);
-
+		if (salary != null) {
+			job.setSalary(salary.trim());
+		}
+		
 //		skills
 		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
-		job.setSkills(skills != null ? skills.trim() : null);
+		if (skills != null) {
+			job.setSkills(skills.trim());
+		}
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);

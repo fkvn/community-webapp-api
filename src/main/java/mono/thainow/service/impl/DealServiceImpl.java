@@ -130,11 +130,16 @@ public class DealServiceImpl implements DealService {
 
 //		description
 		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		deal.setDescription(description !=null ?  description.trim() : null);
+		if (description != null) {
+			deal.setDescription(description.trim());
+		}
+		
 
 //		category
 		String category = Optional.ofNullable(request.getCategory()).orElse(null);
-		deal.setCategory(category != null ? category.trim() : null);
+		if (category != null) {
+			deal.setCategory(category.trim());
+		}
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
