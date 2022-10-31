@@ -124,6 +124,12 @@ public class ReviewServiceImpl implements ReviewService {
 		saveReview(fetchReviewFromUpdateRequest(review, request));
 	}
 
+	
+	@Override
+	public void deleteReview(Review review) {
+		reviewDao.removeReview(review);
+	}
+
 //	@Autowired
 //	private PostDao postDao;
 //

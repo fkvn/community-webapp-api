@@ -3,8 +3,6 @@ package mono.thainow.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -16,7 +14,6 @@ import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.rest.request.CompanyRequest;
-import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.CompanyService;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
@@ -46,7 +43,7 @@ public class CompanyServiceImpl implements CompanyService {
 	@Override
 	public Company createCompany(CompanyRequest companyRequest) {
 
-		Company company = fetchCompanyFromRequest(companyRequest);
+		Company company = fetchCompanyFromRequest(null, companyRequest);
 
 		company = saveCompany(company);
 
@@ -59,76 +56,111 @@ public class CompanyServiceImpl implements CompanyService {
 	}
 
 	@Override
-	public Company fetchCompanyFromRequest(CompanyRequest companyRequest) {
-		Company company = new Company();
+	public Company fetchCompanyFromRequest(Company company, CompanyRequest request) {
+
+		if (company == null) {
+			company = new Company();
+
+//			Company Logo / Profile
+			StorageDefault storageDefault = new StorageDefault();
+			Long profileId = storageDefault.getIndustryLogoUrl().get(company.getIndustry().toUpperCase().trim());
+			if (profileId == null) {
+				profileId = storageDefault.getBusinessProfileDefault();
+			}
+			Storage profile = storageService.findStorageById(profileId);
+			company.setLogo(profile);
+			
+//			status
+			company.setStatus(CompanyStatus.PENDING);
+
+		}
 
 //		Informal company is a company not having physical address 
-		Boolean isInformal = Optional.ofNullable(companyRequest.getIsInformal()).orElse(false);
+		Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(false);
 		company.setInformalCompany(isInformal);
 
 //		company name 
-		String name = Optional.ofNullable(companyRequest.getName()).orElse("").trim();
+		String name = Optional.ofNullable(request.getName()).orElse("").trim();
 		Assert.isTrue(!name.isBlank(), "Invalid Name");
 		company.setName(name);
 
 //		company industry 
-		String industry = Optional.ofNullable(companyRequest.getIndustry()).orElse("").trim();
+		String industry = Optional.ofNullable(request.getIndustry()).orElse("").trim();
 		Assert.isTrue(!industry.isBlank(), "Invalid Industry");
 		company.setIndustry(industry);
 
-//		Company Logo / Profile
-		StorageDefault storageDefault = new StorageDefault();
-		Long profileId = storageDefault.getIndustryLogoUrl().get(company.getIndustry().toUpperCase().trim());
-		if (profileId == null) {
-			profileId = storageDefault.getBusinessProfileDefault();
-		}
-		Storage profile = storageService.findStorageById(profileId);
-		company.setLogo(profile);
-
 //		company email (optional)
-		String email = Optional.ofNullable(companyRequest.getEmail()).orElse("").trim();
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
 		if (!email.isBlank()) {
 			Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
-			company.setEmail(email);
 		}
+		company.setEmail(email);
+
+//		public email
+		Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(true);
+		company.setEmailPublic(isEmailPublic);
 
 //		company phone 
-		String phone = Optional.ofNullable(companyRequest.getPhone()).orElse("").trim();
+		String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
 //		required for informal company
-		if (isInformal) {
+		if (company.isInformalCompany()) {
 			Assert.isTrue(!phone.isBlank(), "Invalid Phone!");
 			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-			company.setPhone(phone);
 		}
 //		phone is optional for formal company
 		else if (!phone.isBlank()) {
 			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-			company.setPhone(phone);
 		}
+		company.setPhone(phone);
 
-//		company website (optinal)
-		String website = Optional.ofNullable(companyRequest.getWebsite()).orElse("").trim();
-		if (!website.isBlank()) {
-			Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
-			company.setWebsite(website);
-		}
+//		public phone
+		Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(true);
+		company.setPhonePublic(isPhonePublic);
 
 //		company location 
-		String placeid = Optional.ofNullable(companyRequest.getPlaceid()).orElse("").trim();
-		String address = Optional.ofNullable(companyRequest.getAddress()).orElse("").trim();
+		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
+		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 
 //		company location is not required for informal company
-		if (isInformal) {
+		if (company.isInformalCompany()) {
 //			since it's optional, only add if address is provided
 			if (!address.isBlank())
 				company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-		} else {
-			Assert.isTrue(address != null && !address.isBlank(), "Invalid Location!");
+			else
+				company.setLocation(null);
+		}
+//		required for formal company
+		else {
+			Assert.isTrue(!address.isBlank(), "Invalid Location!");
 			company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 		}
+		
+//		description
+		String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
+		company.setDescription(description);
 
-//		company status
-		company.setStatus(CompanyStatus.PENDING);
+//		public description
+		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(true);
+		company.setDescriptionPublic(isDescriptionPublic);
+		
+//		company website
+		String website = Optional.ofNullable(request.getWebsite()).orElse("").trim();
+		if (!website.isBlank()) {
+			Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");	
+		}
+		company.setWebsite(website);
+		
+//		public website
+		Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(true);
+		company.setWebsitePublic(isWebsitePublic);
+		
+//		size
+		String size = Optional.ofNullable(request.getSize()).orElse("").trim();
+		company.setSize(size);
+
+//		public size
+		Boolean isSizePublic = Optional.ofNullable(request.getIsSizePublic()).orElse(true);
+		company.setSizePublic(isSizePublic);
 
 		return company;
 	}
@@ -169,134 +201,134 @@ public class CompanyServiceImpl implements CompanyService {
 		saveCompany(company);
 	}
 
-	@Override
-	public Company fetchCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request) {
-
-//		Informal company is a company not having physical address 
-		Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(null);
-		if (isInformal != null)
-			company.setInformalCompany(isInformal);
-
-//		name
-		String name = Optional.ofNullable(request.getName()).orElse(null);
-		if (name != null) {
-			Assert.isTrue(!name.isBlank(), "Invalid Name!");
-			company.setName(name.trim());
-		}
-
-//		industry
-		String industry = Optional.ofNullable(request.getIndustry()).orElse(null);
-		if (industry != null) {
-			Assert.isTrue(!company.getIndustry().isBlank(), "Invalid Industry!");
-			company.setIndustry(industry.trim());
-		}
-
-//		company location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
-		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-
-//		company location is not required for informal company
-		if (company.isInformalCompany()) {
-
-//			since it's optional, only add if address is provided
-			if (address != null)
-				if (!address.isBlank())
-					company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-				else
-					company.setLocation(null);
-		} else {
-			Assert.isTrue(address != null && !address.isBlank(), "Invalid Location!");
-			company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-		}
-
-//		new cover pictures
-		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
-		if (coverPictures != null) {
-			company.setPictures(coverPictures);
-		}
-
-//		email
-		String email = Optional.ofNullable(request.getEmail()).orElse(null);
-		if (email != null) {
-			email = email.trim();
-			if (!email.isBlank()) {
-				Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
-			}
-			company.setEmail(email);
-		}
-
-//		public email
-		Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(null);
-		if (isEmailPublic != null) {
-			company.setEmailPublic(isEmailPublic);
-		}
-
-//		company phone 
-		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
-//		required for informal company
-		if (company.isInformalCompany()) {
-			Assert.isTrue(!phone.isBlank(), "Phone number is required when a business doesn't have physical location!");
-			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-			company.setPhone(phone);
-		}
-//		phone is optional for formal company
-		else if (phone != null) {
-			phone = phone.trim();
-			if (!phone.isBlank()) {
-				PhoneUtil.validatePhoneNumberWithGoogleAPI(phone.trim(), "US");
-			}
-			company.setPhone(phone);
-		}
-
-//		public phone
-		Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(null);
-		if (isPhonePublic != null) {
-			company.setPhonePublic(isPhonePublic);
-		}
-
-//		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			company.setDescription(description.trim());
-		}
-
-//		public description
-		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(null);
-		if (isDescriptionPublic != null) {
-			company.setDescriptionPublic(isDescriptionPublic);
-		}
-
-//		website
-		String website = Optional.ofNullable(request.getWebsite()).orElse(null);
-		if (website != null) {
-			website =  website.trim();
-			if (!website.isBlank()) {
-				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
-			}
-			company.setWebsite(website);
-		}
-
-//		public website
-		Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(null);
-		if (isWebsitePublic != null) {
-			company.setWebsitePublic(isWebsitePublic);
-		}
-
-//		size
-		String size = Optional.ofNullable(request.getSize()).orElse(null);
-		if (size != null) {
-			company.setSize(size.trim());
-		}
-
-//		public size
-		Boolean isSizePublic = Optional.ofNullable(request.getIsSizePublic()).orElse(null);
-		if (isSizePublic != null) {
-			company.setSizePublic(isSizePublic);
-		}
-
-		return company;
-	}
+//	@Override
+//	public Company fetchCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request) {
+//
+////		Informal company is a company not having physical address 
+//		Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(null);
+//		if (isInformal != null)
+//			company.setInformalCompany(isInformal);
+//
+////		name
+//		String name = Optional.ofNullable(request.getName()).orElse(null);
+//		if (name != null) {
+//			Assert.isTrue(!name.isBlank(), "Invalid Name!");
+//			company.setName(name.trim());
+//		}
+//
+////		industry
+//		String industry = Optional.ofNullable(request.getIndustry()).orElse(null);
+//		if (industry != null) {
+//			Assert.isTrue(!company.getIndustry().isBlank(), "Invalid Industry!");
+//			company.setIndustry(industry.trim());
+//		}
+//
+////		company location
+//		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
+//		String address = Optional.ofNullable(request.getAddress()).orElse(null);
+//
+////		company location is not required for informal company
+//		if (company.isInformalCompany()) {
+//
+////			since it's optional, only add if address is provided
+//			if (address != null)
+//				if (!address.isBlank())
+//					company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+//				else
+//					company.setLocation(null);
+//		} else {
+//			Assert.isTrue(address != null && !address.isBlank(), "Invalid Location!");
+//			company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+//		}
+//
+////		new cover pictures
+//		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
+//		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
+//		if (coverPictures != null) {
+//			company.setPictures(coverPictures);
+//		}
+//
+////		email
+//		String email = Optional.ofNullable(request.getEmail()).orElse(null);
+//		if (email != null) {
+//			email = email.trim();
+//			if (!email.isBlank()) {
+//				Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
+//			}
+//			company.setEmail(email);
+//		}
+//
+////		public email
+//		Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(null);
+//		if (isEmailPublic != null) {
+//			company.setEmailPublic(isEmailPublic);
+//		}
+//
+////		company phone 
+//		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
+////		required for informal company
+//		if (company.isInformalCompany()) {
+//			Assert.isTrue(!phone.isBlank(), "Phone number is required when a business doesn't have physical location!");
+//			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
+//			company.setPhone(phone);
+//		}
+////		phone is optional for formal company
+//		else if (phone != null) {
+//			phone = phone.trim();
+//			if (!phone.isBlank()) {
+//				PhoneUtil.validatePhoneNumberWithGoogleAPI(phone.trim(), "US");
+//			}
+//			company.setPhone(phone);
+//		}
+//
+////		public phone
+//		Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(null);
+//		if (isPhonePublic != null) {
+//			company.setPhonePublic(isPhonePublic);
+//		}
+//
+////		description
+//		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+//		if (description != null) {
+//			company.setDescription(description.trim());
+//		}
+//
+////		public description
+//		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(null);
+//		if (isDescriptionPublic != null) {
+//			company.setDescriptionPublic(isDescriptionPublic);
+//		}
+//
+////		website
+//		String website = Optional.ofNullable(request.getWebsite()).orElse(null);
+//		if (website != null) {
+//			website =  website.trim();
+//			if (!website.isBlank()) {
+//				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
+//			}
+//			company.setWebsite(website);
+//		}
+//
+////		public website
+//		Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(null);
+//		if (isWebsitePublic != null) {
+//			company.setWebsitePublic(isWebsitePublic);
+//		}
+//
+////		size
+//		String size = Optional.ofNullable(request.getSize()).orElse(null);
+//		if (size != null) {
+//			company.setSize(size.trim());
+//		}
+//
+////		public size
+//		Boolean isSizePublic = Optional.ofNullable(request.getIsSizePublic()).orElse(null);
+//		if (isSizePublic != null) {
+//			company.setSizePublic(isSizePublic);
+//		}
+//
+//		return company;
+//	}
 
 	@Override
 	public Company activateCompany(Company company) {

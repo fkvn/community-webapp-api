@@ -1,6 +1,8 @@
 package mono.thainow.service.impl;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import mono.thainow.domain.post.job.JobPost;
 import mono.thainow.domain.post.marketplace.Marketplace;
 import mono.thainow.domain.post.marketplace.MarketplacePost;
 import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.review.PostReview;
 import mono.thainow.rest.request.DealRequest;
 import mono.thainow.rest.request.HousingRequest;
 import mono.thainow.rest.request.JobRequest;
@@ -28,6 +31,7 @@ import mono.thainow.service.HousingService;
 import mono.thainow.service.JobService;
 import mono.thainow.service.MarketplaceService;
 import mono.thainow.service.PostService;
+import mono.thainow.service.ReviewService;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -46,6 +50,10 @@ public class PostServiceImpl implements PostService {
 
 	@Autowired
 	private MarketplaceService marketplaceService;
+	
+	
+	@Autowired
+	private ReviewService reviewService;
 
 //	=============================================================
 
@@ -173,10 +181,20 @@ public class PostServiceImpl implements PostService {
 		default:
 			break;
 		}
-
+		
+//		delete remove
+		Set<PostReview> reviews = Optional.ofNullable(post.getReviews()).orElse(null);
+		if (reviews!= null) {
+			reviews.forEach(review -> reviewService.deleteReview(review));
+		}
+		
+//		remove attached
+		post.setReviews(null);
+		
 //		delete post
-		postDao.deletePostById(post.getId());
-
+//		postDao.deletePostById(post.getId());
+		deletePost(post);
+	
 	}
 
 	@Override
@@ -231,6 +249,12 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public Post savePost(Post post) {
 		return postDao.savePost(post);
+	}
+
+	@Override
+	public void deletePost(Post post) {
+		postDao.deletePost(post);
+		
 	}
 
 }

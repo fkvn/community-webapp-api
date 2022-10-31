@@ -5,13 +5,13 @@ import mono.thainow.rest.request.MarketplaceRequest;
 
 public interface MarketplaceService {
 
-	Marketplace fetchMarketplaceFromRequest(MarketplaceRequest request);
+	Marketplace fetchMarketplaceFromRequest(Marketplace marketplace, MarketplaceRequest request);
 
 	Marketplace createMarketplace(MarketplaceRequest request);
 	
 	Marketplace saveMarketplace(Marketplace marketplace);
 
-	Marketplace fetchMarketplaceFromUpdateRequest(Marketplace marketplace, MarketplaceRequest request);
+//	Marketplace fetchMarketplaceFromUpdateRequest(Marketplace marketplace, MarketplaceRequest request);
 
 	void removeMarketplace(Marketplace marketplace);
 

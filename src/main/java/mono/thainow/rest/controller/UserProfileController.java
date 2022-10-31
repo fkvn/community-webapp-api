@@ -119,7 +119,7 @@ public class UserProfileController {
 
 //		update user
 		User account = profile.getAccount();
-		account = userService.fetchUserFromUpdateRequest(account, request);
+		account = userService.fetchUserFromUserRequest(account, request);
 		account = userService.saveUser(account);
 	}
 

@@ -19,4 +19,6 @@ public interface ReviewService {
 	Review findActiveReviewById(Long reviewId);
 
 	void updateReview(Review review, @Valid ReviewRequest request);
+	
+	void deleteReview(Review review);
 }

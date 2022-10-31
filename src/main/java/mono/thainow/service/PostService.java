@@ -33,6 +33,8 @@ public interface PostService {
 
 	void removePost(Post post);
 	
+	void deletePost(Post post);
+	
 	Post savePost(Post post);
 
 //	Post getPost(PostType type, Object entity);

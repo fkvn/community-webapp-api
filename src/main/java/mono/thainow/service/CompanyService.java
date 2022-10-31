@@ -2,14 +2,12 @@ package mono.thainow.service;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
 import mono.thainow.domain.company.Company;
 import mono.thainow.rest.request.CompanyRequest;
 
 public interface CompanyService {
 
-	Company fetchCompanyFromRequest(CompanyRequest companyRequest);
+	Company fetchCompanyFromRequest(Company company, CompanyRequest request);
 	
 	Company createCompany(CompanyRequest companyRequest);
 	
@@ -25,7 +23,7 @@ public interface CompanyService {
 
 	void remove(Company company);
 
-	Company fetchCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request);
+//	Company fetchCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request);
 
 	Company findCompanyById(Long companyId);
 

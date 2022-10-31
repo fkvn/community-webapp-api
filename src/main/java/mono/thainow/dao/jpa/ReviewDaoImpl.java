@@ -29,4 +29,10 @@ public class ReviewDaoImpl implements ReviewDao {
 		.setParameter("id", reviewId).getSingleResult();
 	}
 
+	@Override
+	@Transactional
+	public void removeReview(Review review) {
+		entityManager.remove(review);
+	}
+
 }

@@ -1,6 +1,5 @@
 package mono.thainow.service.impl;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +19,6 @@ import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.AppleRequest;
 import mono.thainow.rest.request.FacebookRequest;
 import mono.thainow.rest.request.GoogleRequest;
-import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.request.UserRequest;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.StorageService;
@@ -121,15 +119,31 @@ public class UserServiceImpl implements UserService {
 //	}
 
 	@Override
-	public User fetchUserFromRegisterRequest(UserRequest request) {
+	public User fetchUserFromUserRequest(User user, UserRequest request) {
+		
+		if (user == null) {
+			user = new User();
+			
+//			set password 
+			String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
+			user.setPassword(encodePassword(password, true));
 
-//		signup credential 
+//			user profile
+			StorageDefault storageDefault = new StorageDefault();
+			Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault());
+			user.setPicture(picture);
+			
+//			set status
+			user.setStatus(UserStatus.ACTIVATED);
+		}
+		
+//		credential 
 		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
 		String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
 
-		Assert.isTrue(!phone.isEmpty() || !email.isEmpty(),
-				"Users must have at least email or phone number to register!");
-		User user = new User();
+		Assert.isTrue(!phone.isBlank() || !email.isBlank(),
+				"Please provide at least one email address or phone number.");
+	
 
 //		set email
 		if (!email.isBlank()) {
@@ -157,18 +171,41 @@ public class UserServiceImpl implements UserService {
 		String username = Optional.ofNullable(request.getUsername()).orElse("").trim();
 		Assert.isTrue(!username.isBlank(), "Invalid Name!");
 		user.setUsername(username);
+		
+//		location
+		String address = Optional.ofNullable(request.getAddress()).orElse(null);
+		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
 
-//		set password 
-		String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
-		user.setPassword(encodePassword(password, true));
+//		since it's optional, only add if address is provided
+		if (address != null)
+			if (!address.isBlank())
+				user.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+			else
+				user.setLocation(null);
+		
+//		public location
+		Boolean isLocationPublic = Optional.ofNullable(request.getIsLocationPublic()).orElse(false);
+		user.setLocationPublic(isLocationPublic);
 
-//		user profile
-		StorageDefault storageDefault = new StorageDefault();
-		Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault());
-		user.setPicture(picture);
+//		description
+		String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
+		user.setDescription(description.trim());
 
-//		set status
-		user.setStatus(UserStatus.ACTIVATED);
+//		public description
+		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(false);
+		user.setDescriptionPublic(isDescriptionPublic);
+		
+		
+//		website
+		String website = Optional.ofNullable(request.getWebsite()).orElse("").trim();
+		if (!website.isBlank()) {
+			Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
+		}
+		user.setWebsite(website.trim());
+
+//		public website
+		Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(false);
+		user.setWebsitePublic(isWebsitePublic);
 
 		return user;
 	}
@@ -336,130 +373,130 @@ public class UserServiceImpl implements UserService {
 		saveUser(account);
 	}
 
-	@Override
-	public User fetchUserFromUpdateRequest(User user, UserRequest request) {
-
-//		username
-		String username = Optional.ofNullable(request.getUsername()).orElse(null);
-		if (username != null) {
-			Assert.isTrue(!username.isBlank(), "Invalid Name!");
-			user.setUsername(username.trim());
-		}
-
-//		first name
-		String firstname = Optional.ofNullable(request.getFirstname()).orElse(null);
-		if (firstname != null) {
-			user.setFirstName(firstname.trim());
-		}
-
-//		last name
-		String lastname = Optional.ofNullable(request.getLastname()).orElse(null);
-		if (lastname != null) {
-			user.setLastName(lastname.trim());
-		}
-
-//		new cover pictures
-		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
-		if (coverPictures != null) {
-			user.setPictures(coverPictures);
-		}
-
-//		location
-		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
-
-//		since it's optional, only add if address is provided
-		if (address != null)
-			if (!address.isBlank())
-				user.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-			else
-				user.setLocation(null);
-
-//		public location
-		Boolean isLocationPublic = Optional.ofNullable(request.getIsLocationPublic()).orElse(null);
-		if (isLocationPublic != null) {
-			user.setLocationPublic(isLocationPublic); 
-		}
-
-//		email
-		String email = Optional.ofNullable(request.getEmail()).orElse(null);
-		if (email != null && !email.equals(user.getEmail())) {
-			email = email.trim();
-			if (!email.isBlank()) {
-				Assert.isTrue(isEmailUnique(email), "Email has already been taken.");
-				Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
-			}
-			user.setEmail(email);
-		}
-
-//		phone
-		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
-		if (phone != null && !phone.equals(user.getPhone())) {
-			phone = phone.trim();
-			if (!phone.isBlank()) {
-				Assert.isTrue(isPhoneUnique(phone), "Phone has already been taken.");
-				PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-			}
-			user.setPhone(phone);
-		}
-
-		Assert.isTrue(!user.getEmail().isEmpty() || !user.getPhone().isEmpty(),
-				"Please provide at least one email address or phone number.");
-
-//		public email
-		Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(null);
-		if (isEmailPublic != null) {
-			user.setEmailPublic(isEmailPublic);
-		}
-
-//		verify email
-		Boolean isEmailVerified = Optional.ofNullable(request.getIsEmailVerified()).orElse(null);
-		if (isEmailVerified != null) {
-			user.setEmailVerified(isEmailVerified);
-		}
-
-//		public phone
-		Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(null);
-		if (isPhonePublic != null) {
-			user.setPhonePublic(isPhonePublic);
-		}
-
-//		verify phone
-		Boolean isPhoneVerified = Optional.ofNullable(request.getIsPhoneVerified()).orElse(null);
-		if (isPhoneVerified != null) {
-			user.setPhoneVerified(isPhoneVerified);
-		}
-
-//		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			user.setDescription(description.trim());
-		}
-
-//		public description
-		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(null);
-		if (isDescriptionPublic != null) {
-			user.setDescriptionPublic(isDescriptionPublic);
-		}
-
-//		website
-		String website = Optional.ofNullable(request.getWebsite()).orElse(null);
-		if (website != null) {
-			if (!website.isEmpty()) {
-				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
-			}
-			user.setWebsite(website.trim());
-		}
-
-//		public website
-		Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(null);
-		if (isWebsitePublic != null) {
-			user.setWebsitePublic(isWebsitePublic);
-		}
-
-		return user;
-	}
+//	@Override
+//	public User fetchUserFromUpdateRequest(User user, UserRequest request) {
+//
+////		username
+//		String username = Optional.ofNullable(request.getUsername()).orElse(null);
+//		if (username != null) {
+//			Assert.isTrue(!username.isBlank(), "Invalid Name!");
+//			user.setUsername(username.trim());
+//		}
+//
+////		first name
+//		String firstname = Optional.ofNullable(request.getFirstname()).orElse(null);
+//		if (firstname != null) {
+//			user.setFirstName(firstname.trim());
+//		}
+//
+////		last name
+//		String lastname = Optional.ofNullable(request.getLastname()).orElse(null);
+//		if (lastname != null) {
+//			user.setLastName(lastname.trim());
+//		}
+//
+////		new cover pictures
+//		List<StorageRequest> coverPictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
+//		List<Storage> coverPictures = storageService.fetchStoragesFromRequests(coverPictureRequests);
+//		if (coverPictures != null) {
+//			user.setPictures(coverPictures);
+//		}
+//
+////		location
+//		String address = Optional.ofNullable(request.getAddress()).orElse(null);
+//		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
+//
+////		since it's optional, only add if address is provided
+//		if (address != null)
+//			if (!address.isBlank())
+//				user.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+//			else
+//				user.setLocation(null);
+//
+////		public location
+//		Boolean isLocationPublic = Optional.ofNullable(request.getIsLocationPublic()).orElse(null);
+//		if (isLocationPublic != null) {
+//			user.setLocationPublic(isLocationPublic); 
+//		}
+//
+////		email
+//		String email = Optional.ofNullable(request.getEmail()).orElse(null);
+//		if (email != null && !email.equals(user.getEmail())) {
+//			email = email.trim();
+//			if (!email.isBlank()) {
+//				Assert.isTrue(isEmailUnique(email), "Email has already been taken.");
+//				Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
+//			}
+//			user.setEmail(email);
+//		}
+//
+////		phone
+//		String phone = Optional.ofNullable(request.getPhone()).orElse(null);
+//		if (phone != null && !phone.equals(user.getPhone())) {
+//			phone = phone.trim();
+//			if (!phone.isBlank()) {
+//				Assert.isTrue(isPhoneUnique(phone), "Phone has already been taken.");
+//				PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
+//			}
+//			user.setPhone(phone);
+//		}
+//
+//		Assert.isTrue(!user.getEmail().isEmpty() || !user.getPhone().isEmpty(),
+//				"Please provide at least one email address or phone number.");
+//
+////		public email
+//		Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(null);
+//		if (isEmailPublic != null) {
+//			user.setEmailPublic(isEmailPublic);
+//		}
+//
+////		verify email
+//		Boolean isEmailVerified = Optional.ofNullable(request.getIsEmailVerified()).orElse(null);
+//		if (isEmailVerified != null) {
+//			user.setEmailVerified(isEmailVerified);
+//		}
+//
+////		public phone
+//		Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(null);
+//		if (isPhonePublic != null) {
+//			user.setPhonePublic(isPhonePublic);
+//		}
+//
+////		verify phone
+//		Boolean isPhoneVerified = Optional.ofNullable(request.getIsPhoneVerified()).orElse(null);
+//		if (isPhoneVerified != null) {
+//			user.setPhoneVerified(isPhoneVerified);
+//		}
+//
+////		description
+//		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+//		if (description != null) {
+//			user.setDescription(description.trim());
+//		}
+//
+////		public description
+//		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(null);
+//		if (isDescriptionPublic != null) {
+//			user.setDescriptionPublic(isDescriptionPublic);
+//		}
+//
+////		website
+//		String website = Optional.ofNullable(request.getWebsite()).orElse(null);
+//		if (website != null) {
+//			if (!website.isEmpty()) {
+//				Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
+//			}
+//			user.setWebsite(website.trim());
+//		}
+//
+////		public website
+//		Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(null);
+//		if (isWebsitePublic != null) {
+//			user.setWebsitePublic(isWebsitePublic);
+//		}
+//
+//		return user;
+//	}
 
 
 

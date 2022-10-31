@@ -34,9 +34,12 @@ public class DealServiceImpl implements DealService {
 	private StorageService storageService;
 
 	@Override
-	public Deal fetchDealFromRequest(DealRequest request) {
+	public Deal fetchDealFromRequest(Deal deal, DealRequest request) {
 
-		Deal deal = new Deal();
+		if (deal == null) {
+			deal = new Deal();
+			deal.setStatus(PostStatus.AVAILABLE);
+		}
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
@@ -62,32 +65,28 @@ public class DealServiceImpl implements DealService {
 		deal.setContactInfo(contactInfo);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			deal.setDescription(description.trim());
-		}
+		String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
+		deal.setDescription(description.trim());
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
-		if (category != null) {
-			deal.setCategory(category.trim());
-		}
+		String category = Optional.ofNullable(request.getCategory()).orElse("").trim();
+		deal.setCategory(category);
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		if (expiredOn != null) {
-			deal.setExpiredOn(expiredOn);
-		}
+		deal.setExpiredOn(expiredOn);
 
-//		deal status
-		deal.setStatus(PostStatus.AVAILABLE);
+//		status
+		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(deal.getStatus());
+		Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
+		deal.setStatus(status);
 
 		return deal;
 	}
 
 	@Override
 	public Deal createDeal(DealRequest request) {
-		return saveDeal(fetchDealFromRequest(request));
+		return saveDeal(fetchDealFromRequest(null, request));
 	}
 
 	@Override
@@ -95,69 +94,69 @@ public class DealServiceImpl implements DealService {
 		return dealDao.saveDeal(deal);
 	}
 
-	@Override
-	public Deal fetchDealFromUpdateRequest(Deal deal, DealRequest request) {
-
-//		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null);
-		if (title != null) {
-			Assert.isTrue(!deal.getTitle().isBlank(), "Invalid Title");
-			deal.setTitle(title.trim());
-		}
-		
-//		location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
-		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-		if (address != null) {
-			Assert.isTrue(!address.isBlank(), "Invalid Location!");
-			deal.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-		}
-
-//		new cover pictures
-		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
-		if (pictures != null) {
-			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
-			deal.setPictures(pictures);
-		}
-		
-//		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
-		if (contactInfo != null) {
-			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
-			deal.setContactInfo(contactInfo);
-		}
-
-//		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			deal.setDescription(description.trim());
-		}
-		
-
-//		category
-		String category = Optional.ofNullable(request.getCategory()).orElse(null);
-		if (category != null) {
-			deal.setCategory(category.trim());
-		}
-
-//		expiration Date
-		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		deal.setExpiredOn(expiredOn);
-
-//		deal status
-		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
-		if (status != null) {
-			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
-			deal.setStatus(status);
-		}
-
-		return deal;
-	}
+//	@Override
+//	public Deal fetchDealFromUpdateRequest(Deal deal, DealRequest request) {
+//
+////		title
+//		String title = Optional.ofNullable(request.getTitle()).orElse(null);
+//		if (title != null) {
+//			Assert.isTrue(!deal.getTitle().isBlank(), "Invalid Title");
+//			deal.setTitle(title.trim());
+//		}
+//		
+////		location
+//		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
+//		String address = Optional.ofNullable(request.getAddress()).orElse(null);
+//		if (address != null) {
+//			Assert.isTrue(!address.isBlank(), "Invalid Location!");
+//			deal.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+//		}
+//
+////		new cover pictures
+//		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
+//		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
+//		if (pictures != null) {
+//			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
+//			deal.setPictures(pictures);
+//		}
+//		
+////		contact information
+//		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
+//		if (contactInfo != null) {
+//			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
+//			deal.setContactInfo(contactInfo);
+//		}
+//
+////		description
+//		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+//		if (description != null) {
+//			deal.setDescription(description.trim());
+//		}
+//		
+//
+////		category
+//		String category = Optional.ofNullable(request.getCategory()).orElse(null);
+//		if (category != null) {
+//			deal.setCategory(category.trim());
+//		}
+//
+////		expiration Date
+//		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
+//		deal.setExpiredOn(expiredOn);
+//
+////		deal status
+//		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
+//		if (status != null) {
+//			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
+//			deal.setStatus(status);
+//		}
+//
+//		return deal;
+//	}
 
 	@Override
 	public void removeDeal(Deal deal) {
-		deal.setStatus(PostStatus.DELETED);
+		deal.setStatus(PostStatus.REMOVED);
 		saveDeal(deal);
 	}
 
@@ -169,8 +168,7 @@ public class DealServiceImpl implements DealService {
 
 	@Override
 	public void updateDeal(Deal deal, DealRequest request) {
-		fetchDealFromUpdateRequest(deal, request);
-		saveDeal(deal);
+		saveDeal(fetchDealFromRequest(deal, request));
 	}
 
 	@Override

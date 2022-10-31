@@ -5,13 +5,13 @@ import mono.thainow.rest.request.DealRequest;
 
 public interface DealService {
 
-	Deal fetchDealFromRequest(DealRequest request);
+	Deal fetchDealFromRequest(Deal deal, DealRequest request);
 
 	Deal createDeal(DealRequest request);
 	
 	Deal saveDeal(Deal deal);
 
-	Deal fetchDealFromUpdateRequest(Deal deal, DealRequest request);
+//	Deal fetchDealFromUpdateRequest(Deal deal, DealRequest request);
 
 	void removeDeal(Deal deal);
 

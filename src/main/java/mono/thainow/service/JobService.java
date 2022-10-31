@@ -5,13 +5,13 @@ import mono.thainow.rest.request.JobRequest;
 
 public interface JobService {
 
-	Job fetchJobFromRequest(JobRequest request);
+	Job fetchJobFromRequest(JobRequest request, Job job);
 
 	Job createJob(JobRequest request);
 	
 	Job saveJob(Job job);
 
-	Job fetchJobFromUpdateRequest(Job job, JobRequest request);
+//	Job fetchJobFromUpdateRequest(Job job, JobRequest request);
 
 	void removeJob(Job job);
 

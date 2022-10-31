@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
 		Assert.isTrue(isVerified, "Users must be verified to register!");
 
 //		retrieve user information
-		User user = userService.fetchUserFromRegisterRequest(request);
+		User user = userService.fetchUserFromUserRequest(null, request);
 
 //		persist user info into database 
 		user = userService.saveUser(user);

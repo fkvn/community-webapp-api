@@ -34,9 +34,12 @@ public class JobServiceImpl implements JobService {
 	private StorageService storageService;
 
 	@Override
-	public Job fetchJobFromRequest(JobRequest request) {
+	public Job fetchJobFromRequest(JobRequest request, Job job) {
 
-		Job job = new Job();
+		if (job == null) {
+			job = new Job();
+			job.setStatus(PostStatus.AVAILABLE);
+		}
 
 //		title
 		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
@@ -66,38 +69,41 @@ public class JobServiceImpl implements JobService {
 		job.setRemote(isRemote);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		job.setDescription(description != null ? description.trim() : null);
+		String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
+		job.setDescription(description.trim());
 
 //		positions
-		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
+		TreeSet<String> positions = Optional.ofNullable(request.getPositions())
+				.orElse(new TreeSet<>(String.CASE_INSENSITIVE_ORDER));
 		job.setPositions(positions);
 
 //		experience
-		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
-		job.setExperience(experience != null ? experience.trim() : null);
+		String experience = Optional.ofNullable(request.getExperience()).orElse("").trim();
+		job.setExperience(experience);
 
 //		salary
-		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
-		job.setSalary(salary != null ? salary.trim() : null);
+		String salary = Optional.ofNullable(request.getSalary()).orElse("").trim();
+		job.setSalary(salary);
 
 //		skills
-		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
-		job.setSkills(skills != null ? skills.trim() : null);
+		String skills = Optional.ofNullable(request.getSkills()).orElse("").trim();
+		job.setSkills(skills);
 
 //		expiration Date
 		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
 		job.setExpiredOn(expiredOn);
 
-//		job status
-		job.setStatus(PostStatus.AVAILABLE);
+//		status
+		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(job.getStatus());
+		Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
+		job.setStatus(status);
 
 		return job;
 	}
 
 	@Override
 	public Job createJob(JobRequest request) {
-		return saveJob(fetchJobFromRequest(request));
+		return saveJob(fetchJobFromRequest(request, null));
 	}
 
 	@Override
@@ -105,99 +111,98 @@ public class JobServiceImpl implements JobService {
 		return jobDao.saveJob(job);
 	}
 
-	@Override
-	public Job fetchJobFromUpdateRequest(Job job, JobRequest request) {
-
-//		title
-		String title = Optional.ofNullable(request.getTitle()).orElse(null);
-		if (title != null) {
-			Assert.isTrue(!title.isBlank(), "Invalid Title");
-			job.setTitle(title.trim());
-		}
-
-//		location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
-		String address = Optional.ofNullable(request.getAddress()).orElse(null);
-		if (address != null) {
-			Assert.isTrue(!address.isBlank(), "Invalid Location!");
-			job.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-		}
-
-//		new cover pictures
-		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
-		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
-		if (pictures != null) {
-			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
-			job.setPictures(pictures);
-		}
-
-//		contact information
-		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
-		if (contactInfo != null) {
-			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
-			job.setContactInfo(contactInfo);
-		}
-
-//		remote job
-		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(null);
-		if (isRemote != null) {
-			job.setRemote(isRemote);
-		}
-
-//		description
-		String description = Optional.ofNullable(request.getDescription()).orElse(null);
-		if (description != null) {
-			job.setDescription(description.trim());
-		}
-
-//		positions
-		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
-		if (positions != null && positions.size() > 0) {
-			job.setPositions(positions);
-		}
-
-//		experience
-		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
-		if (experience != null) {
-			job.setExperience(experience.trim());
-		}
-
-//		salary
-		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
-		if (salary != null) {
-			job.setSalary(salary.trim());
-		}
-		
-//		skills
-		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
-		if (skills != null) {
-			job.setSkills(skills.trim());
-		}
-
-//		expiration Date
-		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		job.setExpiredOn(expiredOn);
-
-//		job status
-		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
-		if (status != null) {
-			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
-			job.setStatus(status);
-		}
-
-		return job;
-	}
+//	@Override
+//	public Job fetchJobFromUpdateRequest(Job job, JobRequest request) {
+//
+////		title
+//		String title = Optional.ofNullable(request.getTitle()).orElse(null);
+//		if (title != null) {
+//			Assert.isTrue(!title.isBlank(), "Invalid Title");
+//			job.setTitle(title.trim());
+//		}
+//
+////		location
+//		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
+//		String address = Optional.ofNullable(request.getAddress()).orElse(null);
+//		if (address != null) {
+//			Assert.isTrue(!address.isBlank(), "Invalid Location!");
+//			job.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+//		}
+//
+////		new cover pictures
+//		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(null);
+//		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
+//		if (pictures != null) {
+//			Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
+//			job.setPictures(pictures);
+//		}
+//
+////		contact information
+//		TreeMap<String, String> contactInfo = Optional.ofNullable(request.getContactInfo()).orElse(null);
+//		if (contactInfo != null) {
+//			Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
+//			job.setContactInfo(contactInfo);
+//		}
+//
+////		remote job
+//		Boolean isRemote = Optional.ofNullable(request.getIsRemote()).orElse(null);
+//		if (isRemote != null) {
+//			job.setRemote(isRemote);
+//		}
+//
+////		description
+//		String description = Optional.ofNullable(request.getDescription()).orElse(null);
+//		if (description != null) {
+//			job.setDescription(description.trim());
+//		}
+//
+////		positions
+//		TreeSet<String> positions = Optional.ofNullable(request.getPositions()).orElse(null);
+//		if (positions != null && positions.size() > 0) {
+//			job.setPositions(positions);
+//		}
+//
+////		experience
+//		String experience = Optional.ofNullable(request.getExperience()).orElse(null);
+//		if (experience != null) {
+//			job.setExperience(experience.trim());
+//		}
+//
+////		salary
+//		String salary = Optional.ofNullable(request.getSalary()).orElse(null);
+//		if (salary != null) {
+//			job.setSalary(salary.trim());
+//		}
+//
+////		skills
+//		String skills = Optional.ofNullable(request.getSkills()).orElse(null);
+//		if (skills != null) {
+//			job.setSkills(skills.trim());
+//		}
+//
+////		expiration Date
+//		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
+//		job.setExpiredOn(expiredOn);
+//
+////		job status
+//		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(null);
+//		if (status != null) {
+//			Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
+//			job.setStatus(status);
+//		}
+//
+//		return job;
+//	}
 
 	@Override
 	public void removeJob(Job job) {
-		job.setStatus(PostStatus.DELETED);
+		job.setStatus(PostStatus.REMOVED);
 		saveJob(job);
 	}
 
 	@Override
 	public void updateJob(Job job, JobRequest request) {
-		job = fetchJobFromUpdateRequest(job, request);
-		saveJob(job);
+		saveJob(fetchJobFromRequest(request, job));
 	}
 
 	@Override

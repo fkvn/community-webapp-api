@@ -5,13 +5,13 @@ import mono.thainow.rest.request.HousingRequest;
 
 public interface HousingService {
 
-	Housing fetchHousingFromRequest(HousingRequest request, Housing housing);
+	Housing fetchHousingFromRequest(Housing housing, HousingRequest request);
 
 	Housing createHousing(HousingRequest request);
 	
 	Housing saveHousing(Housing housing);
 
-	Housing fetchHousingFromUpdateRequest(Housing housing, HousingRequest request);
+//	Housing fetchHousingFromUpdateRequest(Housing housing, HousingRequest request);
 
 	void removeHousing(Housing housing);
 

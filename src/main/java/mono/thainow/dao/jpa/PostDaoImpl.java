@@ -124,6 +124,12 @@ public class PostDaoImpl implements PostDao {
 		entityManager.remove(post);
 	}
 
+	@Override
+	@Transactional
+	public void deletePost(Post post) {
+		entityManager.remove(post);
+	}
+
 //	@Override
 //	public Post getPost(PostType type, Object entity) {
 //		String sql = "";

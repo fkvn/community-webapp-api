@@ -28,7 +28,7 @@ public interface UserService {
 
 	String encodePassword(String password, boolean validate);
 
-	User fetchUserFromRegisterRequest(UserRequest signUpRequest);
+	User fetchUserFromUserRequest(User user, UserRequest signUpRequest);
 
 	User fetchUserFromGoogleRequest(GoogleRequest request);
 	
@@ -40,7 +40,7 @@ public interface UserService {
 
 	void remove(User account);
 
-	User fetchUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
+//	User fetchUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
 
 	User activateUserById(Long userId);
 

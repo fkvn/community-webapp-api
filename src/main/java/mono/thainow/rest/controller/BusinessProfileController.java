@@ -124,7 +124,7 @@ public class BusinessProfileController {
 
 //		update company
 		Company company = profile.getCompany();
-		company = companyService.fetchCompanyFromUpdateRequest(company, request);
+		company = companyService.fetchCompanyFromRequest(company, request);
 		company = companyService.saveCompany(company);
 
 		return profile;
