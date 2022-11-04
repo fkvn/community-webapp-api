@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.Getter;
 import lombok.Setter;
-import mono.thainow.domain.review.Review;
 import mono.thainow.view.View;
 
 @Getter
@@ -22,7 +21,7 @@ public class SearchReviewResponse<T> extends SearchResponse<T> {
 		try {
 
 			BigDecimal avgRating = new BigDecimal(
-					this.getFetchResult().stream().reduce(0, (total, e) -> total + ((Review) e).getRate(), Integer::sum)
+					this.getCategory().keySet().stream().reduce(0, (total, e) -> total + e * this.getCategory().get(e).intValue(), Integer::sum)
 							/ (double) this.getTotalCount()).setScale(1, RoundingMode.HALF_UP);
 
 			return avgRating.doubleValue();

@@ -23,10 +23,9 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.search.engine.backend.types.Aggregable;
 import org.hibernate.search.engine.backend.types.Sortable;
-import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -61,13 +60,17 @@ public class Review implements Serializable {
 
 	@Id
 	@GeneratedValue
-	@GenericField
+	@GenericField(name = "id")
+	@GenericField(name = "postId")
+	@GenericField(name = "reviewByProfileId")
+	@GenericField(name = "reviewOfProfileId")
+	@GenericField(name = "reviewOfPostId")
 	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "REVIEWER_ID")
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
+	@IndexedEmbedded(includePaths = { "reviewerId" })
 	private Profile reviewer;
 
 	@UpdateTimestamp

@@ -186,7 +186,7 @@ public class FullTextSearchController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchReviewResponse<?> searchReview(@RequestParam(defaultValue = "-1") Long reviewerId,
-			@RequestParam ReviewType type, @RequestParam Long id, @RequestParam(defaultValue = "Date") String sort,
+			@RequestParam ReviewType type, @RequestParam Long id, @RequestParam(defaultValue = "Default") String sort,
 			@RequestParam(defaultValue = "desc") String sortOrder, @RequestParam(defaultValue = "1") int page,
 			@RequestParam(defaultValue = "20") int limit) {
 

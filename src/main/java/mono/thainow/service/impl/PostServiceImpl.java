@@ -183,7 +183,7 @@ public class PostServiceImpl implements PostService {
 		}
 		
 //		delete remove
-		Set<PostReview> reviews = Optional.ofNullable(post.getReviews()).orElse(null);
+		List<PostReview> reviews = Optional.ofNullable(post.getReviews()).orElse(null);
 		if (reviews!= null) {
 			reviews.forEach(review -> reviewService.deleteReview(review));
 		}

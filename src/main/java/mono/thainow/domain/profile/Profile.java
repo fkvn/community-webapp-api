@@ -3,7 +3,7 @@ package mono.thainow.domain.profile;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -32,6 +32,7 @@ import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.review.ProfileReview;
+import mono.thainow.domain.review.Review;
 import mono.thainow.domain.user.User;
 import mono.thainow.view.View;
 
@@ -56,7 +57,8 @@ public abstract class Profile implements Serializable {
 	@Id
 	@GeneratedValue
 	@GenericField(name = "id")
-	@GenericField(name = "revieweeId")
+	@GenericField(name = "postOwnerId")
+	@GenericField(name = "profileRevieweeId")
 	@GenericField(name = "reviewerId")
 	private Long id;
 
@@ -74,20 +76,21 @@ public abstract class Profile implements Serializable {
 //	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 //	@JsonIdentityReference(alwaysAsId = true)
 	private User account;
-
-//	@JsonIgnore
-//	@OneToMany(mappedBy = "reviewer", fetch = FetchType.LAZY)
-//	@IndexedEmbedded(includePaths = { "id" })
-//	private Set<Review> reviewedList;
+ 
+	@JsonIgnore
+	@OneToMany(mappedBy = "reviewer", fetch = FetchType.LAZY)
+	@IndexedEmbedded(includePaths = { "reviewByProfileId" })
+	private List<Review> reviewedList;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
-	@IndexedEmbedded
-	private Set<ProfileReview> reviews;
+	@IndexedEmbedded(includePaths = { "reviewOfProfileId" })
+	private List<ProfileReview> reviews;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-	private Set<Post> posts;
+	@IndexedEmbedded(includePaths = { "postId" })
+	private List<Post> posts;
 
 	public int getTotalReview() {
 		try {

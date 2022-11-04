@@ -36,7 +36,7 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public Review createReview(Profile reviewer, ReviewRequest request) {
 
-		Review review = null;
+		
 
 		switch (request.getType()) {
 		case POST_REVIEW: {
@@ -48,11 +48,11 @@ public class ReviewServiceImpl implements ReviewService {
 			Assert.isTrue(!reviewee.getOwner().getId().equals(reviewer.getId()),
 					"Post owner can't review their own posts!");
 
-			review = new PostReview(reviewer, reviewee);
-
+			PostReview review = new PostReview(reviewer, reviewee);
+			return saveReview(fetchReviewFromRequest(review, request));
 		}
 
-			break;
+	
 		case PROFILE_REVIEW: {
 			Long profileReviewId = Optional.ofNullable(request.getProfileId()).orElse(null);
 			Assert.isTrue(profileReviewId != null, "Invalid Reviewee");
@@ -61,17 +61,18 @@ public class ReviewServiceImpl implements ReviewService {
 			Assert.isTrue(!reviewer.getAccount().getId().equals(reviewee.getAccount().getId()),
 					"User can't review their own profiles!");
 
-			review = new ProfileReview(reviewer, reviewee);
-
+			ProfileReview review = new ProfileReview(reviewer, reviewee);
+			
+			return saveReview(fetchReviewFromRequest(review, request));
 		}
-			break;
+	
 		default:
 			throw new BadRequest("Invalid Review Type!");
 		}
 
-		review = saveReview(fetchReviewFromRequest(review, request));
+		
 
-		return review;
+//		return review;
 	}
 
 	@Override
@@ -96,23 +97,23 @@ public class ReviewServiceImpl implements ReviewService {
 		return review;
 	}
 
-	@Override
-	public Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request) {
-
-//		rate
-		Integer rate = Optional.ofNullable(request.getRate()).orElse(null);
-		if (rate != null) {
-			review.setRate(rate);
-		}
-
-//		comment
-		String comment = Optional.ofNullable(request.getComment()).orElse(null).trim();
-		if (comment != null) {
-			review.setComment(comment);
-		}
-
-		return review;
-	}
+//	@Override
+//	public Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request) {
+//
+////		rate
+//		Integer rate = Optional.ofNullable(request.getRate()).orElse(null);
+//		if (rate != null) {
+//			review.setRate(rate);
+//		}
+//
+////		comment
+//		String comment = Optional.ofNullable(request.getComment()).orElse(null).trim();
+//		if (comment != null) {
+//			review.setComment(comment);
+//		}
+//
+//		return review;
+//	}
 
 	@Override
 	public Review findActiveReviewById(Long reviewId) {
@@ -121,7 +122,7 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	public void updateReview(Review review, @Valid ReviewRequest request) {
-		saveReview(fetchReviewFromUpdateRequest(review, request));
+		saveReview(fetchReviewFromRequest(review, request));
 	}
 
 	

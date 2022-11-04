@@ -12,7 +12,7 @@ public interface ReviewService {
 
 	Review fetchReviewFromRequest(Review review, ReviewRequest request);
 	
-	Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request);
+//	Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request);
 
 	Review saveReview(Review newReview);
 

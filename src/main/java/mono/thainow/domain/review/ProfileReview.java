@@ -43,7 +43,7 @@ public class ProfileReview extends Review {
 	@ManyToOne
 	@JoinColumn(name = "REVIEWEE_PROFILE_ID")
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-	@IndexedEmbedded(includePaths = { "revieweeId" })
+	@IndexedEmbedded(includePaths = { "profileRevieweeId" })
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
 	@JsonProperty("profileId")

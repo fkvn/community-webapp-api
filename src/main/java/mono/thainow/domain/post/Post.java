@@ -3,7 +3,7 @@ package mono.thainow.domain.post;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -54,11 +54,13 @@ public abstract class Post implements Serializable {
 	@Id
 	@GeneratedValue
 	@GenericField
+	@GenericField(name = "postId")
+	@GenericField(name = "postRevieweeId")
 	private Long id;
 
 	@ManyToOne
 	@JsonIgnore
-	@IndexedEmbedded( includePaths = { "id" })
+	@IndexedEmbedded( includePaths = { "postOwnerId" })
 	private Profile owner;
 
 	public Profile getPostOwner() {
@@ -75,8 +77,8 @@ public abstract class Post implements Serializable {
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
-	@IndexedEmbedded
-	public Set<PostReview> reviews;
+	@IndexedEmbedded( includePaths = { "reviewOfPostId" })
+	public List<PostReview> reviews;
 
 	public int getTotalReview() {
 		return reviews.size();

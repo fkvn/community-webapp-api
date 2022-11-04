@@ -39,15 +39,15 @@ public class ReviewController {
 	@AuthenticatedAccess
 	public Long createPostReview(@Valid @RequestBody ReviewRequest request) {
 
-		Long profileId = Optional.ofNullable(request.getReviewerId()).orElse(null);
-		Assert.isTrue(profileId != null, "Missing profile information!");
+		Long reviewerId = Optional.ofNullable(request.getReviewerId()).orElse(null);
+		Assert.isTrue(reviewerId != null, "Missing profile information!");
 
 		ReviewType type = Optional.ofNullable(request.getType()).orElse(null);
 		
 		Assert.isTrue(type != null && (type == ReviewType.POST_REVIEW || type == ReviewType.PROFILE_REVIEW),
 				"Invalid Review Type!");
 
-		Profile reviewer = profileService.findProfileById(profileId);
+		Profile reviewer = profileService.findProfileById(reviewerId);
 		AuthUtil.authorizedAccess(reviewer, true);
 
 		Review newReview = reviewService.createReview(reviewer, request);

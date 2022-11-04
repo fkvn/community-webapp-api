@@ -483,8 +483,7 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 //	=======================================================================================
-	
-	
+
 	@Override
 	public SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
 			double centerLng, String industry, String sort, String sortOrder, String within, int radius,
@@ -552,7 +551,7 @@ public class SearchDaoImpl implements SearchDao {
 
 		return companies;
 	}
-	
+
 	@Override
 	public SearchResult<DealPost> searchDealPost(Long ownerId, String keywords, int limit, int page, double centerLat,
 			double centerLng, String category, String sort, String sortOrder, String within, int radius,
@@ -566,7 +565,7 @@ public class SearchDaoImpl implements SearchDao {
 
 			if (ownerId > 0) {
 //				owner
-				b.must(f.match().field("owner.id").matching(ownerId));
+				b.must(f.match().field("owner.postOwnerId").matching(ownerId));
 
 //				status
 				b.must(f.terms().field("deal.status").matchingAny(PostStatus.AVAILABLE, PostStatus.PRIVATE,
@@ -641,7 +640,7 @@ public class SearchDaoImpl implements SearchDao {
 
 			if (ownerId > 0) {
 //				owner
-				b.must(f.match().field("owner.id").matching(ownerId));
+				b.must(f.match().field("owner.postOwnerId").matching(ownerId));
 
 //				status
 				b.must(f.terms().field("housing.status").matchingAny(PostStatus.AVAILABLE, PostStatus.PRIVATE,
@@ -768,7 +767,7 @@ public class SearchDaoImpl implements SearchDao {
 
 			if (ownerId > 0) {
 //				owner
-				b.must(f.match().field("owner.id").matching(ownerId));
+				b.must(f.match().field("owner.postOwnerId").matching(ownerId));
 
 //				status
 				b.must(f.terms().field("job.status").matchingAny(PostStatus.AVAILABLE, PostStatus.PRIVATE,
@@ -861,7 +860,7 @@ public class SearchDaoImpl implements SearchDao {
 
 					if (ownerId > 0) {
 //						owner
-						b.must(f.match().field("owner.id").matching(ownerId));
+						b.must(f.match().field("owner.postOwnerId").matching(ownerId));
 
 //						status
 						b.must(f.terms().field("marketplace.status").matchingAny(PostStatus.AVAILABLE,
@@ -938,18 +937,16 @@ public class SearchDaoImpl implements SearchDao {
 		return marketplaces;
 	}
 
-
-
 	@Override
-	public SearchResult<PostReview> searchPostReview(Long postId, String sort, String sortOrder, int limit,
-			int page, AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId) {
+	public SearchResult<PostReview> searchPostReview(Long postId, String sort, String sortOrder, int limit, int page,
+			AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
 		SearchResult<PostReview> reviews = searchSession.search(PostReview.class).where(f -> f.bool(b -> {
 
 //			post id
-			b.must(f.match().field("post.id").matching(postId));
+			b.must(f.match().field("post.postOwnerId").matching(postId));
 
 //			status
 			b.must(f.terms().field("status").matchingAny(ReviewStatus.ACTIVATED));
@@ -987,23 +984,25 @@ public class SearchDaoImpl implements SearchDao {
 		SearchResult<ProfileReview> reviews = searchSession.search(ProfileReview.class).where(f -> f.bool(b -> {
 
 //			profile id
-			b.must(f.match().field("profile.revieweeId").matching(profileId));
+			b.must(f.match().field("profile.profileRevieweeId").matching(profileId));
 
 //			status
 			b.must(f.terms().field("status").matchingAny(ReviewStatus.ACTIVATED));
 
 		})).aggregation(aggregationKey, f -> f.terms().field("rate", Integer.class)).sort(f -> f.composite(b -> {
+
+			String field = "";
+
 			switch (sort) {
-			case "Date": {
-				if (sortOrder.equals("desc")) {
-					b.add(f.field("updatedOn").desc());
-				} else {
-					b.add(f.field("updatedOn").asc());
-				}
-			}
-				break;
+			case "Date":
+				field = "updatedOn";
 			case "Rating":
-				b.add(f.field("rate").desc());
+				field = "rate";
+				if (sortOrder.equals("desc")) {
+					b.add(f.field(field).desc());
+				} else {
+					b.add(f.field(field).asc());
+				}
 				break;
 			default:
 //				score, or other qualities

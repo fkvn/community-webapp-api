@@ -44,7 +44,8 @@ public class PostReview extends Review {
 	@ManyToOne
 	@JoinColumn(name = "REVIEWEE_ID")
 	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-	@IndexedEmbedded( includePaths = { "id" })
+	@IndexedEmbedded(includePaths = { "postRevieweeId" })
+//	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.SHALLOW)
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
 	@JsonProperty("postId")
