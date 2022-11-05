@@ -946,23 +946,24 @@ public class SearchDaoImpl implements SearchDao {
 		SearchResult<PostReview> reviews = searchSession.search(PostReview.class).where(f -> f.bool(b -> {
 
 //			post id
-			b.must(f.match().field("post.postOwnerId").matching(postId));
+			b.must(f.match().field("post.postRevieweeId").matching(postId));
 
 //			status
 			b.must(f.terms().field("status").matchingAny(ReviewStatus.ACTIVATED));
 
 		})).aggregation(aggregationKey, f -> f.terms().field("rate", Integer.class)).sort(f -> f.composite(b -> {
+			String field = "";
+
 			switch (sort) {
-			case "Date": {
-				if (sortOrder.equals("desc")) {
-					b.add(f.field("updatedOn").desc());
-				} else {
-					b.add(f.field("updatedOn").asc());
-				}
-			}
-				break;
+			case "Date":
+				field = "updatedOn";
 			case "Rating":
-				b.add(f.field("rate").desc());
+				field = "rate";
+				if (sortOrder.equals("desc")) {
+					b.add(f.field(field).desc());
+				} else {
+					b.add(f.field(field).asc());
+				}
 				break;
 			default:
 //				score, or other qualities
@@ -998,11 +999,14 @@ public class SearchDaoImpl implements SearchDao {
 				field = "updatedOn";
 			case "Rating":
 				field = "rate";
+				
+//				sort order 
 				if (sortOrder.equals("desc")) {
 					b.add(f.field(field).desc());
 				} else {
 					b.add(f.field(field).asc());
 				}
+				
 				break;
 			default:
 //				score, or other qualities
