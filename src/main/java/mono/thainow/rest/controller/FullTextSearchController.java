@@ -95,7 +95,8 @@ public class FullTextSearchController {
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		SearchResponse<?> res = searchService.searchDealPost(requesterId, ownerId, category, keywords,
-				location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft, bottomRight);
+				location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft,
+				bottomRight);
 
 		res.setLocation(location);
 
@@ -106,9 +107,9 @@ public class FullTextSearchController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> searchJobPost(@RequestParam(defaultValue = "-1") Long ownerId,
-			@RequestParam(defaultValue = "") String keywords, @RequestParam(defaultValue = "All") String position,
-			@RequestParam(defaultValue = "All") String experience, @RequestParam(defaultValue = "All") String skills,
-			@RequestParam(defaultValue = "false") Boolean remote,
+			@RequestParam(defaultValue = "-1") Long requesterId, @RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String position, @RequestParam(defaultValue = "All") String experience,
+			@RequestParam(defaultValue = "All") String skills, @RequestParam(defaultValue = "false") Boolean remote,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
@@ -119,9 +120,9 @@ public class FullTextSearchController {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
-		SearchResponse<?> res = searchService.searchJobPost(ownerId, keywords, position, experience, skills, remote,
-				location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft,
-				bottomRight);
+		SearchResponse<?> res = searchService.searchJobPost(requesterId, ownerId, keywords, position, experience,
+				skills, remote, location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius,
+				topLeft, bottomRight);
 
 		res.setLocation(location);
 
@@ -132,12 +133,12 @@ public class FullTextSearchController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> searchHousingPost(@RequestParam(defaultValue = "-1") Long ownerId,
-			@RequestParam(defaultValue = "") String keywords, @RequestParam(defaultValue = "All") String type,
-			@RequestParam(defaultValue = "All") String costType, @RequestParam(defaultValue = "0") Double minCost,
-			@RequestParam(defaultValue = "0") Double maxCost, @RequestParam(defaultValue = "0") Integer guest,
-			@RequestParam(defaultValue = "0") Integer bed, @RequestParam(defaultValue = "0") Integer parking,
-			@RequestParam(defaultValue = "0") Integer bath, @RequestParam(defaultValue = "All") String amenity,
-			@RequestParam(defaultValue = "All") String category,
+			@RequestParam(defaultValue = "-1") Long requesterId, @RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String type, @RequestParam(defaultValue = "All") String costType,
+			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
+			@RequestParam(defaultValue = "0") Integer guest, @RequestParam(defaultValue = "0") Integer bed,
+			@RequestParam(defaultValue = "0") Integer parking, @RequestParam(defaultValue = "0") Integer bath,
+			@RequestParam(defaultValue = "All") String amenity, @RequestParam(defaultValue = "All") String category,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
@@ -148,9 +149,9 @@ public class FullTextSearchController {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
-		SearchResponse<?> res = searchService.searchHousingPost(ownerId, keywords, type, costType, minCost, maxCost,
-				guest, bed, parking, bath, amenity, category, location.getLat(), location.getLng(), limit, page, sort,
-				sortOrder, within, radius, topLeft, bottomRight);
+		SearchResponse<?> res = searchService.searchHousingPost(requesterId, ownerId, keywords, type, costType, minCost,
+				maxCost, guest, bed, parking, bath, amenity, category, location.getLat(), location.getLng(), limit,
+				page, sort, sortOrder, within, radius, topLeft, bottomRight);
 
 		res.setLocation(location);
 
@@ -161,9 +162,9 @@ public class FullTextSearchController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> searchMarketplacePost(@RequestParam(defaultValue = "-1") Long ownerId,
-			@RequestParam(defaultValue = "") String keywords, @RequestParam(defaultValue = "All") String condition,
-			@RequestParam(defaultValue = "All") String category, @RequestParam(defaultValue = "0") Double minCost,
-			@RequestParam(defaultValue = "0") Double maxCost,
+			@RequestParam(defaultValue = "-1") Long requesterId, @RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String condition, @RequestParam(defaultValue = "All") String category,
+			@RequestParam(defaultValue = "0") Double minCost, @RequestParam(defaultValue = "0") Double maxCost,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
@@ -174,9 +175,9 @@ public class FullTextSearchController {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
-		SearchResponse<?> res = searchService.searchMarketplacePost(ownerId, keywords, condition, category, minCost,
-				maxCost, location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft,
-				bottomRight);
+		SearchResponse<?> res = searchService.searchMarketplacePost(requesterId, ownerId, keywords, condition, category,
+				minCost, maxCost, location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius,
+				topLeft, bottomRight);
 
 		res.setLocation(location);
 

@@ -48,6 +48,10 @@ public interface ProfileService {
 
 	List<Profile> findProfilesByAccountId(Long id);
 
+	void blockPost(Long requesterId, Long postId);
+
+	void unBlockPost(Long requesterId, Long postId);
+
 //	UserProfile findUserProfileById(Long profileId);
 
 }

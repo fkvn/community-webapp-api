@@ -88,7 +88,7 @@ public abstract class Profile implements Serializable {
 	@OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
 	@IndexedEmbedded(includePaths = { "reviewOfProfileId" })
 	private List<ProfileReview> reviews;
-
+ 
 	@JsonIgnore
 	@OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
 	@IndexedEmbedded(includePaths = { "postId" })
@@ -97,7 +97,7 @@ public abstract class Profile implements Serializable {
 	@JsonIgnore
 	@ManyToMany(mappedBy = "blockers", fetch = FetchType.LAZY)
 	@IndexedEmbedded(includePaths = { "blockedPostId" })
-	private List<Post> blockPosts;
+	private List<Post> blockedPosts;
 
 	public int getTotalReview() {
 		try {

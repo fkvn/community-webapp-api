@@ -631,16 +631,20 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<HousingPost> searchHousingPost(Long ownerId, String keywords, String type, String costType,
-			Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity,
-			String category, double centerLat, double centerLng, int limit, int page, String sort, String sortOrder,
-			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResult<HousingPost> searchHousingPost(Long requesterId, Long ownerId, String keywords, String type,
+			String costType, Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath,
+			String amenity, String category, double centerLat, double centerLng, int limit, int page, String sort,
+			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
 		GeoPoint center = GeoPoint.of(centerLat, centerLng);
 
 		SearchResult<HousingPost> housings = searchSession.search(HousingPost.class).where(f -> f.bool(b -> {
+
+			if (requesterId > 0) {
+				b.mustNot(f.match().field("blockers.blockerId").matching(requesterId));
+			}
 
 			if (ownerId > 0) {
 //				owner
@@ -759,15 +763,19 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<JobPost> searchJobPost(Long ownerId, String keywords, String position, String experience,
-			String skills, Boolean remote, int limit, int page, double centerLat, double centerLng, String sort,
-			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String position,
+			String experience, String skills, Boolean remote, int limit, int page, double centerLat, double centerLng,
+			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
 		GeoPoint center = GeoPoint.of(centerLat, centerLng);
 
 		SearchResult<JobPost> jobs = searchSession.search(JobPost.class).where(f -> f.bool(b -> {
+
+			if (requesterId > 0) {
+				b.mustNot(f.match().field("blockers.blockerId").matching(requesterId));
+			}
 
 			if (ownerId > 0) {
 //				owner
@@ -851,9 +859,10 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<MarketplacePost> searchMarketplacePost(Long ownerId, String keywords, String condition,
-			String category, Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page,
-			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResult<MarketplacePost> searchMarketplacePost(Long requesterId, Long ownerId, String keywords,
+			String condition, String category, Double minCost, Double maxCost, double centerLat, double centerLng,
+			int limit, int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft,
+			List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -861,6 +870,10 @@ public class SearchDaoImpl implements SearchDao {
 
 		SearchResult<MarketplacePost> marketplaces = searchSession.search(MarketplacePost.class)
 				.where(f -> f.bool(b -> {
+
+					if (requesterId > 0) {
+						b.mustNot(f.match().field("blockers.blockerId").matching(requesterId));
+					}
 
 					if (ownerId > 0) {
 //						owner

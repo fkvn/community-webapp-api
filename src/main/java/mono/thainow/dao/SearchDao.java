@@ -46,18 +46,18 @@ public interface SearchDao {
 	SearchResult<DealPost> searchDealPost(Long requesterId, Long ownerId, String keywords, int limit, int page,
 			double centerLat, double centerLng, String category, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
-	SearchResult<HousingPost> searchHousingPost(Long ownerId, String keywords, String type, String costType,
-			Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity,
-			String category, double centerLat, double centerLng, int limit, int page, String sort, String sortOrder,
-			String within, int radius, List<Double> topLeft, List<Double> bottomRight);
-
-	SearchResult<JobPost> searchJobPost(Long ownerId, String keywords, String position, String experience,
-			String skills, Boolean remote, int limit, int page, double centerLat, double centerLng, String sort,
+	SearchResult<HousingPost> searchHousingPost(Long requesterId, Long ownerId, String keywords, String type,
+			String costType, Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath,
+			String amenity, String category, double centerLat, double centerLng, int limit, int page, String sort,
 			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
-	SearchResult<MarketplacePost> searchMarketplacePost(Long ownerId, String keywords, String condition,
-			String category, Double minCost, Double maxCost, double centerLat, double centerLng, int limit, int page,
+	SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String position,
+			String experience, String skills, Boolean remote, int limit, int page, double centerLat, double centerLng,
 			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+
+	SearchResult<MarketplacePost> searchMarketplacePost(Long requesterId, Long ownerId, String keywords,
+			String condition, String category, Double minCost, Double maxCost, double centerLat, double centerLng, int limit,
+			int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
 			double centerLng, String industry, String sort, String sortOrder, String within, int radius,

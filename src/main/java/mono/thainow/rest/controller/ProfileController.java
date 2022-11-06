@@ -156,4 +156,18 @@ public class ProfileController {
 		
 		return picture;
 	}
+
+	
+	@PostMapping("/{requesterId}/block/posts/{postId}")
+	@AuthenticatedAccess
+	public void blockPost(@PathVariable Long requesterId, @PathVariable Long postId) {
+		profileService.blockPost(requesterId, postId);
+	}
+	
+	@PostMapping("/{requesterId}/unblock/posts/{postId}")
+	@AuthenticatedAccess
+	public void unBlockPost(@PathVariable Long requesterId, @PathVariable Long postId) {
+		profileService.unBlockPost(requesterId, postId);
+	}
+
 }

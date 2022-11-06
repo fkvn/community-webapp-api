@@ -62,7 +62,7 @@ public abstract class Post implements Serializable {
 
 	@ManyToOne
 	@JsonIgnore
-	@IndexedEmbedded( includePaths = { "postOwnerId", "blockPosts" })
+	@IndexedEmbedded( includePaths = { "postOwnerId"})
 	private Profile owner;
 
 	public Profile getPostOwner() {
@@ -86,7 +86,7 @@ public abstract class Post implements Serializable {
 	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY)
 	@IndexedEmbedded( includePaths = { "blockerId" })
-	private List<Post> blockers;
+	private List<Profile> blockers;
 
 	public int getTotalReview() {
 		return reviews.size();

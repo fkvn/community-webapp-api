@@ -67,17 +67,17 @@ public class ProfileServiceImpl implements ProfileService {
 
 //		remove account
 		userService.remove(profile.getAccount());
-		
+
 //		remove related post
 		List<Post> posts = postService.findPostsByProfile(profile);
 		postService.removePosts(posts);
-		
+
 		if (removeAccount) {
-	//		remove / delete company profiles
+			// remove / delete company profiles
 			List<BusinessProfile> profiles = findBusinessProfilesByAccount(profile.getAccount());
-	
+
 			profiles.forEach(prof -> {
-	//			disable profile
+				// disable profile
 				removeBusinessProfile(prof);
 			});
 		}
@@ -204,8 +204,36 @@ public class ProfileServiceImpl implements ProfileService {
 		return profileDao.findProfilesByAccountId(id);
 	}
 
-//	@Override
-//	public UserProfile findUserProfileById(Long profileId) {
-//		return profileDao.findUserProfileById(profileId);
-//	}
+	@Override
+	public void blockPost(Long requesterId, Long postId) {
+
+		Profile requester = findProfileById(requesterId);
+		Post post = postService.findPostById(postId);
+
+		Assert.isTrue(!post.getOwner().getId().equals(requesterId), "Profiles can't block their own post");
+
+		if (requester.getBlockedPosts().indexOf(post) < 0) {
+			requester.getBlockedPosts().add(post);
+			requester = saveProfile(requester);			
+		}
+		
+		if (post.getBlockers().indexOf(requester) < 0) {
+			post.getBlockers().add(requester);
+			post = postService.savePost(post);
+		}
+		
+	}
+
+	@Override
+	public void unBlockPost(Long requesterId, Long postId) {
+
+		Profile requester = findProfileById(requesterId);
+		Post post = postService.findPostById(postId);
+
+		requester.getBlockedPosts().remove(post);
+		requester = saveProfile(requester);
+
+		post.getBlockers().remove(requester);
+		post = postService.savePost(post);
+	}
 }
