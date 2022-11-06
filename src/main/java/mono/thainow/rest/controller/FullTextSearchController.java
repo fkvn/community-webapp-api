@@ -82,7 +82,8 @@ public class FullTextSearchController {
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> searchDealPost(@RequestParam(defaultValue = "-1") Long ownerId,
-			@RequestParam(defaultValue = "") String keywords, @RequestParam(defaultValue = "All") String category,
+			@RequestParam(defaultValue = "-1") Long requesterId, @RequestParam(defaultValue = "") String keywords,
+			@RequestParam(defaultValue = "All") String category,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
 			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue = "desc") String sortOrder,
@@ -93,8 +94,8 @@ public class FullTextSearchController {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
-		SearchResponse<?> res = searchService.searchDealPost(ownerId, category, keywords, location.getLat(),
-				location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft, bottomRight);
+		SearchResponse<?> res = searchService.searchDealPost(requesterId, ownerId, category, keywords,
+				location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius, topLeft, bottomRight);
 
 		res.setLocation(location);
 

@@ -10,8 +10,8 @@ public interface SearchService {
 	SearchResponse<?> searchCompany(String industry, String keywords, double centerLat, double centerLng, int limit,
 			int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
-	SearchResponse<?> searchDealPost(Long ownerId, String category, String keywords, double centerLat, double centerLng,
-			int limit, int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+	SearchResponse<?> searchDealPost(Long requesterId, Long ownerId, String category, String keywords, double centerLat,
+			double centerLng, int limit, int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResponse<?> searchJobPost(Long ownerId, String keywords, String position, String experience, String skills,
 			Boolean remote, double centerLat, double centerLng, int limit, int page, String sort, String sortOrder,

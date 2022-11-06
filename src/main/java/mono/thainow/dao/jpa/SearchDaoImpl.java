@@ -553,15 +553,19 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<DealPost> searchDealPost(Long ownerId, String keywords, int limit, int page, double centerLat,
-			double centerLng, String category, String sort, String sortOrder, String within, int radius,
-			List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResult<DealPost> searchDealPost(Long requesterId, Long ownerId, String keywords, int limit, int page,
+			double centerLat, double centerLng, String category, String sort, String sortOrder, String within,
+			int radius, List<Double> topLeft, List<Double> bottomRight) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
 		GeoPoint center = GeoPoint.of(centerLat, centerLng);
 
 		SearchResult<DealPost> deals = searchSession.search(DealPost.class).where(f -> f.bool(b -> {
+
+			if (requesterId > 0) {
+				b.mustNot(f.match().field("blockers.blockerId").matching(requesterId));
+			}
 
 			if (ownerId > 0) {
 //				owner
@@ -999,14 +1003,14 @@ public class SearchDaoImpl implements SearchDao {
 				field = "updatedOn";
 			case "Rating":
 				field = "rate";
-				
+
 //				sort order 
 				if (sortOrder.equals("desc")) {
 					b.add(f.field(field).desc());
 				} else {
 					b.add(f.field(field).asc());
 				}
-				
+
 				break;
 			default:
 //				score, or other qualities

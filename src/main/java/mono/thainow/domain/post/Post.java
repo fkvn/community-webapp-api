@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -56,11 +57,12 @@ public abstract class Post implements Serializable {
 	@GenericField
 	@GenericField(name = "postId")
 	@GenericField(name = "postRevieweeId")
+	@GenericField(name = "blockedPostId")
 	private Long id;
 
 	@ManyToOne
 	@JsonIgnore
-	@IndexedEmbedded( includePaths = { "postOwnerId" })
+	@IndexedEmbedded( includePaths = { "postOwnerId", "blockPosts" })
 	private Profile owner;
 
 	public Profile getPostOwner() {
@@ -79,6 +81,12 @@ public abstract class Post implements Serializable {
 	@OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
 	@IndexedEmbedded( includePaths = { "reviewOfPostId" })
 	public List<PostReview> reviews;
+	
+	
+	@JsonIgnore
+	@ManyToMany(fetch = FetchType.LAZY)
+	@IndexedEmbedded( includePaths = { "blockerId" })
+	private List<Post> blockers;
 
 	public int getTotalReview() {
 		return reviews.size();

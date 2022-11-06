@@ -43,8 +43,8 @@ public interface SearchDao {
 			Double maxCost, double centerLat, double centerLng, int limit, int page, String sort, String within,
 			int radius, List<Double> topLeft, List<Double> bottomRight);
 
-	SearchResult<DealPost> searchDealPost(Long ownerId, String keywords, int limit, int page, double centerLat,
-			double centerLng, String category, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+	SearchResult<DealPost> searchDealPost(Long requesterId, Long ownerId, String keywords, int limit, int page,
+			double centerLat, double centerLng, String category, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<HousingPost> searchHousingPost(Long ownerId, String keywords, String type, String costType,
 			Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath, String amenity,

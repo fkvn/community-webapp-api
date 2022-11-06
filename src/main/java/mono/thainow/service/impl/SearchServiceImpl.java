@@ -46,12 +46,12 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse<?> searchDealPost(Long ownerId, String category, String keywords, double centerLat,
-			double centerLng, int limit, int page, String sort, String sortOrder, String within,
-			int radius, List<Double> topLeft, List<Double> bottomRight) {
+	public SearchResponse<?> searchDealPost(Long requesterId, Long ownerId, String category, String keywords,
+			double centerLat, double centerLng, int limit, int page, String sort, String sortOrder,
+			String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
 
-		SearchResult<DealPost> result = searchDao.searchDealPost(ownerId, keywords, limit, page, centerLat, centerLng,
-				category, sort, sortOrder, within, radius, topLeft, bottomRight);
+		SearchResult<DealPost> result = searchDao.searchDealPost(requesterId, ownerId, keywords, limit, page, centerLat,
+				centerLng, category, sort, sortOrder, within, radius, topLeft, bottomRight);
 
 		SearchResponse<DealPost> searchRes = new SearchResponse<DealPost>();
 		searchRes.setTotalCount(result.total().hitCount());
