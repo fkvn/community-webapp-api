@@ -5,6 +5,7 @@ import javax.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -87,9 +88,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-				.antMatchers("/api/**").permitAll()
-				.anyRequest()
-				.authenticated();
+				.antMatchers("/api/**").permitAll().anyRequest().authenticated();
 //		.antMatchers("/api/**").permitAll()
 		;
 
@@ -97,15 +96,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				(Class<? extends Filter>) UsernamePasswordAuthenticationFilter.class);
 	}
 
-	
 	// ignore swagger
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		
+
 		web.ignoring().mvcMatchers("/swagger-ui/**", "/swagger-ui.html/**", "/configuration/**",
 				"/swagger-resources/**", "/v2/api-docs");
 	}
-	
+
 //	cors
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {

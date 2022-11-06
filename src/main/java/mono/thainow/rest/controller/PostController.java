@@ -119,7 +119,7 @@ public class PostController {
 	@GetMapping("/{postId}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@JsonView(View.Detail.class)
-	public Post findPost(@PathVariable Long postId, @RequestParam(required = false) Long profileId,
+	public Post findPost(@PathVariable Long postId, @RequestParam(defaultValue = "-1") Long profileId,
 			@RequestParam PostType type) {
 
 		if (AuthUtil.isAdminAuthenticated()) {
@@ -127,13 +127,17 @@ public class PostController {
 		}
 
 		Post post = postService.findValidPost(postId, type);
-		Profile requester = profileService.findProfileById(profileId);
 
-		Assert.isTrue(post.getBlockers().indexOf(requester) < 0,
-				"You have blocked this post in the past. Contact the administrator if you need other helps!");
+		Profile requester = null;
+
+		if (profileId >= 0) {
+			requester = profileService.findProfileById(profileId);
+			Assert.isTrue(post.getBlockers().indexOf(requester) < 0,
+					"You have blocked this post in the past. Contact the administrator if you need other helps!");
+		}
 
 		if (post.getStatus() == PostStatus.PRIVATE) {
-			if (profileId == null)
+			if (requester == null)
 				throw new AccessForbidden();
 			AuthUtil.authorizedAccess(requester, post, true);
 		}
