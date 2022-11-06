@@ -55,8 +55,10 @@ public class PostController {
 	private Long createPostFromRequest(PostRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		if (profileId == null) profileId = AuthUtil.getAuthenticatedUser().getId();
-		if (profileId == null) throw new AccessForbidden();
+		if (profileId == null)
+			profileId = AuthUtil.getAuthenticatedUser().getId();
+		if (profileId == null)
+			throw new AccessForbidden();
 
 		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
 		Assert.isTrue(type != null, "Invalid Post Type!");
@@ -64,7 +66,7 @@ public class PostController {
 //		only active profile can post
 		Profile postOwner = profileService.findProfileById(profileId);
 		if (postOwner.getType() == ProfileType.USER_PROFILE) {
-			Assert.isTrue(postOwner.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile" );
+			Assert.isTrue(postOwner.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile");
 		} else if (postOwner.getType() == ProfileType.BUSINESS_PROFILE) {
 			Assert.isTrue(((BusinessProfile) postOwner).getCompany().getStatus() == CompanyStatus.REGISTERED,
 					"Invalid Profile");
@@ -81,10 +83,12 @@ public class PostController {
 	private void updatePostFromRequest(Long postId, PostRequest request) {
 
 		Long profileId = Optional.ofNullable(request.getProfileId()).orElse(null);
-		if (profileId == null) profileId = AuthUtil.getAuthenticatedUser().getId();
-		if (profileId == null) throw new AccessForbidden();
-		
-		Profile postOwner =  profileService.findProfileById(profileId);
+		if (profileId == null)
+			profileId = AuthUtil.getAuthenticatedUser().getId();
+		if (profileId == null)
+			throw new AccessForbidden();
+
+		Profile postOwner = profileService.findProfileById(profileId);
 
 		PostType type = Optional.ofNullable(request.getPostType()).orElse(null);
 		Assert.isTrue(type != null, "Invalid Post Type!");
@@ -123,11 +127,15 @@ public class PostController {
 		}
 
 		Post post = postService.findValidPost(postId, type);
-		
+		Profile requester = profileService.findProfileById(profileId);
+
+		Assert.isTrue(post.getBlockers().indexOf(requester) < 0,
+				"You have blocked this post in the past. Contact the administrator if you need other helps!");
+
 		if (post.getStatus() == PostStatus.PRIVATE) {
-			if (profileId == null) throw new AccessForbidden();
-			Profile postOwner = profileService.findProfileById(profileId);
-			AuthUtil.authorizedAccess(postOwner, post, true);
+			if (profileId == null)
+				throw new AccessForbidden();
+			AuthUtil.authorizedAccess(requester, post, true);
 		}
 
 		return post;

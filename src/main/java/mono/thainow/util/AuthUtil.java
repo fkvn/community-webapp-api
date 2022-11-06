@@ -46,7 +46,7 @@ public class AuthUtil {
 		if (userDetails == null)
 			return false;
 
-		return userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN;
+		return userDetails.getRole() == UserRole.ADMIN || userDetails.getRole() == UserRole.SUPERADMIN;
 	}
 
 	public static boolean authorizedAccess(Profile postOwner, Post post, boolean throwError) {
