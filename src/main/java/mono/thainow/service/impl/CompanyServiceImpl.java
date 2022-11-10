@@ -57,13 +57,17 @@ public class CompanyServiceImpl implements CompanyService {
 
 	@Override
 	public Company fetchCompanyFromRequest(Company company, CompanyRequest request) {
+		
+//		company industry 
+		String industry = Optional.ofNullable(request.getIndustry()).orElse("").trim();
+		Assert.isTrue(!industry.isBlank(), "Invalid Industry");
 
 		if (company == null) {
 			company = new Company();
 
 //			Company Logo / Profile
 			StorageDefault storageDefault = new StorageDefault();
-			Long profileId = storageDefault.getIndustryLogoUrl().get(company.getIndustry().toUpperCase().trim());
+			Long profileId = storageDefault.getIndustryLogoUrl().get(industry.toUpperCase());
 			if (profileId == null) {
 				profileId = storageDefault.getBusinessProfileDefault();
 			}
@@ -74,6 +78,9 @@ public class CompanyServiceImpl implements CompanyService {
 			company.setStatus(CompanyStatus.PENDING);
 
 		}
+		
+//		set industry
+		company.setIndustry(industry);
 
 //		Informal company is a company not having physical address 
 		Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(false);
@@ -83,11 +90,6 @@ public class CompanyServiceImpl implements CompanyService {
 		String name = Optional.ofNullable(request.getName()).orElse("").trim();
 		Assert.isTrue(!name.isBlank(), "Invalid Name");
 		company.setName(name);
-
-//		company industry 
-		String industry = Optional.ofNullable(request.getIndustry()).orElse("").trim();
-		Assert.isTrue(!industry.isBlank(), "Invalid Industry");
-		company.setIndustry(industry);
 
 //		company email (optional)
 		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();

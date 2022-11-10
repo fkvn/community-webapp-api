@@ -185,7 +185,7 @@ public class AuthServiceImpl implements AuthService {
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-		User account = userService.findActiveUserByEmail(userDetails.getEmail());
+		User account = userService.findActiveUserById(userDetails.getId());
 		UserProfile profile = profileService.findUserProfileByAccount(account);
 
 		JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
