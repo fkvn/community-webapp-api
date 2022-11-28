@@ -44,20 +44,20 @@ public interface SearchDao {
 			int radius, List<Double> topLeft, List<Double> bottomRight);
 
 	SearchResult<DealPost> searchDealPost(Long requesterId, Long ownerId, String keywords, int limit, int page,
-			double centerLat, double centerLng, String category, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+			double centerLat, double centerLng, String category, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status);
 
 	SearchResult<HousingPost> searchHousingPost(Long requesterId, Long ownerId, String keywords, String type,
 			String costType, Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath,
 			String amenity, String category, double centerLat, double centerLng, int limit, int page, String sort,
-			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status);
 
 	SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String position,
 			String experience, String skills, Boolean remote, int limit, int page, double centerLat, double centerLng,
-			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status);
 
 	SearchResult<MarketplacePost> searchMarketplacePost(Long requesterId, Long ownerId, String keywords,
 			String condition, String category, Double minCost, Double maxCost, double centerLat, double centerLng, int limit,
-			int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight);
+			int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status);
 
 	SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page, double centerLat,
 			double centerLng, String industry, String sort, String sortOrder, String within, int radius,

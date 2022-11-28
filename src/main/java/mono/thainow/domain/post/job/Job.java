@@ -99,6 +99,7 @@ public class Job implements Serializable {
 
 	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "JOB_EXPIRED_ON")
+	@GenericField
 	private Date expiredOn;
 
 //	Detail Information

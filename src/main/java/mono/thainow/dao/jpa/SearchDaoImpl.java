@@ -1,6 +1,7 @@
 package mono.thainow.dao.jpa;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -555,7 +556,7 @@ public class SearchDaoImpl implements SearchDao {
 	@Override
 	public SearchResult<DealPost> searchDealPost(Long requesterId, Long ownerId, String keywords, int limit, int page,
 			double centerLat, double centerLng, String category, String sort, String sortOrder, String within,
-			int radius, List<Double> topLeft, List<Double> bottomRight) {
+			int radius, List<Double> topLeft, List<Double> bottomRight, String status) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -584,10 +585,16 @@ public class SearchDaoImpl implements SearchDao {
 				b.must(f.match().field("deal.title").boost(3.0f).field("deal.category_search").boost(2.0f)
 						.field("deal.description").boost(1.0f).matching(keywords));
 			}
-//
+			
+//			status filter (available only)
+			if (!status.isEmpty() && !status.equals("All")) {
+				Date current = new Date();
+				b.filter(f.range().field("deal.expiredOn").atLeast(current));
+			}
+
 //			category filter
 			if (!category.isEmpty() && !category.equals("All")) {
-				b.filter(f.match().field("deal.category").matching(category));
+				b.filter(f.match().field("deal.category_search").matching(category));
 			}
 //
 //			radius default 20 miles
@@ -634,7 +641,7 @@ public class SearchDaoImpl implements SearchDao {
 	public SearchResult<HousingPost> searchHousingPost(Long requesterId, Long ownerId, String keywords, String type,
 			String costType, Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath,
 			String amenity, String category, double centerLat, double centerLng, int limit, int page, String sort,
-			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -663,6 +670,12 @@ public class SearchDaoImpl implements SearchDao {
 				b.must(f.match().field("housing.title").boost(2.0f).field("housing.category_search").boost(4.0f)
 						.field("housing.type_search").boost(3.0f).field("housing.description").boost(1.0f)
 						.matching(keywords));
+			}
+			
+//			status filter (available only)
+			if (!status.isEmpty() && !status.equals("All")) {
+				Date current = new Date();
+				b.filter(f.range().field("housing.expiredOn").atLeast(current));
 			}
 
 //			guess filter
@@ -765,7 +778,7 @@ public class SearchDaoImpl implements SearchDao {
 	@Override
 	public SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String position,
 			String experience, String skills, Boolean remote, int limit, int page, double centerLat, double centerLng,
-			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight) {
+			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -793,6 +806,12 @@ public class SearchDaoImpl implements SearchDao {
 			if (!keywords.isEmpty()) {
 				b.must(f.match().field("job.title").boost(3.0f).field("job.positions").boost(2.0f)
 						.field("job.description").boost(1.0f).matching(keywords));
+			}
+			
+//			status filter (available only)
+			if (!status.isEmpty() && !status.equals("All")) {
+				Date current = new Date();
+				b.filter(f.range().field("job.expiredOn").atLeast(current));
 			}
 
 //			position filter
@@ -862,7 +881,7 @@ public class SearchDaoImpl implements SearchDao {
 	public SearchResult<MarketplacePost> searchMarketplacePost(Long requesterId, Long ownerId, String keywords,
 			String condition, String category, Double minCost, Double maxCost, double centerLat, double centerLng,
 			int limit, int page, String sort, String sortOrder, String within, int radius, List<Double> topLeft,
-			List<Double> bottomRight) {
+			List<Double> bottomRight, String status) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -892,6 +911,12 @@ public class SearchDaoImpl implements SearchDao {
 						b.must(f.match().field("marketplace.title").boost(2.0f).field("marketplace.category_search")
 								.boost(4.0f).field("marketplace.condition_search").boost(3.0f)
 								.field("marketplace.description").boost(1.0f).matching(keywords));
+					}
+					
+//					status filter (available only)
+					if (!status.isEmpty() && !status.equals("All")) {
+						Date current = new Date();
+						b.filter(f.range().field("marketplace.expiredOn").atLeast(current));
 					}
 
 //					costType filter

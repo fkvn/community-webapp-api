@@ -96,6 +96,7 @@ public class Deal implements Serializable {
 
 	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "DEAL_EXPIRED_ON")
+	@GenericField
 	private Date expiredOn;
 
 //	Detail Information
@@ -109,7 +110,6 @@ public class Deal implements Serializable {
 
 	@Column(name = "DEAL_CATEGORY")
 	@JsonView(View.Detail.class)
-	@KeywordField
 	@FullTextField(name = "category_search")
 	private String category;
 

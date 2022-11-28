@@ -101,6 +101,7 @@ public class Housing implements Serializable {
 
 	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "HOUSING_EXPIRED_ON")
+	@GenericField
 	private Date expiredOn;
 
 //	Detail Information

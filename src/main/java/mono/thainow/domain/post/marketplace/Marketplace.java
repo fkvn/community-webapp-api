@@ -96,6 +96,7 @@ public class Marketplace implements Serializable {
 
 	@JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
 	@Column(name = "MARKETPLACE_EXPIRED_ON")
+	@GenericField
 	private Date expiredOn;
 
 //	Detail Information
