@@ -15,6 +15,7 @@ import mono.thainow.dao.UserDao;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserProvider;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.rest.request.AppleRequest;
 import mono.thainow.rest.request.FacebookRequest;
@@ -80,14 +81,14 @@ public class UserServiceImpl implements UserService {
 		user.setStatus(UserStatus.ACTIVATED);
 		return saveUser(user);
 	}
-	
+
 	@Override
 	public User activateUserById(Long userId) {
 		User user = findUserById(userId);
 		user.setStatus(UserStatus.ACTIVATED);
 		return saveUser(user);
 	}
-	
+
 	@Override
 	public User saveUser(User user) {
 		return userDao.saveUser(user);
@@ -120,10 +121,10 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User fetchUserFromUserRequest(User user, UserRequest request) {
-		
+
 		if (user == null) {
 			user = new User();
-			
+
 //			set password 
 			String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
 			user.setPassword(encodePassword(password, true));
@@ -132,32 +133,36 @@ public class UserServiceImpl implements UserService {
 			StorageDefault storageDefault = new StorageDefault();
 			Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault());
 			user.setPicture(picture);
-			
+
+//			set provider
+			user.setProvider(UserProvider.THAINOW);
+
 //			set status
 			user.setStatus(UserStatus.ACTIVATED);
 		}
-		
+
 //		credential 
 		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
 		String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
 
 		Assert.isTrue(!phone.isBlank() || !email.isBlank(),
 				"Please provide at least one email address or phone number.");
-	
 
 //		set email
-		if (!email.isBlank()) {
+		if (!email.isBlank() && user.getEmail() != null && !user.getEmail().equals(email)) {
+			Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
+					"Update Error! This profile email is managed by " + user.getProvider() + " account.");
 			Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
 			Assert.isTrue(isEmailUnique(email), "Email has already been taken.");
 		}
 		user.setEmail(email);
 
 //		set phone
-		if (!phone.isBlank()) {
+		if (!phone.isBlank() && user.getPhone() != null && !user.getPhone().equals(phone)) {
 			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
 			Assert.isTrue(isPhoneUnique(phone), "Phone has already been taken.");
-			user.setPhone(phone);
 		}
+		user.setPhone(phone);
 
 //		email Verified
 		Boolean isEmailVerified = Optional.ofNullable(request.getIsEmailVerified()).orElse(false);
@@ -171,7 +176,7 @@ public class UserServiceImpl implements UserService {
 		String username = Optional.ofNullable(request.getUsername()).orElse("").trim();
 		Assert.isTrue(!username.isBlank(), "Invalid Name!");
 		user.setUsername(username);
-		
+
 //		location
 		String address = Optional.ofNullable(request.getAddress()).orElse(null);
 		String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
@@ -182,7 +187,7 @@ public class UserServiceImpl implements UserService {
 				user.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 			else
 				user.setLocation(null);
-		
+
 //		public location
 		Boolean isLocationPublic = Optional.ofNullable(request.getIsLocationPublic()).orElse(false);
 		user.setLocationPublic(isLocationPublic);
@@ -194,8 +199,7 @@ public class UserServiceImpl implements UserService {
 //		public description
 		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(false);
 		user.setDescriptionPublic(isDescriptionPublic);
-		
-		
+
 //		website
 		String website = Optional.ofNullable(request.getWebsite()).orElse("").trim();
 		if (!website.isBlank()) {
@@ -251,7 +255,7 @@ public class UserServiceImpl implements UserService {
 		user.setPicture(picture);
 
 //		set provider
-		user.setProvider("GOOGLE");
+		user.setProvider(UserProvider.GOOGLE);
 
 //		set status
 		user.setStatus(UserStatus.ACTIVATED);
@@ -286,7 +290,7 @@ public class UserServiceImpl implements UserService {
 		user.setPicture(picture);
 
 //		set provider
-		user.setProvider("APPLE");
+		user.setProvider(UserProvider.APPLE);
 
 //		set status
 		user.setStatus(UserStatus.ACTIVATED);
@@ -327,7 +331,7 @@ public class UserServiceImpl implements UserService {
 		user.setPicture(picture);
 
 //		set provider
-		user.setProvider("FACEBOOK");
+		user.setProvider(UserProvider.FACEBOOK);
 
 //		set status
 		user.setStatus(UserStatus.ACTIVATED);
@@ -497,9 +501,5 @@ public class UserServiceImpl implements UserService {
 //
 //		return user;
 //	}
-
-
-
-
 
 }

@@ -2,6 +2,8 @@ package mono.thainow.service.impl;
 
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,7 +15,9 @@ import org.springframework.util.Assert;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
+import mono.thainow.domain.user.UserProvider;
 import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.ChangePasswordRequest;
 import mono.thainow.rest.request.FacebookRequest;
 import mono.thainow.rest.request.GoogleRequest;
 import mono.thainow.rest.request.TokenRequest;
@@ -164,11 +168,79 @@ public class AuthServiceImpl implements AuthService {
 			profileService.createUserProfile(user);
 		} else {
 			User user = userService.findActiveUserByEmail(email);
-			Assert.isTrue(user.getProvider().equals("GOOGLE"), "The email linked with this account has already taken!");
+			Assert.isTrue(user.getProvider().equals(UserProvider.GOOGLE),
+					"The email linked with this account has already taken!");
+
+//			this is to keep posted with password change from GOOGLE account
+			String password = Optional.ofNullable(request.getSub().trim()).orElse("").trim();
+			user.setPassword(userService.encodePassword(password, false));
+			userService.saveUser(user);
 		}
-		
+
 		String username = "email-login," + email;
 		String password = Optional.ofNullable(request.getSub()).orElse("").trim();
+
+		return signedJWTAuth(username, password);
+	}
+
+	@Override
+	public JwtResponse accessWithApple(AppleRequest request) {
+
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+
+//		email is unique -> new user -> sign up
+		if (userService.isEmailUnique(email)) {
+			User user = userService.fetchUserFromAppleRequest(request);
+
+//			persit user
+			user = userService.saveUser(user);
+
+//			create a account profile with new user
+			profileService.createUserProfile(user);
+		} else {
+			User user = userService.findActiveUserByEmail(email);
+			Assert.isTrue(user.getProvider().equals(UserProvider.APPLE),
+					"The email linked with this account has already taken!");
+
+//			this is to keep posted with password change from APPLE account
+			String password = Optional.ofNullable(request.getSub().trim()).orElse("").trim();
+			user.setPassword(userService.encodePassword(password, false));
+			userService.saveUser(user);
+		}
+
+		String username = "email-login," + email;
+		String password = Optional.ofNullable(request.getSub()).orElse("").trim();
+
+		return signedJWTAuth(username, password);
+	}
+
+	@Override
+	public JwtResponse accessWithFacebook(FacebookRequest request) {
+
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+
+//		email is unique -> new user -> sign up
+		if (userService.isEmailUnique(email)) {
+			User user = userService.fetchUserFromFacebookRequest(request);
+
+//			persit user
+			user = userService.saveUser(user);
+
+//			create a account profile with new user
+			profileService.createUserProfile(user);
+		} else {
+			User user = userService.findActiveUserByEmail(email);
+			Assert.isTrue(user.getProvider().equals(UserProvider.FACEBOOK),
+					"The email linked with this account has already taken!");
+
+//			this is to keep posted with password change from FACEBOOK account
+			String password = Optional.ofNullable(request.getId().trim()).orElse("").trim();
+			user.setPassword(userService.encodePassword(password, false));
+			userService.saveUser(user);
+		}
+
+		String username = "email-login," + email;
+		String password = Optional.ofNullable(request.getId()).orElse("").trim();
 
 		return signedJWTAuth(username, password);
 	}
@@ -198,55 +270,50 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public JwtResponse accessWithApple(AppleRequest request) {
+	public void changePassword(@Valid ChangePasswordRequest request) {
 
-		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
-		
-		
-//		email is unique -> new user -> sign up
-		if (userService.isEmailUnique(email)) {
-			User user = userService.fetchUserFromAppleRequest(request);
+		String channel = Optional.ofNullable(request.getChannel()).orElse("");
 
-//			persit user
-			user = userService.saveUser(user);
+//		only verify by email and phone
+		Assert.isTrue(channel.equals("email") || channel.equals("phone"),
+				"Only Email and Phone are supported at the moment!");
 
-//			create a account profile with new user
-			profileService.createUserProfile(user);
-		} else {
-			User user = userService.findActiveUserByEmail(email);
-			Assert.isTrue(user.getProvider().equals("APPLE"), "The email linked with this account has already taken!");
+//		password verification
+		String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
+
+		User user = null;
+
+		switch (channel) {
+
+		case "email": {
+
+			String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+
+//			email is required
+			Assert.isTrue(!email.isEmpty(), "Email is required!");
+			user = userService.findActiveUserByEmail(email);
 		}
-		
-		String username = "email-login," + email;
-		String password = Optional.ofNullable(request.getSub()).orElse("").trim();
+			break;
 
-		return signedJWTAuth(username, password);
-	}
+		case "phone": {
 
-	@Override
-	public JwtResponse accessWithFacebook(FacebookRequest request) {
+			String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
 
-		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
-
-//		email is unique -> new user -> sign up
-		if (userService.isEmailUnique(email)) {
-			User user = userService.fetchUserFromFacebookRequest(request);
-
-//			persit user
-			user = userService.saveUser(user);
-
-//			create a account profile with new user
-			profileService.createUserProfile(user);
-		} else {
-			User user = userService.findActiveUserByEmail(email);
-			Assert.isTrue(user.getProvider().equals("FACEBOOK"),
-					"The email linked with this account has already taken!");
+//			phone number is required
+			Assert.isTrue(!phone.isEmpty(), "Phone number is required!");
+			user = userService.findActiveUserByPhone(phone);
 		}
-		
-		String username = "email-login," + email;
-		String password = Optional.ofNullable(request.getId()).orElse("").trim();
+			break;
+		default:
+			break;
+		}
 
-		return signedJWTAuth(username, password);
+		Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
+				"Update Error! This profile is managed by " + user.getProvider() + " account.");
+		user.setPassword(userService.encodePassword(password, true));
+
+		userService.saveUser(user);
+
 	}
 
 }

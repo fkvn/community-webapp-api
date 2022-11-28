@@ -1,6 +1,9 @@
 package mono.thainow.service;
 
+import javax.validation.Valid;
+
 import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.ChangePasswordRequest;
 import mono.thainow.rest.request.FacebookRequest;
 import mono.thainow.rest.request.GoogleRequest;
 import mono.thainow.rest.request.TokenRequest;
@@ -25,5 +28,7 @@ public interface AuthService {
 	JwtResponse accessWithFacebook(FacebookRequest request);
 	
 	JwtResponse signedJWTAuth(String username, String password);
+
+	void changePassword(@Valid ChangePasswordRequest request);
 
 }

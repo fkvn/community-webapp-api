@@ -77,6 +77,11 @@ public class User implements Serializable {
 	@Column(name = "USER_CREATED_ON")
 	private Date createdOn = new Date();
 	
+	@NotNull
+	@Column(name = "USER_ISSUER")
+	@Enumerated(EnumType.STRING)
+	private UserProvider provider = UserProvider.THAINOW;
+	
 //  Detail Information
 	
 	@UpdateTimestamp
@@ -154,11 +159,6 @@ public class User implements Serializable {
 	@Column(name = "USER_STATUS")
 	@JsonView(View.FullDetail.class)
 	private UserStatus status = UserStatus.DISABLED;
-
-	@NotNull
-	@Column(name = "USER_ISSUER")
-	@JsonView(View.FullDetail.class)
-	private String provider = "THAINOW";
 	
 	@NotNull
 	@Column(name = "USER_SUB")

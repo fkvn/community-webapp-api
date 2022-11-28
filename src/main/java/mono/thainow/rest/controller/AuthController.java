@@ -6,17 +6,20 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
 import mono.thainow.rest.request.AppleRequest;
+import mono.thainow.rest.request.ChangePasswordRequest;
 import mono.thainow.rest.request.FacebookRequest;
 import mono.thainow.rest.request.GoogleRequest;
 import mono.thainow.rest.request.TokenRequest;
@@ -71,7 +74,6 @@ public class AuthController {
 		Long userId = authService.registerWithThaiNow(request);
 		return userId;
 	}
-
 	
 	@PostMapping("/google/access")
 	@JsonView(View.Basic.class)
@@ -85,7 +87,6 @@ public class AuthController {
 		return authService.accessWithApple(signupRequest);
 	}
 	
-
 	@PostMapping("/facebook/access")
 	@JsonView(View.Basic.class)
 	public JwtResponse accessWithFacebook(@Valid @RequestBody FacebookRequest request) {
@@ -97,13 +98,21 @@ public class AuthController {
 		return Collections.singletonMap("unique", userService.isUsernameUnique(username));
 	}
 
-	@PostMapping("/thainow/phone/unique")
-	public Map<String, Boolean> isPhoneUnique(@RequestParam String phone) {
-		return Collections.singletonMap("unique", userService.isPhoneUnique(phone));
+	@PostMapping("/verify/phone")
+	public Boolean isPhoneUnique(@RequestParam String phone) {
+		return userService.isPhoneUnique(phone);
+//		return Collections.singletonMap("unique", userService.isPhoneUnique(phone));
 	}
 
-	@PostMapping("/thainow/email/unique")
-	public Map<String, Boolean> validateUserEmail(@RequestParam String email) {
-		return Collections.singletonMap("unique", userService.isEmailUnique(email));
+	@PostMapping("/verify/email")
+	public Boolean validateUserEmail(@RequestParam String email) {
+		return userService.isEmailUnique(email);
+//		return Collections.singletonMap("unique", userService.isEmailUnique(email));
+	}
+	
+	@PostMapping("/change-password")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+		authService.changePassword(request);
 	}
 }
