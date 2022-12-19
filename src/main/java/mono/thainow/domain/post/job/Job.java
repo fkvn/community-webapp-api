@@ -120,6 +120,7 @@ public class Job implements Serializable {
 	@JsonView(View.Detail.class)
 	@ElementCollection
 	@FullTextField
+	@GenericField(name="position-filter")
 	private Set<String> positions = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
 	@Column(name = "JOB_EXPERIENCE")

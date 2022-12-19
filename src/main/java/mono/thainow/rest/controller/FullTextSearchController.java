@@ -108,7 +108,7 @@ public class FullTextSearchController {
 	@JsonView(View.Basic.class)
 	public SearchResponse<?> searchJobPost(@RequestParam(defaultValue = "-1") Long ownerId,
 			@RequestParam(defaultValue = "-1") Long requesterId, @RequestParam(defaultValue = "") String keywords,
-			@RequestParam(defaultValue = "All") String status, @RequestParam(defaultValue = "All") String position,
+			@RequestParam(defaultValue = "All") String status, @RequestParam(defaultValue = "All") String positions,
 			@RequestParam(defaultValue = "All") String experience, @RequestParam(defaultValue = "All") String skills,
 			@RequestParam(defaultValue = "false") Boolean remote,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
@@ -121,7 +121,7 @@ public class FullTextSearchController {
 
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
-		SearchResponse<?> res = searchService.searchJobPost(requesterId, ownerId, keywords, position, experience,
+		SearchResponse<?> res = searchService.searchJobPost(requesterId, ownerId, keywords, positions, experience,
 				skills, remote, location.getLat(), location.getLng(), limit, page, sort, sortOrder, within, radius,
 				topLeft, bottomRight, status);
 
@@ -139,7 +139,7 @@ public class FullTextSearchController {
 			@RequestParam(defaultValue = "All") String costType, @RequestParam(defaultValue = "0") Double minCost,
 			@RequestParam(defaultValue = "0") Double maxCost, @RequestParam(defaultValue = "0") Integer guest,
 			@RequestParam(defaultValue = "0") Integer bed, @RequestParam(defaultValue = "0") Integer parking,
-			@RequestParam(defaultValue = "0") Integer bath, @RequestParam(defaultValue = "All") String amenity,
+			@RequestParam(defaultValue = "0") Integer bath, @RequestParam(defaultValue = "All") String amenities,
 			@RequestParam(defaultValue = "All") String category,
 			@RequestParam(defaultValue = "ChIJf2z2Hle_woARaNaIiR198fg") String placeid,
 			@RequestParam(defaultValue = "Thai Town, Los Angeles, CA 90027, USA") String address,
@@ -152,7 +152,7 @@ public class FullTextSearchController {
 		Location location = locationService.findLocationByPlaceidOrAddress(placeid, address);
 
 		SearchResponse<?> res = searchService.searchHousingPost(requesterId, ownerId, keywords, type, costType, minCost,
-				maxCost, guest, bed, parking, bath, amenity, category, location.getLat(), location.getLng(), limit,
+				maxCost, guest, bed, parking, bath, amenities, category, location.getLat(), location.getLng(), limit,
 				page, sort, sortOrder, within, radius, topLeft, bottomRight, status);
 
 		res.setLocation(location);

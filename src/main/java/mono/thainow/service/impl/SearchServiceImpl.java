@@ -62,11 +62,11 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse<?> searchJobPost(Long requesterId, Long ownerId, String keywords, String position,
+	public SearchResponse<?> searchJobPost(Long requesterId, Long ownerId, String keywords, String positions,
 			String experience, String skills, Boolean remote, double centerLat, double centerLng, int limit, int page,
 			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status) {
 
-		SearchResult<JobPost> result = searchDao.searchJobPost(requesterId, ownerId, keywords, position, experience, skills,
+		SearchResult<JobPost> result = searchDao.searchJobPost(requesterId, ownerId, keywords, positions, experience, skills,
 				remote, limit, page, centerLat, centerLng, sort, sortOrder, within, radius, topLeft, bottomRight, status);
 
 		SearchResponse<JobPost> searchRes = new SearchResponse<JobPost>();

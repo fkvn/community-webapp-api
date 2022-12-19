@@ -148,6 +148,7 @@ public class Housing implements Serializable {
 	@JsonView(View.Detail.class)
 	@ElementCollection
 	@FullTextField
+	@GenericField(name="amenities-filter")
 	private Set<String> amenities = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
 	@ElementCollection

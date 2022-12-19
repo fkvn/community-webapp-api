@@ -506,6 +506,7 @@ public class SearchDaoImpl implements SearchDao {
 
 //			industry filter
 			if (!industry.isEmpty() && !industry.equals("All")) {
+				System.out.println(industry);
 				b.filter(f.match().field("company.industry").matching(industry));
 			}
 
@@ -585,7 +586,7 @@ public class SearchDaoImpl implements SearchDao {
 				b.must(f.match().field("deal.title").boost(3.0f).field("deal.category_search").boost(2.0f)
 						.field("deal.description").boost(1.0f).matching(keywords));
 			}
-			
+
 //			status filter (available only)
 			if (!status.isEmpty() && !status.equals("All")) {
 				Date current = new Date();
@@ -641,7 +642,8 @@ public class SearchDaoImpl implements SearchDao {
 	public SearchResult<HousingPost> searchHousingPost(Long requesterId, Long ownerId, String keywords, String type,
 			String costType, Double minCost, Double maxCost, Integer guest, Integer bed, Integer parking, Integer bath,
 			String amenity, String category, double centerLat, double centerLng, int limit, int page, String sort,
-			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status) {
+			String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight,
+			String status) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -671,7 +673,7 @@ public class SearchDaoImpl implements SearchDao {
 						.field("housing.type_search").boost(3.0f).field("housing.description").boost(1.0f)
 						.matching(keywords));
 			}
-			
+
 //			status filter (available only)
 			if (!status.isEmpty() && !status.equals("All")) {
 				Date current = new Date();
@@ -727,7 +729,10 @@ public class SearchDaoImpl implements SearchDao {
 
 //			amenity filter
 			if (!amenity.isEmpty() && !amenity.equals("All")) {
-				b.filter(f.match().field("housing.amenities").matching(amenity));
+				String amenityQuery = amenity.replace(",", "|");
+				System.out.println(amenityQuery);
+				b.filter(f.simpleQueryString().field("housing.amenities-filter").matching(amenityQuery));
+//				b.filter(f.match().field("housing.amenities").matching(amenity));
 			}
 
 //			category filter
@@ -776,9 +781,10 @@ public class SearchDaoImpl implements SearchDao {
 	}
 
 	@Override
-	public SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String position,
+	public SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String positions,
 			String experience, String skills, Boolean remote, int limit, int page, double centerLat, double centerLng,
-			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight, String status) {
+			String sort, String sortOrder, String within, int radius, List<Double> topLeft, List<Double> bottomRight,
+			String status) {
 
 		SearchSession searchSession = Search.session(entityManager);
 
@@ -807,7 +813,7 @@ public class SearchDaoImpl implements SearchDao {
 				b.must(f.match().field("job.title").boost(3.0f).field("job.positions").boost(2.0f)
 						.field("job.description").boost(1.0f).matching(keywords));
 			}
-			
+
 //			status filter (available only)
 			if (!status.isEmpty() && !status.equals("All")) {
 				Date current = new Date();
@@ -815,8 +821,9 @@ public class SearchDaoImpl implements SearchDao {
 			}
 
 //			position filter
-			if (!position.isEmpty() && !position.equals("All")) {
-				b.filter(f.match().field("job.positions").matching(position));
+			if (!positions.isEmpty() && !positions.equals("All")) {
+				String positionQuery = positions.replace(",", "|");
+				b.filter(f.simpleQueryString().field("job.position-filter").matching(positionQuery));
 			}
 
 //			experience filter
@@ -912,7 +919,7 @@ public class SearchDaoImpl implements SearchDao {
 								.boost(4.0f).field("marketplace.condition_search").boost(3.0f)
 								.field("marketplace.description").boost(1.0f).matching(keywords));
 					}
-					
+
 //					status filter (available only)
 					if (!status.isEmpty() && !status.equals("All")) {
 						Date current = new Date();
