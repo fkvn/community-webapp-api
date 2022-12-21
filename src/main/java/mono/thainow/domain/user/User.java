@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -191,7 +192,6 @@ public class User implements Serializable {
 	
 //	Write ONLY information
 	
-	@NotNull(message = "User password can't be null")
 	@Column(name = "USER_PASSWORD")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
@@ -204,6 +204,7 @@ public class User implements Serializable {
 		if (this.fullName.equals("")) {
 			this.setFullName(this.firstName + " " + this.lastName);
 		}
-	}
+		
+		Assert.isTrue(this.getPassword() != null, "User password can't be null");	}
 
 }
