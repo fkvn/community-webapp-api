@@ -1,0 +1,24 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Twilio" type="Application" factoryName="Application">
+    <envs>
+      <env name="TWILIO_ACCOUNT_SID" value="AC717febc2f6f291c8e8d0eb6afe028074" />
+      <env name="TWILIO_AUTH_TOKEN" value="9ef54ffa6fd9a80d4b4692f2433e5c3f" />
+      <env name="TWILIO_OTP_SERVICE_ID" value="VA3e5ee9be3da08b9bebe9ad236bd99d15" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="mono.thainow.ThainowApplication" />
+    <module name="thainow" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="false" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

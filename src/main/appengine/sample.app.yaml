@@ -1,0 +1,9 @@
+runtime: java11
+instance_class: F2
+env_variables:
+  TWILIO_ACCOUNT_SID: AC717febc2f6f291c8e8d0e22b6afe028074
+  TWILIO_AUTH_TOKEN: a7b7833c425e16fc62213bdc4a7f55893e
+  TWILIO_OTP_SERVICE_ID: VA3e5ee9be3da0121218b9bebe9ad236bd99d15
+
+# build and deploy
+# ./mvnw -DskipTests package appengine:deploy
