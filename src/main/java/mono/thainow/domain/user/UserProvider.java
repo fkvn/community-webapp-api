@@ -1,5 +1,5 @@
 package mono.thainow.domain.user;
 
 public enum UserProvider {
-	THAINOW, GOOGLE, APPLE, FACEBOOK
+	THAINOW, GOOGLE, APPLE, FACEBOOK, LINE
 }

@@ -82,6 +82,11 @@ public class User implements Serializable {
 	@Column(name = "USER_ISSUER")
 	@Enumerated(EnumType.STRING)
 	private UserProvider provider = UserProvider.THAINOW;
+
+	@Email(message = "Email is not valid")
+	@Column(name = "USER_EMAIL")
+//	@JsonView(View.Detail.class)
+	private String email;
 	
 //  Detail Information
 	
@@ -104,11 +109,6 @@ public class User implements Serializable {
 	@Column(name = "USER_DESCRIPTION")
 	@JsonView(View.Detail.class)
 	private String description;
-	
-	@Email(message = "Email is not valid")
-	@Column(name = "USER_EMAIL")
-	@JsonView(View.Detail.class)
-	private String email;
 	
 	@Column(name = "USER_PHONE")
 	@JsonView(View.Detail.class)

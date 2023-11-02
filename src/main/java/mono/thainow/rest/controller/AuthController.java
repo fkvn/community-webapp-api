@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import mono.thainow.rest.request.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,12 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import mono.thainow.rest.request.AppleRequest;
-import mono.thainow.rest.request.ChangePasswordRequest;
-import mono.thainow.rest.request.FacebookRequest;
-import mono.thainow.rest.request.GoogleRequest;
-import mono.thainow.rest.request.TokenRequest;
-import mono.thainow.rest.request.UserRequest;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.MessageResponse;
 import mono.thainow.rest.response.TokenResponse;
@@ -91,6 +86,12 @@ public class AuthController {
 	@JsonView(View.Basic.class)
 	public JwtResponse accessWithFacebook(@Valid @RequestBody FacebookRequest request) {
 		return authService.accessWithFacebook(request);
+	}
+
+	@PostMapping("/line/access")
+	@JsonView(View.Basic.class)
+	public JwtResponse accessWithLine(@Valid @RequestBody LineRequest request) {
+		return authService.accessWithLine(request);
 	}
 
 	@PostMapping("/thainow/username/unique")

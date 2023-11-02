@@ -5,20 +5,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GoogleRequest {
-	
+public class LineRequest {
+
 	private String sub;
-	
+
 	private String email;
-	
-	private Boolean email_verified;
+
+//	private Boolean email_verified;
 
 	private String name;
-	
-	private String picture;
-	
-	private String given_name;
-	
-	private String family_name;
+
+//	private String picture;
 
 }

@@ -1,9 +1,12 @@
-dispatch:
-  - url: "www.api.searchforthai.com/*"
-    service: default
-  - url: "api.searchforthai.com/*"
-    service: default
-  - url: "www.api.dev.searchforthai.com/*"
-    service: dev-app
-  - url: "api.dev.searchforthai.com/*"
-    service: dev-app
+# remove dispatch rules
+dispatch: []
+
+#dispatch:
+#  - url: "www.api.searchforthai.com/*"
+#    service: default
+#  - url: "api.searchforthai.com/*"
+#    service: default
+#  - url: "www.api.dev.searchforthai.com/*"
+#    service: dev-app
+#  - url: "api.dev.searchforthai.com/*"
+#    service: dev-app

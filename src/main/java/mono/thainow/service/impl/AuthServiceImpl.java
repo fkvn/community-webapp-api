@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import mono.thainow.rest.request.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,12 +17,6 @@ import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserProvider;
-import mono.thainow.rest.request.AppleRequest;
-import mono.thainow.rest.request.ChangePasswordRequest;
-import mono.thainow.rest.request.FacebookRequest;
-import mono.thainow.rest.request.GoogleRequest;
-import mono.thainow.rest.request.TokenRequest;
-import mono.thainow.rest.request.UserRequest;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.security.jwt.JwtUtils;
@@ -169,7 +164,7 @@ public class AuthServiceImpl implements AuthService {
 		} else {
 			User user = userService.findActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals(UserProvider.GOOGLE),
-					"The email linked with this account has already taken!");
+					String.format("The email linked with your %s account!", user.getProvider()));
 
 //			this is to keep posted with password change from GOOGLE account
 			String password = Optional.ofNullable(request.getSub().trim()).orElse("").trim();
@@ -200,10 +195,10 @@ public class AuthServiceImpl implements AuthService {
 		} else {
 			User user = userService.findActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals(UserProvider.APPLE),
-					"The email linked with this account has already taken!");
+					String.format("The email linked with your %s account!", user.getProvider()));
 
 //			this is to keep posted with password change from APPLE account
-			String password = Optional.ofNullable(request.getSub().trim()).orElse("").trim();
+			String password = Optional.of(request.getSub().trim()).orElse("").trim();
 			user.setPassword(userService.encodePassword(password, false));
 			userService.saveUser(user);
 		}
@@ -231,16 +226,46 @@ public class AuthServiceImpl implements AuthService {
 		} else {
 			User user = userService.findActiveUserByEmail(email);
 			Assert.isTrue(user.getProvider().equals(UserProvider.FACEBOOK),
-					"The email linked with this account has already taken!");
+					String.format("The email linked with your %s account!", user.getProvider()));
 
 //			this is to keep posted with password change from FACEBOOK account
-			String password = Optional.ofNullable(request.getId().trim()).orElse("").trim();
+			String password = Optional.of(request.getId().trim()).orElse("").trim();
 			user.setPassword(userService.encodePassword(password, false));
 			userService.saveUser(user);
 		}
 
 		String username = "email-login," + email;
 		String password = Optional.ofNullable(request.getId()).orElse("").trim();
+
+		return signedJWTAuth(username, password);
+	}
+
+	@Override
+	public JwtResponse accessWithLine(LineRequest request) {
+		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+
+//		email is unique -> new user -> sign up
+		if (userService.isEmailUnique(email)) {
+			User user = userService.fetchUserFromLineRequest(request);
+
+//			persit user
+			user = userService.saveUser(user);
+
+//			create a account profile with new user
+			profileService.createUserProfile(user);
+		} else {
+			User user = userService.findActiveUserByEmail(email);
+			Assert.isTrue(user.getProvider().equals(UserProvider.LINE),
+					String.format("The email %s linked with your %s account!", user.getEmail(), user.getProvider()));
+
+//			this is to keep posted with password change from GOOGLE account
+			String password = Optional.ofNullable(request.getSub().trim()).orElse("").trim();
+			user.setPassword(userService.encodePassword(password, false));
+			userService.saveUser(user);
+		}
+
+		String username = "email-login," + email;
+		String password = Optional.ofNullable(request.getSub()).orElse("").trim();
 
 		return signedJWTAuth(username, password);
 	}
@@ -309,7 +334,7 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
-				"Update Error! This profile is managed by " + user.getProvider() + " account.");
+				String.format("Update Error! This profile is managed by %s account.", user.getProvider()));
 		user.setPassword(userService.encodePassword(password, true));
 
 		userService.saveUser(user);

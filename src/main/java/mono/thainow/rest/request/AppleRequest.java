@@ -11,7 +11,7 @@ public class AppleRequest {
 
 	private String email;
 
-	private Boolean isEmailVerified;
+	private Boolean email_verified;
 	
 	private String name;
 

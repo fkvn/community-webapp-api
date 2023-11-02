@@ -1,10 +1,7 @@
 package mono.thainow.service;
 
 import mono.thainow.domain.user.User;
-import mono.thainow.rest.request.AppleRequest;
-import mono.thainow.rest.request.FacebookRequest;
-import mono.thainow.rest.request.GoogleRequest;
-import mono.thainow.rest.request.UserRequest;
+import mono.thainow.rest.request.*;
 
 public interface UserService {
 
@@ -38,6 +35,8 @@ public interface UserService {
 
 	User fetchUserFromFacebookRequest(FacebookRequest facebookSignupRequest);
 
+	User fetchUserFromLineRequest(LineRequest request);
+
 	void remove(User account);
 
 //	User fetchUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
@@ -47,7 +46,5 @@ public interface UserService {
 	User activateUser(User user);
 
 
-
-	
 
 }
