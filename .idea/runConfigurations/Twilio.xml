@@ -2,7 +2,7 @@
   <configuration default="false" name="Twilio" type="Application" factoryName="Application">
     <envs>
       <env name="TWILIO_ACCOUNT_SID" value="AC717febc2f6f291c8e8d0eb6afe028074" />
-      <env name="TWILIO_AUTH_TOKEN" value="a7b7833c425e16fc623bdc4a7f55893e" />
+      <env name="TWILIO_AUTH_TOKEN" value="886129cd448f9c1f6b50d85d16f16336" />
       <env name="TWILIO_OTP_SERVICE_ID" value="VA3e5ee9be3da08b9bebe9ad236bd99d15" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="mono.thainow.ThainowApplication" />
