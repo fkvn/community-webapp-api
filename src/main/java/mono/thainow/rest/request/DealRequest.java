@@ -1,30 +1,30 @@
 package mono.thainow.rest.request;
 
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
-
 import lombok.Getter;
 import mono.thainow.domain.post.PostStatus;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.TreeMap;
 
 @Getter
 public class DealRequest extends PostRequest {
 
-	private String title;
+    private String title;
 
-	private String address;
+    private String address;
 
-	private String placeid;
+    private String placeid;
 
-	private List<StorageRequest> pictures;
+    private List<StorageRequest> pictures;
 
-	private TreeMap<String, String> contactInfo = null;
+    private final TreeMap<String, String> contactInfo = null;
 
-	private String description;
+    private String description;
 
-	private String category;
+    private String category;
 
-	private Date expiredOn;
+    private LocalDateTime expiredOn;
 
-	private PostStatus status;
+    private PostStatus status;
 }

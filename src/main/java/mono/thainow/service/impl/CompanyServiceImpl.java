@@ -1,12 +1,5 @@
 package mono.thainow.service.impl;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import mono.thainow.dao.CompanyDao;
 import mono.thainow.dao.SearchDao;
 import mono.thainow.domain.company.Company;
@@ -14,163 +7,168 @@ import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.rest.request.CompanyRequest;
-import mono.thainow.service.CompanyService;
-import mono.thainow.service.LocationService;
-import mono.thainow.service.StorageService;
-import mono.thainow.util.PhoneUtil;
+import mono.thainow.service.*;
 import mono.thainow.util.Util;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
 
-	@Autowired
-	private CompanyDao companyDao;
+    @Autowired
+    private CompanyDao companyDao;
 
-	@Autowired
-	private LocationService locationService;
+    @Autowired
+    private EmailService emailService;
 
-	@Autowired
-	private StorageService storageService;
+    @Autowired
+    private LocationService locationService;
 
-	@Autowired
-	private SearchDao elasticSearchDao;
+    @Autowired
+    private StorageService storageService;
 
-	@Override
-	public Company findCompanyById(Long companyId) {
-		return companyDao.findCompanyById(companyId);
-	}
+    @Autowired
+    private SearchDao elasticSearchDao;
 
-	@Override
-	public Company createCompany(CompanyRequest companyRequest) {
+    @Autowired
+    private PhoneService phoneService;
 
-		Company company = fetchCompanyFromRequest(null, companyRequest);
+    @Override
+    public Company findCompanyById(Long companyId) {
+        return companyDao.findCompanyById(companyId);
+    }
 
-		company = saveCompany(company);
+    @Override
+    public Company createCompany(CompanyRequest companyRequest) {
 
-		return company;
-	}
+        Company company = fetchCompanyFromRequest(null, companyRequest);
 
-	@Override
-	public List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit) {
-		return elasticSearchDao.searchCompanyByNameOnly(keywords, fetchAll, fetchLimit);
-	}
+        company = saveCompany(company);
 
-	@Override
-	public Company fetchCompanyFromRequest(Company company, CompanyRequest request) {
-		
+        return company;
+    }
+
+    @Override
+    public List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit) {
+        return elasticSearchDao.searchCompanyByNameOnly(keywords, fetchAll, fetchLimit);
+    }
+
+    @Override
+    public Company fetchCompanyFromRequest(Company company, CompanyRequest request) {
+
 //		company industry 
-		String industry = Optional.ofNullable(request.getIndustry()).orElse("").trim();
-		Assert.isTrue(!industry.isBlank(), "Invalid Industry");
+        String industry = Optional.ofNullable(request.getIndustry()).orElse("").trim();
+        Assert.isTrue(!industry.isBlank(), "Invalid Industry");
 
-		if (company == null) {
-			company = new Company();
+        if (company == null) {
+            company = new Company();
 
 //			Company Logo / Profile
-			StorageDefault storageDefault = new StorageDefault();
-			Long profileId = storageDefault.getIndustryLogoUrl().get(industry.toUpperCase());
-			if (profileId == null) {
-				profileId = storageDefault.getBusinessProfileDefault();
-			}
-			Storage profile = storageService.findStorageById(profileId);
-			company.setLogo(profile);
-			
-//			status
-			company.setStatus(CompanyStatus.PENDING);
+            StorageDefault storageDefault = new StorageDefault();
+            Long profileId = storageDefault.getIndustryLogoUrl().get(industry.toUpperCase());
+            if (profileId == null) {
+                profileId = storageDefault.getBusinessProfileDefault();
+            }
+            Storage profile = storageService.findStorageById(profileId).orElseGet(null);
+            company.setLogo(profile);
 
-		}
-		
+//			status
+            company.setStatus(CompanyStatus.PENDING);
+
+        }
+
 //		set industry
-		company.setIndustry(industry);
+        company.setIndustry(industry);
 
 //		Informal company is a company not having physical address 
-		Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(false);
-		company.setInformalCompany(isInformal);
+        Boolean isInformal = Optional.ofNullable(request.getIsInformal()).orElse(false);
+        company.setInformalCompany(isInformal);
 
 //		company name 
-		String name = Optional.ofNullable(request.getName()).orElse("").trim();
-		Assert.isTrue(!name.isBlank(), "Invalid Name");
-		company.setName(name);
+        String name = Optional.ofNullable(request.getName()).orElse("").trim();
+        Assert.isTrue(!name.isBlank(), "Invalid Name");
+        company.setName(name);
 
 //		company email (optional)
-		String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
-		if (!email.isBlank()) {
-			Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
-		}
-		company.setEmail(email);
+        String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+        if (!email.isBlank()) {
+            Assert.isTrue(emailService.isEmailValid(email), "Invalid Email");
+        }
+        company.setEmail(email);
 
 //		public email
-		Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(true);
-		company.setEmailPublic(isEmailPublic);
+        Boolean isEmailPublic = Optional.ofNullable(request.getIsEmailPublic()).orElse(true);
+        company.setEmailPublic(isEmailPublic);
 
 //		company phone 
-		String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
-//		required for informal company
-		if (company.isInformalCompany()) {
-			Assert.isTrue(!phone.isBlank(), "Invalid Phone!");
-			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-		}
-//		phone is optional for formal company
-		else if (!phone.isBlank()) {
-			PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-		}
-		company.setPhone(phone);
+        String phone = Optional.ofNullable(request.getPhone()).orElse("").trim();
+//		required for informal company or if phone is not blank
+        if (company.isInformalCompany() || !phone.isBlank()) {
+            phoneService.validatePhone(phone, "US");
+        }
+//      else -> optional -> no validation needed
+        company.setPhone(phone);
 
 //		public phone
-		Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(true);
-		company.setPhonePublic(isPhonePublic);
+        Boolean isPhonePublic = Optional.ofNullable(request.getIsPhonePublic()).orElse(true);
+        company.setPhonePublic(isPhonePublic);
 
 //		company location 
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
-		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
+        String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
+        String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
 
 //		company location is not required for informal company
-		if (company.isInformalCompany()) {
+        if (company.isInformalCompany()) {
 //			since it's optional, only add if address is provided
-			if (!address.isBlank())
-				company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-			else
-				company.setLocation(null);
-		}
+            if (!address.isBlank())
+                company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+            else
+                company.setLocation(null);
+        }
 //		required for formal company
-		else {
-			Assert.isTrue(!address.isBlank(), "Invalid Location!");
-			company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
-		}
-		
+        else {
+            Assert.isTrue(!address.isBlank(), "Invalid Location!");
+            company.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+        }
+
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
-		company.setDescription(description);
+        String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
+        company.setDescription(description);
 
 //		public description
-		Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(true);
-		company.setDescriptionPublic(isDescriptionPublic);
-		
+        Boolean isDescriptionPublic = Optional.ofNullable(request.getIsDescriptionPublic()).orElse(true);
+        company.setDescriptionPublic(isDescriptionPublic);
+
 //		company website
-		String website = Optional.ofNullable(request.getWebsite()).orElse("").trim();
-		if (!website.isBlank()) {
-			Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");	
-		}
-		company.setWebsite(website);
-		
+        String website = Optional.ofNullable(request.getWebsite()).orElse("").trim();
+        if (!website.isBlank()) {
+            Assert.isTrue(Util.isValidUrl(website), "Invalid Website Address");
+        }
+        company.setWebsite(website);
+
 //		public website
-		Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(true);
-		company.setWebsitePublic(isWebsitePublic);
-		
+        Boolean isWebsitePublic = Optional.ofNullable(request.getIsWebsitePublic()).orElse(true);
+        company.setWebsitePublic(isWebsitePublic);
+
 //		size
-		String size = Optional.ofNullable(request.getSize()).orElse("").trim();
-		company.setSize(size);
+        String size = Optional.ofNullable(request.getSize()).orElse("").trim();
+        company.setSize(size);
 
 //		public size
-		Boolean isSizePublic = Optional.ofNullable(request.getIsSizePublic()).orElse(true);
-		company.setSizePublic(isSizePublic);
+        Boolean isSizePublic = Optional.ofNullable(request.getIsSizePublic()).orElse(true);
+        company.setSizePublic(isSizePublic);
 
-		return company;
-	}
+        return company;
+    }
 
-	@Override
-	public Company saveCompany(Company company) {
-		return companyDao.saveCompany(company);
-	}
+    @Override
+    public Company saveCompany(Company company) {
+        return companyDao.saveCompany(company);
+    }
 
 //	@Override
 //	public Storage uploadLogoPicture(Company company, MultipartFile file) {
@@ -197,11 +195,11 @@ public class CompanyServiceImpl implements CompanyService {
 //		return null;
 //	}
 
-	@Override
-	public void remove(Company company) {
-		company.setStatus(CompanyStatus.REJECTED);
-		saveCompany(company);
-	}
+    @Override
+    public void remove(Company company) {
+        company.setStatus(CompanyStatus.REJECTED);
+        saveCompany(company);
+    }
 
 //	@Override
 //	public Company fetchCompanyFromUpdateRequest(Company company, @Valid CompanyRequest request) {
@@ -332,10 +330,10 @@ public class CompanyServiceImpl implements CompanyService {
 //		return company;
 //	}
 
-	@Override
-	public Company activateCompany(Company company) {
-		company.setStatus(CompanyStatus.REGISTERED);
-		return saveCompany(company);
-	}
+    @Override
+    public Company activateCompany(Company company) {
+        company.setStatus(CompanyStatus.REGISTERED);
+        return saveCompany(company);
+    }
 
 }

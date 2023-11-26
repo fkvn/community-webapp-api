@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <list size="1">
+    <list size="5">
       <item index="0" class="java.lang.String" itemvalue="javax.annotation.PostConstruct" />
+      <item index="1" class="java.lang.String" itemvalue="org.springframework.stereotype.Service" />
+      <item index="2" class="java.lang.String" itemvalue="org.springframework.web.bind.annotation.GetMapping" />
+      <item index="3" class="java.lang.String" itemvalue="org.springframework.web.bind.annotation.PatchMapping" />
+      <item index="4" class="java.lang.String" itemvalue="org.springframework.web.bind.annotation.PostMapping" />
     </list>
+    <writeAnnotations>
+      <writeAnnotation name="org.springframework.beans.factory.annotation.Autowired" />
+    </writeAnnotations>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="MavenProjectsManager">
@@ -13,5 +20,5 @@
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_20" default="true" project-jdk-name="20" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_20" default="true" project-jdk-name="corretto-20" project-jdk-type="JavaSDK" />
 </project>

@@ -1,12 +1,15 @@
 package mono.thainow.service.impl;
 
+import mono.thainow.domain.post.Post;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
+import mono.thainow.domain.review.Review;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserProvider;
+import mono.thainow.domain.user.UserRole;
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.*;
 import mono.thainow.rest.response.JwtResponse;
-import mono.thainow.rest.response.TokenResponse;
 import mono.thainow.security.jwt.JwtUtils;
 import mono.thainow.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,68 +17,134 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.validation.Valid;
 import java.util.Optional;
 
-@Service public class AuthServiceImpl implements AuthService {
-    
+@Service
+public class AuthServiceImpl implements AuthService {
+
     @Autowired
-    AuthenticationManager authenticationManager;
+    private AuthenticationManager authenticationManager;
+
     @Autowired
-    JwtUtils jwtUtils;
+    private JwtUtils jwtUtils;
+
     @Autowired
-    TwilioService twilioService;
-    @Autowired
-    StorageService storageService;
+    private TwilioService twilioService;
+
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
+
     @Autowired
     private ProfileService profileService;
 
 //	======================================================================
-    
+
     @Override
-    public void sendVerificationToken (TokenRequest tokenRequest) {
-
-//		inputs
-        String phone = Optional.ofNullable(tokenRequest.getPhone()).orElse("")
-                .trim();
-        String region = Optional.ofNullable(tokenRequest.getRegion()).orElse("")
-                .trim();
-        String email = Optional.ofNullable(tokenRequest.getEmail()).orElse("")
-                .trim();
-        String channel = Optional.ofNullable(tokenRequest.getChannel())
-                .orElse("").trim();
-
-//		send verification token
-        twilioService.sendVerficationToken(phone, region, email, channel);
+    public void sendVerificationToken(SendTokenRequest request) {
+        twilioService.sendVerificationToken(request);
     }
-    
+
     @Override
-    public void checkVerificationToken (TokenResponse tokenResponse) {
-
-//		inputs
-        String phone = Optional.ofNullable(tokenResponse.getPhone()).orElse("")
-                .trim();
-        String region = Optional.ofNullable(tokenResponse.getRegion())
-                .orElse("US").trim();
-        String email = Optional.ofNullable(tokenResponse.getEmail()).orElse("")
-                .trim();
-        String channel = Optional.ofNullable(tokenResponse.getChannel())
-                .orElse("").trim();
-        String token = Optional.ofNullable(tokenResponse.getToken()).orElse("")
-                .trim();
-
-//		check verification token
-        twilioService.checkVerficationToken(phone, region, email, channel,
-                token);
+    public void checkVerificationToken(VerifyTokenRequest request) {
+        twilioService.checkVerificationToken(request);
     }
-    
+
     @Override
-    public Long registerWithThaiNow (UserRequest request) {
+    public UserDetailsImpl getAuthenticatedUser() {
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+        return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    @Override
+    public String getClientIpAddress() {
+        Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
+        if (details instanceof WebAuthenticationDetails)
+            return ((WebAuthenticationDetails) details).getRemoteAddress();
+        return "unknown";
+    }
+
+    @Override
+    public boolean isAccessAuthorized(Profile profile, boolean throwError) {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+
+        boolean adminAuthorized = userDetails != null
+                && (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
+
+        boolean validRequester = userDetails != null && profile != null
+                && profile.getAccount().getId().equals(userDetails.getId());
+
+        boolean authorizedAccess = adminAuthorized || validRequester;
+
+        if (throwError && !authorizedAccess) {
+            throw new AccessForbidden();
+        }
+
+        return authorizedAccess;
+    }
+
+    @Override
+    public boolean isAccessAuthorized(Profile postOwner, Post post, boolean throwError) {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+
+        boolean adminAuthorized = userDetails != null
+                && (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
+
+        boolean validRequester = userDetails != null && postOwner != null
+                && postOwner.getAccount().getId().equals(userDetails.getId());
+
+        boolean validPostOwner = validRequester && post != null && post.getOwner().getId().equals(userDetails.getId());
+
+        boolean authorizedAccess = adminAuthorized || (validRequester && validPostOwner);
+
+        if (throwError && !authorizedAccess) {
+            throw new AccessForbidden();
+        }
+
+        return authorizedAccess;
+    }
+
+    @Override
+    public boolean isAccessAuthorized(Profile reviewer, Review review, boolean throwError) {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+
+        boolean adminAuthorized = userDetails != null
+                && (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
+
+
+        boolean validRequester = userDetails != null && review != null
+                && review.getReviewer().getId().equals(userDetails.getId());
+
+        boolean validReviewer = validRequester && review != null
+                && review.getReviewer().getId().equals(reviewer.getId());
+
+        boolean authorizedAccess = adminAuthorized || (validRequester && validReviewer);
+
+        if (throwError && !authorizedAccess) {
+            throw new AccessForbidden();
+        }
+
+        return authorizedAccess;
+    }
+
+    @Override
+    public boolean isAdminAuthenticated() {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+        if (userDetails == null)
+            return false;
+        return userDetails.getRole() == UserRole.ADMIN || userDetails.getRole() == UserRole.SUPERADMIN;
+    }
+
+    @Override
+    public Long registerWithThaiNow(UserRequest request) {
 
 //		check Type of verification
         Boolean isVerified = Optional.ofNullable(request.getIsVerified())
@@ -90,93 +159,68 @@ import java.util.Optional;
 //		persist user info into database 
         user = userService.saveUser(user);
 
-//		create a account profile with new user
+//		create an account profile with new user
         Profile userProfile = profileService.createUserProfile(user);
-        
+
         return userProfile.getId();
     }
-    
+
     @Override
-    public JwtResponse signinWithThaiNow (UserRequest request) {
-        
-        String channel = Optional.ofNullable(request.getChannel()).orElse("");
+    public JwtResponse signingWithThaiNowByEmail(SigningByEmailRequest request) {
 
-//		only verify by email and phone
-        Assert.isTrue(channel.equals("email") || channel.equals("phone"),
-                "Only Email and Phone are supported at the moment!");
+        String email = request.getEmail();
+        Assert.isTrue(!email.isBlank(), "Email can't be empty!");
 
-//		password verification
-        String password = Optional.ofNullable(request.getPassword()).orElse("")
-                .trim();
-        
-        String username = "";
-        
-        switch (channel) {
-            
-            case "email": {
-                
-                String email = Optional.ofNullable(request.getEmail())
-                        .orElse("").trim();
+        String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
 
-//			email is required
-                Assert.isTrue(!email.isEmpty(), "Email is required!");
-                
-                User user = userService.findActiveUserByEmail(email);
-                Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
-                        String.format("The email linked with your %s account!",
-                                user.getProvider()));
+        User user = userService.findActiveUserByEmail(email).get();
+        Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
+                String.format("The email linked with your %s account!",
+                        user.getProvider()));
 
-//			update username
-                username = "email-login," + email;
-                
-            }
-            break;
-            
-            case "phone": {
-                
-                String phone = Optional.ofNullable(request.getPhone())
-                        .orElse("").trim();
+//		username uses to log in
+        String username = "email-login," + email.trim();
 
-//			phone number is required
-                Assert.isTrue(!phone.isEmpty(), "Phone number is required!");
-                
-                User user = userService.findActiveUserByPhone(phone);
-                Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
-                        String.format("The email linked with your %s account!",
-                                user.getProvider()));
-
-
-//			update username
-                username = "phone-login," + phone;
-                
-            }
-            break;
-            
-            default:
-                break;
-        }
-        
         return signedJWTAuth(username, password);
-        
+
     }
-    
+
     @Override
-    public JwtResponse accessWithGoogle (GoogleRequest request) {
-        
-        String email = Optional.ofNullable(request.getEmail()).orElse("")
-                .trim();
+    public JwtResponse signingWithThaiNowByPhone(SigningByPhoneRequest request) {
 
-//		email is unique -> new user -> sign up
-        if (userService.isEmailUnique(email)) {
-            User user = userService.fetchUserFromGoogleRequest(request);
+        String phone = request.getPhone();
+        String region = request.getRegion();
+        Assert.isTrue(!phone.isBlank() && !region.isBlank(), "Phone or Region can't be empty!");
 
-//			persist user
+        String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
+
+        User user = userService.findActiveUserByPhone(phone, region).get();
+        Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
+                String.format("The email linked with your %s account!", user.getProvider()));
+
+//		username uses to log in
+        String username = "phone-login," + phone + "," + region;
+
+        return signedJWTAuth(username, password);
+    }
+
+    @Override
+    public JwtResponse accessWithGoogle(AccessByGoogleRequest request) {
+
+        String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+        Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
+
+//		email not exist -> new user -> sign up
+        if (!emailService.isEmailExisting(email)) {
+            User user = userService.fetchNewUserFromAccessByGoogleRequest(request);
+
+//			merge user
             user = userService.saveUser(user);
 
-//			create a account profile with new user
+//			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
-            User user = userService.findActiveUserByEmail(email);
+            User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.GOOGLE),
                     String.format("The email linked with your %s account!",
                             user.getProvider()));
@@ -185,33 +229,34 @@ import java.util.Optional;
             String password = Optional.ofNullable(request.getSub()).orElse("")
                     .trim();
             user.setPassword(userService.encodePassword(password, false));
+
+//          merge user
             userService.saveUser(user);
         }
-        
+
         String username = "email-login," + email;
-        String password = Optional.ofNullable(request.getSub()).orElse("")
-                .trim();
-        
+        String password = Optional.ofNullable(request.getSub()).orElse("").trim();
+
         return signedJWTAuth(username, password);
     }
-    
+
     @Override
-    public JwtResponse accessWithApple (AppleRequest request) {
-        
-        String email = Optional.ofNullable(request.getEmail()).orElse("")
-                .trim();
+    public JwtResponse accessWithApple(AccessByAppleRequest request) {
 
-//		email is unique -> new user -> sign up
-        if (userService.isEmailUnique(email)) {
-            User user = userService.fetchUserFromAppleRequest(request);
+        String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+        Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
 
-//			persit user
+//		email not exist -> new user -> sign up
+        if (!emailService.isEmailExisting(email)) {
+            User user = userService.fetchNewUserFromAccessByAppleRequest(request);
+
+//			merge user
             user = userService.saveUser(user);
 
-//			create a account profile with new user
+//			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
-            User user = userService.findActiveUserByEmail(email);
+            User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.APPLE),
                     String.format("The email linked with your %s account!",
                             user.getProvider()));
@@ -219,33 +264,34 @@ import java.util.Optional;
 //			this is to keep posted with password change from APPLE account
             String password = Optional.of(request.getSub()).orElse("").trim();
             user.setPassword(userService.encodePassword(password, false));
+
+//            merge user
             userService.saveUser(user);
         }
-        
+
         String username = "email-login," + email;
-        String password = Optional.ofNullable(request.getSub()).orElse("")
-                .trim();
-        
+        String password = Optional.ofNullable(request.getSub()).orElse("").trim();
+
         return signedJWTAuth(username, password);
     }
-    
+
     @Override
-    public JwtResponse accessWithFacebook (FacebookRequest request) {
-        
-        String email = Optional.ofNullable(request.getEmail()).orElse("")
-                .trim();
+    public JwtResponse accessWithFacebook(AccessByFacebookRequest request) {
 
-//		email is unique -> new user -> sign up
-        if (userService.isEmailUnique(email)) {
-            User user = userService.fetchUserFromFacebookRequest(request);
+        String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+        Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
 
-//			persit user
+//		email not exist -> new user -> sign up
+        if (!emailService.isEmailExisting(email)) {
+            User user = userService.fetchNewUserFromAccessByFacebookRequest(request);
+
+//			merge user
             user = userService.saveUser(user);
 
-//			create a account profile with new user
+//			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
-            User user = userService.findActiveUserByEmail(email);
+            User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.FACEBOOK),
                     String.format("The email linked with your %s account!",
                             user.getProvider()));
@@ -253,32 +299,33 @@ import java.util.Optional;
 //			this is to keep posted with password change from FACEBOOK account
             String password = Optional.of(request.getId()).orElse("").trim();
             user.setPassword(userService.encodePassword(password, false));
+
+//            merge user
             userService.saveUser(user);
         }
-        
+
         String username = "email-login," + email;
-        String password = Optional.ofNullable(request.getId()).orElse("")
-                .trim();
-        
+        String password = Optional.ofNullable(request.getId()).orElse("").trim();
+
         return signedJWTAuth(username, password);
     }
-    
+
     @Override
-    public JwtResponse accessWithLine (LineRequest request) {
-        String email = Optional.ofNullable(request.getEmail()).orElse("")
-                .trim();
+    public JwtResponse accessWithLine(AccessByLineRequest request) {
+        String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
+        Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
 
-//		email is unique -> new user -> sign up
-        if (userService.isEmailUnique(email)) {
-            User user = userService.fetchUserFromLineRequest(request);
+//		email not exist -> new user -> sign up
+        if (!emailService.isEmailExisting(email)) {
+            User user = userService.fetchNewUserFromAccessByLineRequest(request);
 
-//			persit user
+//			merge user
             user = userService.saveUser(user);
 
-//			create a account profile with new user
+//			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
-            User user = userService.findActiveUserByEmail(email);
+            User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.LINE),
                     String.format("The email %s linked with your %s account!",
                             user.getEmail(), user.getProvider()));
@@ -287,90 +334,41 @@ import java.util.Optional;
             String password = Optional.ofNullable(request.getSub()).orElse("")
                     .trim();
             user.setPassword(userService.encodePassword(password, false));
+
+//            merge user
             userService.saveUser(user);
         }
-        
+
         String username = "email-login," + email;
-        String password = Optional.ofNullable(request.getSub()).orElse("")
-                .trim();
-        
+        String password = Optional.ofNullable(request.getSub()).orElse("").trim();
+
         return signedJWTAuth(username, password);
     }
-    
+
     @Override
-    public JwtResponse signedJWTAuth (String username, String password) {
-        
+    public JwtResponse signedJWTAuth(String username, String password) {
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
-        
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        
+
         String jwt = jwtUtils.generateJwtToken(authentication);
-        
+
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        
-        User account = userService.findActiveUserById(userDetails.getId());
+
+        User account = userService.findActiveUserById(userDetails.getId()).get();
         UserProfile profile = profileService.findUserProfileByAccount(account);
-        
+
         JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
         jwtClaims.setProfile(profile);
 
-//		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-//				.collect(Collectors.toList());
-        
+/*
+		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+				.collect(Collectors.toList());
+*/
+
         return jwtClaims;
     }
-    
-    @Override
-    public void changePassword (@Valid ChangePasswordRequest request) {
-        
-        String channel = Optional.ofNullable(request.getChannel()).orElse("");
 
-//		only verify by email and phone
-        Assert.isTrue(channel.equals("email") || channel.equals("phone"),
-                "Only Email and Phone are supported at the moment!");
-
-//		password verification
-        String password = Optional.ofNullable(request.getPassword()).orElse("")
-                .trim();
-        
-        User user = null;
-        
-        switch (channel) {
-            
-            case "email": {
-                
-                String email = Optional.ofNullable(request.getEmail())
-                        .orElse("").trim();
-
-//			email is required
-                Assert.isTrue(!email.isEmpty(), "Email is required!");
-                user = userService.findActiveUserByEmail(email);
-            }
-            break;
-            
-            case "phone": {
-                
-                String phone = Optional.ofNullable(request.getPhone())
-                        .orElse("").trim();
-
-//			phone number is required
-                Assert.isTrue(!phone.isEmpty(), "Phone number is required!");
-                user = userService.findActiveUserByPhone(phone);
-            }
-            break;
-            default:
-                break;
-        }
-        
-        Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
-                String.format(
-                        "Update Error! This profile is managed by %s account.",
-                        user.getProvider()));
-        user.setPassword(userService.encodePassword(password, true));
-        
-        userService.saveUser(user);
-        
-    }
-    
 }

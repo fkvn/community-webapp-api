@@ -10,10 +10,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 //		MongoAutoConfiguration.class })
 public class ThainowApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ThainowApplication.class, args);
-	}
-	
+
+    public static void main(String[] args) {
+        SpringApplication.run(ThainowApplication.class, args);
+    }
+
 //	@Bean
 //	public boolean createTestIndex(RestHighLevelClient restHighLevelClient) throws Exception {
 //		try {

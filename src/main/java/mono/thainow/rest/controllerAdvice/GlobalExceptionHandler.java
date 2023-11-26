@@ -1,8 +1,9 @@
 package mono.thainow.rest.controllerAdvice;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolationException;
-
+import com.twilio.exception.ApiException;
+import mono.thainow.configuration.ApiError;
+import mono.thainow.exception.AccessForbidden;
+import mono.thainow.exception.BadRequest;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -22,11 +23,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.twilio.exception.ApiException;
-
-import mono.thainow.exception.AccessForbidden;
-import mono.thainow.exception.BadRequest;
-import mono.thainow.util.ApiError;
+import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
+import java.util.NoSuchElementException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
@@ -74,25 +73,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return null;
 //	}
 
-	@ExceptionHandler({ IllegalArgumentException.class, InvalidDataAccessApiUsageException.class,
-			ConstraintViolationException.class })
-	protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
+    @ExceptionHandler({IllegalArgumentException.class, InvalidDataAccessApiUsageException.class,
+            ConstraintViolationException.class})
+    protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex, WebRequest request) {
 
-		ex.printStackTrace();
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage(ex.getLocalizedMessage());
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage(ex.getLocalizedMessage());
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
 //	@ExceptionHandler({ DataIntegrityViolationException.class })
 //	protected ResponseEntity<Object> handleDataIntegrityViolationException(Exception ex, WebRequest request) {
@@ -136,174 +135,174 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 //	}
 
-	@ExceptionHandler({ EmptyResultDataAccessException.class, EntityNotFoundException.class,
-			NullPointerException.class })
-	protected ResponseEntity<Object> handleEmptyResultDataAccessException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({EmptyResultDataAccessException.class, EntityNotFoundException.class,
+            NullPointerException.class, NoSuchElementException.class})
+    protected ResponseEntity<Object> handleEmptyResultDataAccessException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.NOT_FOUND);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.NOT_FOUND);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("No records available! The record is either deleted or not exist.");
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage("No records available! The record is either deleted or not exist.");
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler({ ClassCastException.class, BadRequest.class })
-	protected ResponseEntity<Object> handleBadRequestException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({ClassCastException.class, BadRequest.class})
+    protected ResponseEntity<Object> handleBadRequestException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.BAD_REQUEST);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.BAD_REQUEST);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("Invalid Request Type!");
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage("Invalid Request Type!");
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler({ ApiException.class })
-	protected ResponseEntity<Object> handleTwilioApiException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({ApiException.class})
+    protected ResponseEntity<Object> handleTwilioApiException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
 
-		if (apiError.getError().indexOf("VerificationCheck was not found") > -1) {
+        if (apiError.getError().indexOf("VerificationCheck was not found") > -1) {
 
-			apiError.setMessage("Token Verification Failed. Please try again or request a new code!!!");
-		} else {
-			apiError.setMessage(ex.getCause().getLocalizedMessage());
-		}
+            apiError.setMessage("Token Verification Failed. Please try again or request a new code!!!");
+        } else {
+            apiError.setMessage(ex.getCause().getLocalizedMessage());
+        }
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler({ AccountExpiredException.class, DisabledException.class })
-	protected ResponseEntity<Object> handleAuthenticationApiException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({AccountExpiredException.class, DisabledException.class})
+    protected ResponseEntity<Object> handleAuthenticationApiException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage(ex.getLocalizedMessage());
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage(ex.getLocalizedMessage());
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler({ FileSizeLimitExceededException.class, MaxUploadSizeExceededException.class, })
-	protected ResponseEntity<Object> handleSizeExceededException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({FileSizeLimitExceededException.class, MaxUploadSizeExceededException.class,})
+    protected ResponseEntity<Object> handleSizeExceededException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("Maximum upload size exceeded!");
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage("Maximum upload size exceeded!");
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler({ BadCredentialsException.class })
-	protected ResponseEntity<Object> handleBadCredentialsException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({BadCredentialsException.class})
+    protected ResponseEntity<Object> handleBadCredentialsException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.UNAUTHORIZED);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.UNAUTHORIZED);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("Invalid Password!");
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage("Invalid Password!");
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler({ InternalAuthenticationServiceException.class })
-	protected ResponseEntity<Object> handleInternalAuthenticationServiceException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({InternalAuthenticationServiceException.class})
+    protected ResponseEntity<Object> handleInternalAuthenticationServiceException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.NOT_FOUND);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.NOT_FOUND);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("User Not Found!");
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage("User Not Found!");
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler({ AccessDeniedException.class, AccessForbidden.class })
-	protected ResponseEntity<Object> handleAccessDeniedException(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler({AccessDeniedException.class, AccessForbidden.class})
+    protected ResponseEntity<Object> handleAccessDeniedException(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.FORBIDDEN);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.FORBIDDEN);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("Access is denied!");
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage("Access is denied!");
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
-	@ExceptionHandler
-	protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
-		ex.printStackTrace();
+    @ExceptionHandler
+    protected ResponseEntity<Object> handleExceptions(Exception ex, WebRequest request) {
+        ex.printStackTrace();
 
-		ApiError apiError = new ApiError();
-		apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		try {
-			apiError.setError(ex.getCause().getLocalizedMessage());
-		} catch (Exception e) {
-			apiError.setError(ex.getLocalizedMessage());
-		}
+        ApiError apiError = new ApiError();
+        apiError.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            apiError.setError(ex.getCause().getLocalizedMessage());
+        } catch (Exception e) {
+            apiError.setError(ex.getLocalizedMessage());
+        }
 
-		apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-		apiError.setMessage("Unexpected error! Please contact your administrator.");
+        apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
+        apiError.setMessage("Unexpected error! Please contact your administrator.");
 
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-	}
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
 
 //	@ExceptionHandler({ TransactionSystemException.class, DataIntegrityViolationException.class })
 //	protected ResponseEntity<Object> handleConstraintViolationExceptions(Exception ex,

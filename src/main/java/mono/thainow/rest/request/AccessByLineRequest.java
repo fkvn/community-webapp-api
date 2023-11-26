@@ -5,15 +5,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LineRequest {
+public class AccessByLineRequest {
 
-	private String sub;
+    private String sub;
 
-	private String email;
+    private String email;
 
 //	private Boolean email_verified;
 
-	private String name;
+    private String name;
 
 //	private String picture;
 

@@ -1,76 +1,71 @@
 package mono.thainow.rest.controller;
 
-import java.util.Optional;
-
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.review.Review;
 import mono.thainow.domain.review.ReviewType;
 import mono.thainow.rest.request.ReviewRequest;
+import mono.thainow.service.AuthService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.ReviewService;
-import mono.thainow.util.AuthUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
 
-	@Autowired
-	ReviewService reviewService;
+    @Autowired
+    ReviewService reviewService;
 
-	@Autowired
-	ProfileService profileService;
+    @Autowired
+    ProfileService profileService;
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	@AuthenticatedAccess
-	public Long createPostReview(@Valid @RequestBody ReviewRequest request) {
+    @Autowired
+    AuthService authService;
 
-		Long reviewerId = Optional.ofNullable(request.getReviewerId()).orElse(null);
-		Assert.isTrue(reviewerId != null, "Missing profile information!");
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @AuthenticatedAccess
+    public Long createPostReview(@Valid @RequestBody ReviewRequest request) {
 
-		ReviewType type = Optional.ofNullable(request.getType()).orElse(null);
-		
-		Assert.isTrue(type != null && (type == ReviewType.POST_REVIEW || type == ReviewType.PROFILE_REVIEW),
-				"Invalid Review Type!");
+        Long reviewerId = Optional.ofNullable(request.getReviewerId()).orElse(null);
+        Assert.isTrue(reviewerId != null, "Missing profile information!");
 
-		Profile reviewer = profileService.findProfileById(reviewerId);
-		AuthUtil.authorizedAccess(reviewer, true);
+        ReviewType type = Optional.ofNullable(request.getType()).orElse(null);
 
-		Review newReview = reviewService.createReview(reviewer, request);
+        Assert.isTrue(type != null && (type == ReviewType.POST_REVIEW || type == ReviewType.PROFILE_REVIEW),
+                "Invalid Review Type!");
 
-		return newReview.getId();
+        Profile reviewer = profileService.findProfileById(reviewerId);
+        authService.isAccessAuthorized(reviewer, true);
 
-	}
+        Review newReview = reviewService.createReview(reviewer, request);
 
-	@PatchMapping("/{reviewId}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@AuthenticatedAccess
-	public void updateReview(@PathVariable Long reviewId, @Valid @RequestBody ReviewRequest request) {
+        return newReview.getId();
 
-		Long profileId = Optional.ofNullable(request.getReviewerId()).orElse(null);
-		Assert.isTrue(profileId != null, "Missing profile information!");
+    }
 
-		Profile reviewer = profileService.findProfileById(profileId);
+    @PatchMapping("/{reviewId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AuthenticatedAccess
+    public void updateReview(@PathVariable Long reviewId, @Valid @RequestBody ReviewRequest request) {
 
-		Review review = reviewService.findActiveReviewById(reviewId);
+        Long profileId = Optional.ofNullable(request.getReviewerId()).orElse(null);
+        Assert.isTrue(profileId != null, "Missing profile information!");
 
-		AuthUtil.authorizedAccess(reviewer, review, true);
+        Profile reviewer = profileService.findProfileById(profileId);
 
-		reviewService.updateReview(review, request);
-	}
+        Review review = reviewService.findActiveReviewById(reviewId);
+
+        authService.isAccessAuthorized(reviewer, review, true);
+
+        reviewService.updateReview(review, request);
+    }
 
 }

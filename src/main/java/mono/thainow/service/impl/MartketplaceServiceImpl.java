@@ -1,16 +1,5 @@
 package mono.thainow.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import mono.thainow.dao.MarketplaceDao;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.marketplace.Marketplace;
@@ -20,88 +9,94 @@ import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.LocationService;
 import mono.thainow.service.MarketplaceService;
 import mono.thainow.service.StorageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class MartketplaceServiceImpl implements MarketplaceService {
 
-	@Autowired
-	private LocationService locationService;
+    @Autowired
+    private LocationService locationService;
 
-	@Autowired
-	private MarketplaceDao marketplaceDao;
+    @Autowired
+    private MarketplaceDao marketplaceDao;
 
-	@Autowired
-	private StorageService storageService;
+    @Autowired
+    private StorageService storageService;
 
-	@Override
-	public Marketplace fetchMarketplaceFromRequest(Marketplace marketplace, MarketplaceRequest request) {
+    @Override
+    public Marketplace fetchMarketplaceFromRequest(Marketplace marketplace, MarketplaceRequest request) {
 
-		if (marketplace == null) {
-			marketplace = new Marketplace();
-			marketplace.setStatus(PostStatus.AVAILABLE);
-		}
-		
+        if (marketplace == null) {
+            marketplace = new Marketplace();
+            marketplace.setStatus(PostStatus.AVAILABLE);
+        }
+
 //		title
-		String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
-		Assert.isTrue(!title.isBlank(), "Invalid title!");
-		marketplace.setTitle(title);
+        String title = Optional.ofNullable(request.getTitle()).orElse("").trim();
+        Assert.isTrue(!title.isBlank(), "Invalid title!");
+        marketplace.setTitle(title);
 
 //		location
-		String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
-		String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
-		Assert.isTrue(!address.isBlank(), "Invalid address");
-		marketplace.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+        String placeid = Optional.ofNullable(request.getPlaceid()).orElse("").trim();
+        String address = Optional.ofNullable(request.getAddress()).orElse("").trim();
+        Assert.isTrue(!address.isBlank(), "Invalid address");
+        marketplace.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
 
 //		cover pictures
-		List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
-		List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
-		Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
-		marketplace.setPictures(pictures);
+        List<StorageRequest> pictureRequests = Optional.ofNullable(request.getPictures()).orElse(new ArrayList<>());
+        List<Storage> pictures = storageService.fetchStoragesFromRequests(pictureRequests);
+        Assert.isTrue(pictures.size() > 0, "Require at least 1 picture!");
+        marketplace.setPictures(pictures);
 
 //		contact information
-		Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
-				.orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-		Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
-		marketplace.setContactInfo(contactInfo);
+        Map<String, String> contactInfo = Optional.ofNullable(request.getContactInfo())
+                .orElse(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+        Assert.isTrue(contactInfo.size() > 0, "Require at least 1 contact information!");
+        marketplace.setContactInfo(contactInfo);
 
 //		description
-		String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
-		marketplace.setDescription(description.trim());
+        String description = Optional.ofNullable(request.getDescription()).orElse("").trim();
+        marketplace.setDescription(description.trim());
 
 //		cost
-		Double cost = Optional.ofNullable(request.getCost()).orElse(null);
-		marketplace.setCost(cost);
+        Double cost = Optional.ofNullable(request.getCost()).orElse(null);
+        marketplace.setCost(cost);
 
 //		condition
-		String condition = Optional.ofNullable(request.getCondition()).orElse("").trim();
-		marketplace.setCondition(condition);
+        String condition = Optional.ofNullable(request.getCondition()).orElse("").trim();
+        marketplace.setCondition(condition);
 
 //		category
-		String category = Optional.ofNullable(request.getCategory()).orElse("").trim();
-		marketplace.setCategory(category);
+        String category = Optional.ofNullable(request.getCategory()).orElse("").trim();
+        marketplace.setCategory(category);
 
 //		expiration Date
-		Date expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
-		marketplace.setExpiredOn(expiredOn);
+        LocalDateTime expiredOn = Optional.ofNullable(request.getExpiredOn()).orElse(null);
+        marketplace.setExpiredOn(expiredOn);
 
 //		status
-		PostStatus status = Optional.ofNullable(request.getStatus()).orElse(marketplace.getStatus());
-		Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
-		marketplace.setStatus(status);
+        PostStatus status = Optional.ofNullable(request.getStatus()).orElse(marketplace.getStatus());
+        Assert.isTrue(status == PostStatus.AVAILABLE || status == PostStatus.PRIVATE, "Invalid Status");
+        marketplace.setStatus(status);
 
-		return marketplace;
-	}
-	
+        return marketplace;
+    }
 
-	@Override
-	public Marketplace createMarketplace(MarketplaceRequest request) {
-		return saveMarketplace(fetchMarketplaceFromRequest(null, request));
-	}
 
-	@Override
-	public Marketplace saveMarketplace(Marketplace marketplace) {
-		return marketplaceDao.saveMarketplace(marketplace);
-	}
+    @Override
+    public Marketplace createMarketplace(MarketplaceRequest request) {
+        return saveMarketplace(fetchMarketplaceFromRequest(null, request));
+    }
+
+    @Override
+    public Marketplace saveMarketplace(Marketplace marketplace) {
+        return marketplaceDao.saveMarketplace(marketplace);
+    }
 
 //	@Override
 //	public Marketplace fetchMarketplaceFromUpdateRequest(Marketplace marketplace, MarketplaceRequest request) {
@@ -176,27 +171,27 @@ public class MartketplaceServiceImpl implements MarketplaceService {
 //		return marketplace;
 //	}
 
-	@Override
-	public void removeMarketplace(Marketplace marketplace) {
-		marketplace.setStatus(PostStatus.REMOVED);
-		saveMarketplace(marketplace);
-	}
+    @Override
+    public void removeMarketplace(Marketplace marketplace) {
+        marketplace.setStatus(PostStatus.REMOVED);
+        saveMarketplace(marketplace);
+    }
 
-	@Override
-	public void updateMarketplace(Marketplace marketplace, MarketplaceRequest request) {
-		saveMarketplace(fetchMarketplaceFromRequest(marketplace, request));
-	}
+    @Override
+    public void updateMarketplace(Marketplace marketplace, MarketplaceRequest request) {
+        saveMarketplace(fetchMarketplaceFromRequest(marketplace, request));
+    }
 
-	@Override
-	public void disableMarketplace(Marketplace marketplace) {
-		marketplace.setStatus(PostStatus.DISABLED);
-		saveMarketplace(marketplace);
-	}
+    @Override
+    public void disableMarketplace(Marketplace marketplace) {
+        marketplace.setStatus(PostStatus.DISABLED);
+        saveMarketplace(marketplace);
+    }
 
-	@Override
-	public void activateMarketplace(Marketplace marketplace) {
-		marketplace.setStatus(PostStatus.PRIVATE);
-		saveMarketplace(marketplace);
-	}
+    @Override
+    public void activateMarketplace(Marketplace marketplace) {
+        marketplace.setStatus(PostStatus.PRIVATE);
+        saveMarketplace(marketplace);
+    }
 
 }

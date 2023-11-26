@@ -1,19 +1,20 @@
 package mono.thainow.service;
 
-import javax.validation.Valid;
-
 import mono.thainow.domain.email.EmailDetails;
 import mono.thainow.rest.request.EmailRequest;
 
+import javax.validation.Valid;
+
 public interface EmailService {
 
-	 // Method
+    Boolean isEmailExisting(String email);
+
+    Boolean isEmailValid(String email);
+
     // To send a simple email
     boolean sendSimpleMail(EmailDetails details);
 
-	EmailDetails fetchEmailFromRquest(@Valid EmailRequest request);
- 
-//    // Method
-//    // To send an email with attachment
-//    String sendMailWithAttachment(EmailDetails details);
+    EmailDetails fetchEmailFromRquest(@Valid EmailRequest request);
+
+
 }

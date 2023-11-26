@@ -1,27 +1,31 @@
 package mono.thainow.rest.controller;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import mono.thainow.rest.request.EmailRequest;
 import mono.thainow.service.EmailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/emails")
 public class EmailController {
 
-	@Autowired
-	private EmailService emailService;
+    @Autowired
+    private EmailService emailService;
 
-	// Sending a simple Email
-	@PostMapping
-	public boolean sendMail(@Valid @RequestBody EmailRequest request) {
-		return emailService.sendSimpleMail(emailService.fetchEmailFromRquest(request));
-	}
+    // Sending a simple Email
+    @PostMapping
+    public boolean sendMail(@Valid @RequestBody EmailRequest request) {
+        return emailService.sendSimpleMail(emailService.fetchEmailFromRquest(request));
+    }
+
+    @GetMapping("/exist")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Boolean isEmailExisting(@RequestParam String email) {
+        Boolean isEmailExisting = emailService.isEmailExisting(email);
+        return isEmailExisting;
+    }
 
 }

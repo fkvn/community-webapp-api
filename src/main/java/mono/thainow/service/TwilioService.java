@@ -1,7 +1,10 @@
 package mono.thainow.service;
 
+import mono.thainow.rest.request.SendTokenRequest;
+import mono.thainow.rest.request.VerifyTokenRequest;
+
 public interface TwilioService {
-	void sendVerficationToken(String phone, String region, String email, String channel);
-	
-	void checkVerficationToken(String phone, String region, String email, String channel, String token);
+    void sendVerificationToken(SendTokenRequest request);
+
+    void checkVerificationToken(VerifyTokenRequest request);
 }

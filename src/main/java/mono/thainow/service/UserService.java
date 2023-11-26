@@ -3,50 +3,47 @@ package mono.thainow.service;
 import mono.thainow.domain.user.User;
 import mono.thainow.rest.request.*;
 
+import java.util.Optional;
+
 public interface UserService {
 
-//	List<User> getAllUsers();
-    
-    User findUserById (Long userId);
-    
-    User findActiveUserById (Long id);
-    
-    User findActiveUserByEmail (String email);
-    
-    User findActiveUserByPhone (String phone);
-    
-    User findActiveUserBySub (String sub);
-    
-    boolean isUsernameUnique (String username);
-    
-    boolean isEmailUnique (String email);
-    
-    boolean isPhoneUnique (String phone);
-    
-    String encodePassword (String password, boolean validate);
-    
-    User fetchUserFromUserRequest (User user, UserRequest signUpRequest);
-    
-    User fetchUserFromGoogleRequest (GoogleRequest request);
-    
-    User fetchUserFromAppleRequest (AppleRequest appleSignupRequest);
-    
-    User saveUser (User user);
-    
-    User fetchUserFromFacebookRequest (FacebookRequest facebookSignupRequest);
-    
-    User fetchUserFromLineRequest (LineRequest request);
-    
-    void remove (User account);
+    Optional<User> findUserById(Long id);
 
-//	User fetchUserFromUpdateRequest(User user, UserRequest userUpdateInfoRequest);
+    Optional<User> findUserByEmail(String email);
+
+    Optional<User> findUserByPhone(String phone, String region);
+
+    //	=============================================================
+
+    Optional<User> findActiveUserById(Long id);
+
+    Optional<User> findActiveUserByEmail(String email);
+
+    Optional<User> findActiveUserByPhone(String phone, String region);
+
+    Optional<User> findActiveUserBySub(String sub);
+
+    //	=============================================================
+
+    void activateUserById(Long userId);
+
+    String encodePassword(String password, boolean validate);
+
+    User fetchUserFromUserRequest(User user, UserRequest signUpRequest);
+
+    User fetchNewUserFromAccessByGoogleRequest(AccessByGoogleRequest request);
+
+    User fetchNewUserFromAccessByAppleRequest(AccessByAppleRequest appleSignupRequest);
+
+
+    User fetchNewUserFromAccessByFacebookRequest(AccessByFacebookRequest facebookSignupRequest);
+
+    User fetchNewUserFromAccessByLineRequest(AccessByLineRequest request);
+
+    //	=============================================================
+    User saveUser(User user);
+
+    void remove(User account);
     
-    void activateUserById (Long userId);
-    
-    User activateUser (User user);
-    
-    
-    Boolean isPhoneExisting (String phone);
-    
-    Boolean isEmailExisting (String email);
+    void changePassword(Long userId, String password);
 }

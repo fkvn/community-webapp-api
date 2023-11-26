@@ -1,17 +1,13 @@
 package mono.thainow.domain.email;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import javax.persistence.*;
 import java.io.Serializable;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.time.LocalDateTime;
 
 @Entity
 @RequiredArgsConstructor
@@ -21,20 +17,30 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class EmailDetails implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue
-	private Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-	private String recipient;
-	
-	@Lob
-	private String msgBody;
-	
-	private String subject;
+    @CreationTimestamp
+    @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
+    @Column(name = "EMAIL_CREATED_ON")
+    private LocalDateTime createdOn;
+
+    @UpdateTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Column(name = "EMAIL_UPDATED_ON")
+    private LocalDateTime updatedOn;
+
+    private String recipient;
+
+    @Lob
+    private String msgBody;
+
+    private String subject;
 
 }

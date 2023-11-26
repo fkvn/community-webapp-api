@@ -1,59 +1,53 @@
 package mono.thainow.service.impl;
 
-import java.util.Optional;
-
+import mono.thainow.domain.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
-import mono.thainow.domain.user.User;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-	@Autowired
-	private UserServiceImpl userSDI;
+    @Autowired
+    private UserServiceImpl userSDI;
 
-//	this function is called when Sign-in and Validate token
+    //	this function is called when Sign-in and Validate token
 //	this is called automatically because UserDetailsService interface that has only one method
-	@Override
-	public UserDetails loadUserByUsername(String query) throws UsernameNotFoundException {
+    @Override
+    public UserDetails loadUserByUsername(String query) throws UsernameNotFoundException {
 
-		String[] splitQuery = query.split(",");
-		Optional<User> user = null;	
-		
+        String[] splitQuery = query.split(",");
+        User user = null;
+
 //		sign-in case
-		if (splitQuery.length == 2) {
-			String loginValue = query.split(",")[1].trim();
-			String loginType = query.split(",")[0].trim();
+        if (splitQuery.length == 2) {
+            String loginVia = splitQuery[0].trim();
 
-			switch (loginType) {
-			case "email-login":
-				user = Optional.ofNullable(userSDI.findActiveUserByEmail(loginValue));
-				break;
-			case "phone-login":
-				user = Optional.ofNullable(userSDI.findActiveUserByPhone(loginValue));
-				break;
+            switch (loginVia) {
+                case "email-login": {
+                    String email = splitQuery[1].trim();
+                    user = userSDI.findActiveUserByEmail(email).get();
+                }
+                break;
+                case "phone-login": {
+                    String phone = splitQuery[1].trim();
+                    String region = splitQuery[2].trim();
+                    user = userSDI.findActiveUserByPhone(phone, region).get();
+                }
+                break;
 
-			default:
-			}
-			
-			Assert.isTrue(user != null, "User Not Found with credential: " + loginValue);
-		}
+                default:
+            }
+        }
 //		validate token - this case the query is the sub value
-		else if (splitQuery.length == 1) {
-			
-			String sub = splitQuery[0];
-			
-			user = Optional.ofNullable(userSDI.findActiveUserBySub(sub));
-			
-			Assert.isTrue(!user.isEmpty(), "Error: Unauthorized!");
-		}
-		
-		return UserDetailsImpl.build(user.get());
-	}
+        else if (splitQuery.length == 1) {
+            String sub = splitQuery[0];
+            user = userSDI.findActiveUserBySub(sub).get();
+        }
+
+        return UserDetailsImpl.build(user);
+    }
 
 }

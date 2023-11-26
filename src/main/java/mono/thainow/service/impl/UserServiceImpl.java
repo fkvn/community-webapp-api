@@ -1,20 +1,15 @@
 package mono.thainow.service.impl;
 
-import mono.thainow.dao.UserDao;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserProvider;
 import mono.thainow.domain.user.UserStatus;
+import mono.thainow.repository.UserRepository;
 import mono.thainow.rest.request.*;
-import mono.thainow.service.LocationService;
-import mono.thainow.service.StorageService;
-import mono.thainow.service.UserService;
-import mono.thainow.util.PhoneUtil;
+import mono.thainow.service.*;
 import mono.thainow.util.Util;
-import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -23,71 +18,63 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service @Primary
-//@Qualifier
+@Service
 public class UserServiceImpl implements UserService {
-    
+
     @Autowired
-    private UserDao userDao;
-    
+    private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private PhoneService phoneService;
+
     @Autowired
     private PasswordEncoder encoder;
-    
+
     @Autowired
     private StorageService storageService;
-    
+
     @Autowired
     private LocationService locationService;
 
-//	=============================================================
+    //	=============================================================
 
-//	@Override
-//	public List<User> getAllUsers() {
-//		return userDao.getAllUsers();
-//	}
-    
     @Override
-    public User findActiveUserByEmail (String email) {
-        return userDao.findActiveUserByEmail(email);
+    public Optional<User> findUserById(Long id) {
+        return userRepository.findById(id);
     }
-    
+
     @Override
-    public User findActiveUserByPhone (String phone) {
-        return userDao.findActiveUserByPhone(phone);
+    public Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmailAndStatusNot(email, UserStatus.DELETED);
     }
-    
+
     @Override
-    public User findActiveUserBySub (String sub) {
-        return userDao.findActiveUserBySub(sub);
+    public Optional<User> findUserByPhone(String phone, String region) {
+        return userRepository.findByPhoneAndPhoneRegionAndStatusNot(phone, region, UserStatus.DELETED);
     }
-    
+
+    //	=============================================================
     @Override
-    public User findUserById (Long id) {
-        return userDao.findUserById(id);
+    public Optional<User> findActiveUserById(Long id) {
+        return userRepository.findByIdAndStatus(id, UserStatus.ACTIVATED);
     }
-    
+
     @Override
-    public User findActiveUserById (Long id) {
-        return userDao.findActiveUserById(id);
+    public Optional<User> findActiveUserByEmail(String email) {
+        return userRepository.findByEmailAndStatus(email, UserStatus.ACTIVATED);
     }
-    
+
     @Override
-    public User activateUser (User user) {
-        user.setStatus(UserStatus.ACTIVATED);
-        return saveUser(user);
+    public Optional<User> findActiveUserByPhone(String phone, String region) {
+        return userRepository.findByPhoneAndPhoneRegionAndStatus(phone, region, UserStatus.ACTIVATED);
     }
-    
-    
+
     @Override
-    public void activateUserById (Long userId) {
-        User user = findUserById(userId);
-        user.setStatus(UserStatus.ACTIVATED);
-        saveUser(user);
-    }
-    
-    @Override
-    public User saveUser (User user) {
-        return userDao.saveUser(user);
+    public Optional<User> findActiveUserBySub(String sub) {
+        return userRepository.findBySubAndStatus(sub, UserStatus.ACTIVATED);
     }
 
 //	@Override
@@ -114,10 +101,10 @@ public class UserServiceImpl implements UserService {
 //		return user.getProfileUrl();
 //
 //	}
-    
+
     @Override
-    public User fetchUserFromUserRequest (User user, UserRequest request) {
-        
+    public User fetchUserFromUserRequest(User user, UserRequest request) {
+
         if (user == null) {
             user = new User();
 
@@ -128,8 +115,7 @@ public class UserServiceImpl implements UserService {
 
 //			user profile
             StorageDefault storageDefault = new StorageDefault();
-            Storage picture = storageService.findStorageById(
-                    storageDefault.getUserProfileDefault());
+            Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault()).orElseGet(null);
             user.setPicture(picture);
 
 //			set provider
@@ -144,7 +130,7 @@ public class UserServiceImpl implements UserService {
                 .trim();
         String phone = Optional.ofNullable(request.getPhone()).orElse("")
                 .trim();
-        
+
         Assert.isTrue(!phone.isBlank() || !email.isBlank(),
                 "Please provide at least one email address or phone number.");
 
@@ -152,10 +138,9 @@ public class UserServiceImpl implements UserService {
         if (!email.isBlank() && user.getEmail() != null &&
                 !user.getEmail().equals(email)) {
             Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
-                    "Update Error! This profile email is managed by " +
+                    "This profile email is managed by " +
                             user.getProvider() + " account.");
-            Assert.isTrue(Util.isValidEmail(email), "Invalid Email");
-            Assert.isTrue(isEmailUnique(email),
+            Assert.isTrue(!emailService.isEmailExisting(email),
                     "Email has already been taken.");
         }
         user.setEmail(email);
@@ -163,8 +148,11 @@ public class UserServiceImpl implements UserService {
 //		set phone
         if (!phone.isBlank() && user.getPhone() != null &&
                 !user.getPhone().equals(phone)) {
-            PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-            Assert.isTrue(isPhoneUnique(phone),
+            String phoneRegion = Optional.ofNullable(request.getPhoneRegion()).orElse("US")
+                    .trim();
+            Assert.isTrue(phoneService.isPhoneRegionValid(phoneRegion),
+                    "Region must has exactly 2 characters");
+            Assert.isTrue(!phoneService.isPhoneExisting(phone, phoneRegion),
                     "Phone has already been taken.");
         }
         user.setPhone(phone);
@@ -179,21 +167,32 @@ public class UserServiceImpl implements UserService {
                 request.getIsPhoneVerified()).orElse(false);
         user.setPhoneVerified(isPhoneVerified);
 
+
+        //		set firstname
+        String firstname = Optional.ofNullable(request.getFirstname()).orElse("")
+                .trim();
+        user.setUsername(firstname);
+
+        //		set lastname
+        String lastname = Optional.ofNullable(request.getLastname()).orElse("")
+                .trim();
+        user.setUsername(lastname);
+
 //		set username
-        String username = Optional.ofNullable(request.getUsername()).orElse("")
+        String username = Optional.ofNullable(request.getUsername())
+                .orElse((firstname.isBlank() && lastname.isBlank() ? email : String.format("%s %s", firstname, lastname)))
                 .trim();
         Assert.isTrue(!username.isBlank(), "Invalid Name!");
         user.setUsername(username);
 
 //		location
-        String address = Optional.ofNullable(request.getAddress()).orElse(null);
-        String placeid = Optional.ofNullable(request.getPlaceid()).orElse(null);
+        String address = request.getAddress();
+        String placeid = Optional.ofNullable(request.getPlaceid()).orElse("");
 
 //		since it's optional, only add if address is provided
-        if (address != null) if (!address.isBlank()) user.setLocation(
-                locationService.findLocationByPlaceidOrAddress(placeid,
-                        address));
-        else user.setLocation(null);
+        if (!address.isBlank()) {
+            user.setLocation(locationService.findLocationByPlaceidOrAddress(placeid, address));
+        } else user.setLocation(null);
 
 //		public location
         Boolean isLocationPublic = Optional.ofNullable(
@@ -222,229 +221,178 @@ public class UserServiceImpl implements UserService {
         Boolean isWebsitePublic = Optional.ofNullable(
                 request.getIsWebsitePublic()).orElse(false);
         user.setWebsitePublic(isWebsitePublic);
-        
+
         return user;
     }
-    
+
     @Override
-    public User fetchUserFromGoogleRequest (GoogleRequest request) {
-        
+    public User fetchNewUserFromAccessByGoogleRequest(AccessByGoogleRequest request) {
+
         User user = new User();
-        
-        String password = Optional.ofNullable(request.getSub().trim())
-                .orElse("").trim();
+
+        String email = request.getEmail();
+        String password = request.getSub();
+
+        Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
+
+        user.setEmail(email);
         user.setPassword(encodePassword(password, false));
 
-//		user email
-        String email = Optional.ofNullable(request.getEmail().trim()).orElse("")
-                .trim();
-        Assert.isTrue(!email.isEmpty(), "Invalid Email!");
-        user.setEmail(email);
+        String username = Optional.ofNullable(request.getName()).orElse(email).trim();
+        user.setUsername(username);
 
-//		firstname
-        String firstname = Optional.ofNullable(request.getGiven_name())
-                .orElse("").trim();
+        String firstname = request.getGiven_name();
         user.setFirstName(firstname);
 
-//		lastname
-        String lastname = Optional.ofNullable(request.getFamily_name())
-                .orElse("").trim();
+        String lastname = request.getFamily_name();
         user.setLastName(lastname);
 
-//		username
-        String username = Optional.ofNullable(request.getName()).orElse("")
-                .trim();
-        Assert.isTrue(!username.isBlank(), "Invalid Name!");
-        user.setUsername(username);
-
-//		if email verified
-        Boolean isEmailVerified = Optional.ofNullable(
-                request.getEmail_verified()).orElse(false);
+        Boolean isEmailVerified = Optional.ofNullable(request.getEmail_verified()).orElse(false);
         user.setEmailVerified(isEmailVerified);
 
-//        user profile
         StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(
-                storageDefault.getUserProfileDefault());
+        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault()).orElseGet(null);
         user.setPicture(picture);
 
-//		set provider
         user.setProvider(UserProvider.GOOGLE);
 
-//		set status
         user.setStatus(UserStatus.ACTIVATED);
-        
+
         return user;
     }
-    
+
     @Override
-    public User fetchUserFromAppleRequest (AppleRequest request) {
+    public User fetchNewUserFromAccessByAppleRequest(AccessByAppleRequest request) {
         User user = new User();
-        
-        String password = Optional.ofNullable(request.getSub().trim())
-                .orElse("").trim();
+
+        String email = request.getEmail();
+        String password = request.getSub();
+
+        Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
+
+        user.setEmail(email);
         user.setPassword(encodePassword(password, false));
 
-//		user email
-        String email = Optional.ofNullable(request.getEmail().trim()).orElse("")
-                .trim();
-        Assert.isTrue(!email.isEmpty(), "Invalid Email!");
-        user.setEmail(email);
-
-//		username and if username is missing, using email instead
-        String username = Optional.ofNullable(request.getName()).orElse(email)
-                .trim();
-        Assert.isTrue(!username.isBlank(), "Invalid Name!");
+        String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
 
-//		if email verified
-        Boolean isEmailVerified = Optional.ofNullable(
-                request.getEmail_verified()).orElse(false);
+        Boolean isEmailVerified = Optional.ofNullable(request.getEmail_verified()).orElse(false);
         user.setEmailVerified(isEmailVerified);
 
-//		user profile
         StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(
-                storageDefault.getUserProfileDefault());
+        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault()).orElseGet(null);
         user.setPicture(picture);
 
-//		set provider
         user.setProvider(UserProvider.APPLE);
 
-//		set status
         user.setStatus(UserStatus.ACTIVATED);
-        
+
         return user;
     }
-    
+
     @Override
-    public User fetchUserFromFacebookRequest (FacebookRequest request) {
-        
+    public User fetchNewUserFromAccessByFacebookRequest(AccessByFacebookRequest request) {
+
         User user = new User();
-        
-        String password = Optional.ofNullable(request.getId()).orElse("")
-                .trim();
+
+        String email = request.getEmail();
+        String password = request.getId();
+
+        Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
+
+        user.setEmail(email);
         user.setPassword(encodePassword(password, false));
 
-//		user email
-        String email = Optional.ofNullable(request.getEmail()).orElse("")
-                .trim();
-        Assert.isTrue(!email.isEmpty(), "Invalid Email!");
-        user.setEmail(email);
-
-//		username
-        String username = Optional.ofNullable(request.getName()).orElse(email)
-                .trim();
-        Assert.isTrue(!username.isBlank(), "Invalid Name!");
+        String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
 
-//		if email verified
-        Boolean isEmailVerified = Optional.ofNullable(
-                request.getIsEmailVerified()).orElse(false);
+
+        Boolean isEmailVerified = Optional.ofNullable(request.getIsEmailVerified()).orElse(false);
         user.setEmailVerified(isEmailVerified);
 
-//		user profile
         StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(
-                storageDefault.getUserProfileDefault());
+        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault()).orElseGet(null);
         user.setPicture(picture);
 
-//		set provider
         user.setProvider(UserProvider.FACEBOOK);
 
-//		set status
         user.setStatus(UserStatus.ACTIVATED);
-        
+
         return user;
     }
-    
+
     @Override
-    public User fetchUserFromLineRequest (LineRequest request) {
+    public User fetchNewUserFromAccessByLineRequest(AccessByLineRequest request) {
         User user = new User();
-        
-        String password = Optional.ofNullable(request.getSub().trim())
-                .orElse("").trim();
+
+        String email = request.getEmail();
+        String password = request.getSub();
+
+        Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
+
+        user.setEmail(email);
         user.setPassword(encodePassword(password, false));
 
-//		user email
-        String email = Optional.ofNullable(request.getEmail().trim()).orElse("")
-                .trim();
-        Assert.isTrue(!email.isEmpty(), "Invalid Email!");
-        user.setEmail(email);
-
-
-//		username
-        String username = Optional.ofNullable(request.getName()).orElse("")
-                .trim();
-        Assert.isTrue(!username.isBlank(), "Invalid Name!");
+        String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
 
-//        user profile
         StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(
-                storageDefault.getUserProfileDefault());
+        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault()).orElseGet(null);
         user.setPicture(picture);
 
-//		set provider
         user.setProvider(UserProvider.LINE);
 
-//		set status
         user.setStatus(UserStatus.ACTIVATED);
-        
+
         return user;
     }
-    
+
     @Override
-    public String encodePassword (String password, boolean validate) {
-        
+    public String encodePassword(String password, boolean validate) {
+
         if (validate) {
-            
+
             String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
             Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
             Matcher matcher = pattern.matcher(password);
-            
+
             Assert.isTrue(matcher.matches(),
                     "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
         }
-        
+
         return encoder.encode(password);
     }
-    
+
     @Override
-    public boolean isUsernameUnique (String username) {
-        return userDao.isUsernameUnique(username);
+    public void activateUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        user.get().setStatus(UserStatus.ACTIVATED);
+        saveUser(user.get());
     }
-    
+
     @Override
-    public boolean isEmailUnique (String email) {
-        Assert.isTrue((new EmailValidator().isValid(email, null)),
-                "Email is not valid");
-        return userDao.isEmailUnique(email);
+    public User saveUser(User user) {
+        return userRepository.save(user);
     }
-    
+
     @Override
-    public boolean isPhoneUnique (String phone) {
-        PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-        return userDao.isPhoneUnique(phone);
-    }
-    
-    @Override
-    public Boolean isPhoneExisting (String phone) {
-        PhoneUtil.validatePhoneNumberWithGoogleAPI(phone, "US");
-        return userDao.findActiveUserByPhone(phone) != null;
-    }
-    
-    @Override
-    public Boolean isEmailExisting (String email) {
-        Assert.isTrue((new EmailValidator().isValid(email, null)),
-                "Email is not valid");
-        return userDao.findActiveUserByEmail(email) != null;
-    }
-    
-    @Override
-    public void remove (User account) {
+    public void remove(User account) {
         account.setStatus(UserStatus.DELETED);
         saveUser(account);
+    }
+
+    @Override
+    public void changePassword(Long userId, String password) {
+
+        Assert.isTrue(!password.isBlank(), "Invalid credentials");
+
+        User user = findUserById(userId).get();
+
+        Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW), String.format("Change Password Failed! This profile is managed by %s.", user.getProvider()));
+
+        user.setPassword(encodePassword(password, true));
+
+        saveUser(user);
     }
 
 //	@Override
