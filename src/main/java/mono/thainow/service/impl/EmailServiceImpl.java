@@ -4,6 +4,7 @@ import mono.thainow.dao.EmailDao;
 import mono.thainow.domain.email.EmailDetails;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
+import mono.thainow.exception.BadRequest;
 import mono.thainow.repository.UserRepository;
 import mono.thainow.rest.request.EmailRequest;
 import mono.thainow.service.EmailService;
@@ -36,6 +37,13 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public Boolean isEmailValid(String email) {
         return EmailValidator.getInstance().isValid(email);
+    }
+
+    @Override
+    public String validateEmail(String email) {
+        Boolean isEmailValid = isEmailValid(email);
+        if (!isEmailValid) throw new BadRequest("Invalid Email!");
+        return email;
     }
 
     @Override
@@ -77,7 +85,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public EmailDetails fetchEmailFromRquest(@Valid EmailRequest request) {
+    public EmailDetails fetchEmailFromRequest(@Valid EmailRequest request) {
 
         String email = Optional.ofNullable(request.getRecipient()).orElse("").trim();
 

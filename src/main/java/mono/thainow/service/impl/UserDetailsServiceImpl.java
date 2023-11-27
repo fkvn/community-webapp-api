@@ -47,7 +47,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             user = userSDI.findActiveUserBySub(sub).get();
         }
 
-        return UserDetailsImpl.build(user);
+        UserDetails userDetails = UserDetailsImpl.build(user);
+        return userDetails;
     }
 
 }

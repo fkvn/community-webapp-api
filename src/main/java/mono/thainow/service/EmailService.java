@@ -11,10 +11,12 @@ public interface EmailService {
 
     Boolean isEmailValid(String email);
 
+    String validateEmail(String email);
+
     // To send a simple email
     boolean sendSimpleMail(EmailDetails details);
 
-    EmailDetails fetchEmailFromRquest(@Valid EmailRequest request);
+    EmailDetails fetchEmailFromRequest(@Valid EmailRequest request);
 
 
 }

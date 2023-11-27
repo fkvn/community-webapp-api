@@ -10,13 +10,10 @@ import mono.thainow.rest.request.*;
 import mono.thainow.service.*;
 import mono.thainow.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,13 +28,13 @@ public class UserServiceImpl implements UserService {
     private PhoneService phoneService;
 
     @Autowired
-    private PasswordEncoder encoder;
-
-    @Autowired
     private StorageService storageService;
 
     @Autowired
     private LocationService locationService;
+
+    @Autowired
+    private PasswordService passwordService;
 
     //	=============================================================
 
@@ -109,9 +106,8 @@ public class UserServiceImpl implements UserService {
             user = new User();
 
 //			set password 
-            String password = Optional.ofNullable(request.getPassword())
-                    .orElse("").trim();
-            user.setPassword(encodePassword(password, true));
+            String password = request.getPassword();
+            user.setPassword(passwordService.encodePassword(passwordService.validatePassword(password)));
 
 //			user profile
             StorageDefault storageDefault = new StorageDefault();
@@ -236,7 +232,7 @@ public class UserServiceImpl implements UserService {
         Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
 
         user.setEmail(email);
-        user.setPassword(encodePassword(password, false));
+        user.setPassword(passwordService.encodePassword(password));
 
         String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
@@ -271,7 +267,7 @@ public class UserServiceImpl implements UserService {
         Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
 
         user.setEmail(email);
-        user.setPassword(encodePassword(password, false));
+        user.setPassword(passwordService.encodePassword(password));
 
         String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
@@ -301,7 +297,7 @@ public class UserServiceImpl implements UserService {
         Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
 
         user.setEmail(email);
-        user.setPassword(encodePassword(password, false));
+        user.setPassword(passwordService.encodePassword(password));
 
         String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
@@ -331,7 +327,7 @@ public class UserServiceImpl implements UserService {
         Assert.isTrue(!password.isBlank() && !email.isBlank(), "Invalid credentials!");
 
         user.setEmail(email);
-        user.setPassword(encodePassword(password, false));
+        user.setPassword(passwordService.encodePassword(password));
 
         String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
@@ -347,21 +343,21 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    @Override
-    public String encodePassword(String password, boolean validate) {
-
-        if (validate) {
-
-            String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-            Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
-            Matcher matcher = pattern.matcher(password);
-
-            Assert.isTrue(matcher.matches(),
-                    "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
-        }
-
-        return encoder.encode(password);
-    }
+//    @Override
+//    public String encodePassword(String password, boolean validate) {
+//
+//        if (validate) {
+//
+//            String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
+//            Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+//            Matcher matcher = pattern.matcher(password);
+//
+//            Assert.isTrue(matcher.matches(),
+//                    "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
+//        }
+//
+//        return encoder.encode(password);
+//    }
 
     @Override
     public void activateUserById(Long id) {
@@ -390,7 +386,7 @@ public class UserServiceImpl implements UserService {
 
         Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW), String.format("Change Password Failed! This profile is managed by %s.", user.getProvider()));
 
-        user.setPassword(encodePassword(password, true));
+        user.setPassword(passwordService.encodePassword(passwordService.validatePassword(password)));
 
         saveUser(user);
     }

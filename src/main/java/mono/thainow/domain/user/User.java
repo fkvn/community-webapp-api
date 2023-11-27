@@ -163,10 +163,11 @@ public class User implements Serializable {
     private boolean isPhoneVerified = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
     @CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "USER_PRIVILEGES", nullable = false)
-    @JsonView(View.FullDetail.class)
     private Set<UserPrivilege> privileges = new HashSet<>();
+
 
 //	Write ONLY information
 

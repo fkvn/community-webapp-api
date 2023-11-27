@@ -1,13 +1,13 @@
 package mono.thainow.domain.profile;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import mono.thainow.domain.user.User;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
 @Getter
 @Setter
@@ -17,18 +17,19 @@ import mono.thainow.domain.user.User;
 @DiscriminatorValue("USER_PROFILE")
 public class UserProfile extends Profile {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	public UserProfile(User user) {
-		this.setAccount(user);
-	}
+    public UserProfile(User user) {
+        this.setAccount(user);
+    }
 
-	@Override
-	public Object getInfo() {
-		return this.getAccount();
-	}
+
+    @Override
+    public Object getDetails() {
+        return this.getAccount();
+    }
 
 }

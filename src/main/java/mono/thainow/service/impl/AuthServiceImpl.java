@@ -44,6 +44,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private ProfileService profileService;
 
+    @Autowired
+    private PasswordService passwordService;
+
 //	======================================================================
 
     @Override
@@ -136,6 +139,29 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Long signupWithThaiNowByEmail(SignupByEmailRequest request) {
+
+        String email = request.getEmail();
+        String password = request.getPassword();
+        String firstname = request.getFirstname();
+        String lastname = request.getLastname();
+
+        User user = new User();
+        user.setEmail(emailService.validateEmail(email));
+        user.setPassword(passwordService.encodePassword(passwordService.validatePassword(password)));
+        user.setFirstName(firstname);
+        user.setLastName(lastname);
+
+//		merge user
+        user = userService.saveUser(user);
+
+//		create an account profile with new user
+        Profile userProfile = profileService.createUserProfile(user);
+
+        return userProfile.getId();
+    }
+
+    @Override
     public boolean isAdminAuthenticated() {
         UserDetailsImpl userDetails = getAuthenticatedUser();
         if (userDetails == null)
@@ -169,9 +195,10 @@ public class AuthServiceImpl implements AuthService {
     public JwtResponse signingWithThaiNowByEmail(SigningByEmailRequest request) {
 
         String email = request.getEmail();
-        Assert.isTrue(!email.isBlank(), "Email can't be empty!");
+        Assert.isTrue(!email.isBlank(), "Invalid Email!");
 
-        String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
+        String password = request.getPassword();
+        Assert.isTrue(!password.isBlank(), "Invalid Password!");
 
         User user = userService.findActiveUserByEmail(email).get();
         Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
@@ -181,7 +208,9 @@ public class AuthServiceImpl implements AuthService {
 //		username uses to log in
         String username = "email-login," + email.trim();
 
-        return signedJWTAuth(username, password);
+        JwtResponse res = signedJWTAuth(username, password);
+
+        return res;
 
     }
 
@@ -190,9 +219,10 @@ public class AuthServiceImpl implements AuthService {
 
         String phone = request.getPhone();
         String region = request.getRegion();
-        Assert.isTrue(!phone.isBlank() && !region.isBlank(), "Phone or Region can't be empty!");
+        Assert.isTrue(!phone.isBlank() && !region.isBlank(), "Invalid Phone!");
 
-        String password = Optional.ofNullable(request.getPassword()).orElse("").trim();
+        String password = request.getPassword();
+        Assert.isTrue(!password.isBlank(), "Invalid Password!");
 
         User user = userService.findActiveUserByPhone(phone, region).get();
         Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
@@ -226,9 +256,8 @@ public class AuthServiceImpl implements AuthService {
                             user.getProvider()));
 
 //			this is to keep posted with password change from GOOGLE account
-            String password = Optional.ofNullable(request.getSub()).orElse("")
-                    .trim();
-            user.setPassword(userService.encodePassword(password, false));
+            String password = request.getSub();
+            user.setPassword(passwordService.encodePassword(password));
 
 //          merge user
             userService.saveUser(user);
@@ -262,8 +291,8 @@ public class AuthServiceImpl implements AuthService {
                             user.getProvider()));
 
 //			this is to keep posted with password change from APPLE account
-            String password = Optional.of(request.getSub()).orElse("").trim();
-            user.setPassword(userService.encodePassword(password, false));
+            String password = request.getSub();
+            user.setPassword(passwordService.encodePassword(password));
 
 //            merge user
             userService.saveUser(user);
@@ -297,8 +326,8 @@ public class AuthServiceImpl implements AuthService {
                             user.getProvider()));
 
 //			this is to keep posted with password change from FACEBOOK account
-            String password = Optional.of(request.getId()).orElse("").trim();
-            user.setPassword(userService.encodePassword(password, false));
+            String password = request.getId();
+            user.setPassword(passwordService.encodePassword(password));
 
 //            merge user
             userService.saveUser(user);
@@ -331,9 +360,8 @@ public class AuthServiceImpl implements AuthService {
                             user.getEmail(), user.getProvider()));
 
 //			this is to keep posted with password change from GOOGLE account
-            String password = Optional.ofNullable(request.getSub()).orElse("")
-                    .trim();
-            user.setPassword(userService.encodePassword(password, false));
+            String password = request.getSub();
+            user.setPassword(passwordService.encodePassword(password));
 
 //            merge user
             userService.saveUser(user);
@@ -360,13 +388,9 @@ public class AuthServiceImpl implements AuthService {
         User account = userService.findActiveUserById(userDetails.getId()).get();
         UserProfile profile = profileService.findUserProfileByAccount(account);
 
-        JwtResponse jwtClaims = new JwtResponse(jwt, userDetails);
-        jwtClaims.setProfile(profile);
-
-/*
-		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-				.collect(Collectors.toList());
-*/
+        JwtResponse jwtClaims = new JwtResponse(jwt, profile, userDetails);
+// List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+// 		.collect(Collectors.toList());
 
         return jwtClaims;
     }

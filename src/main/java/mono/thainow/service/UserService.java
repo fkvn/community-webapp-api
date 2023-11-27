@@ -27,7 +27,7 @@ public interface UserService {
 
     void activateUserById(Long userId);
 
-    String encodePassword(String password, boolean validate);
+//    String encodePassword(String password, boolean validate);
 
     User fetchUserFromUserRequest(User user, UserRequest signUpRequest);
 
@@ -44,6 +44,6 @@ public interface UserService {
     User saveUser(User user);
 
     void remove(User account);
-    
+
     void changePassword(Long userId, String password);
 }

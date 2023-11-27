@@ -57,9 +57,9 @@ public class AuthController {
         return authService.signingWithThaiNowByPhone(request);
     }
 
-    @PostMapping("/thainow/signup")
-    public Long registerWithThaiNow(@Valid @RequestBody UserRequest request) {
-        Long userId = authService.registerWithThaiNow(request);
+    @PostMapping("/signupByEmail")
+    public Long signupByEmail(@Valid @RequestBody SignupByEmailRequest request) {
+        Long userId = authService.signupWithThaiNowByEmail(request);
         return userId;
     }
 

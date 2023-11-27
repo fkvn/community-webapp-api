@@ -1,17 +1,19 @@
 package mono.thainow.domain.user;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import mono.thainow.view.View;
 import org.springframework.security.core.GrantedAuthority;
 
-import lombok.Getter;
-
 @Getter
+@JsonView(View.Basic.class)
 public enum UserPrivilege implements GrantedAuthority {
-	
-	USER_MANAGE(Code.USER_MANAGE);
-	
-	private final String authority;
 
-	UserPrivilege(String authority) {
+    USER_MANAGE(Code.USER_MANAGE);
+
+    private final String authority;
+
+    UserPrivilege(String authority) {
         this.authority = authority;
     }
 
@@ -21,6 +23,6 @@ public enum UserPrivilege implements GrantedAuthority {
     }
 
     public class Code {
-    	public static final String USER_MANAGE = "USER_MANAGE";
+        public static final String USER_MANAGE = "USER_MANAGE";
     }
 }

@@ -41,4 +41,5 @@ public interface AuthService {
 
     boolean isAccessAuthorized(Profile reviewer, Review review, boolean throwError);
 
+    Long signupWithThaiNowByEmail(SignupByEmailRequest request);
 }

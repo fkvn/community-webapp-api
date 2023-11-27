@@ -44,7 +44,6 @@ public class UserController {
         userService.changePassword(userId, request.getPassword());
     }
 
-
     @PatchMapping("/{userId}/activate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @AdminAndSAdminAccess
