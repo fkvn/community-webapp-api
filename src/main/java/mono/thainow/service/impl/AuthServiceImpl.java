@@ -7,7 +7,9 @@ import mono.thainow.domain.review.Review;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserProvider;
 import mono.thainow.domain.user.UserRole;
+import mono.thainow.domain.user.UserStatus;
 import mono.thainow.exception.AccessForbidden;
+import mono.thainow.exception.BadRequest;
 import mono.thainow.rest.request.*;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.security.jwt.JwtUtils;
@@ -146,11 +148,20 @@ public class AuthServiceImpl implements AuthService {
         String firstname = request.getFirstname();
         String lastname = request.getLastname();
 
+        Optional<User> existedUser = userService.findUserByEmail(email);
+        if (existedUser.isPresent()) {
+            throw new BadRequest("This account exists in the system!");
+        }
+
         User user = new User();
         user.setEmail(emailService.validateEmail(email));
         user.setPassword(passwordService.encodePassword(passwordService.validatePassword(password)));
         user.setFirstName(firstname);
         user.setLastName(lastname);
+        user.setUsername(email);
+        user.setProvider(UserProvider.THAINOW);
+        user.setRole(UserRole.CLASSIC);
+        user.setStatus(UserStatus.ACTIVATED);
 
 //		merge user
         user = userService.saveUser(user);
@@ -167,28 +178,6 @@ public class AuthServiceImpl implements AuthService {
         if (userDetails == null)
             return false;
         return userDetails.getRole() == UserRole.ADMIN || userDetails.getRole() == UserRole.SUPERADMIN;
-    }
-
-    @Override
-    public Long registerWithThaiNow(UserRequest request) {
-
-//		check Type of verification
-        Boolean isVerified = Optional.ofNullable(request.getIsVerified())
-                .orElse(false);
-
-//		verification is required for users
-        Assert.isTrue(isVerified, "Users must be verified to register!");
-
-//		retrieve user information
-        User user = userService.fetchUserFromUserRequest(null, request);
-
-//		persist user info into database 
-        user = userService.saveUser(user);
-
-//		create an account profile with new user
-        Profile userProfile = profileService.createUserProfile(user);
-
-        return userProfile.getId();
     }
 
     @Override

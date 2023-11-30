@@ -13,6 +13,8 @@ public interface UserService {
 
     Optional<User> findUserByPhone(String phone, String region);
 
+    Optional<User> findUserBySub(String sub);
+
     //	=============================================================
 
     Optional<User> findActiveUserById(Long id);
@@ -26,8 +28,6 @@ public interface UserService {
     //	=============================================================
 
     void activateUserById(Long userId);
-
-//    String encodePassword(String password, boolean validate);
 
     User fetchUserFromUserRequest(User user, UserRequest signUpRequest);
 

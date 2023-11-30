@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPhoneAndPhoneRegionAndStatusNot(String phone, String phoneRegion, UserStatus userStatus);
 
     Optional<User> findBySubAndStatus(String sub, UserStatus userStatus);
+
+    Optional<User> findBySubAndStatusNot(String sub, UserStatus userStatus);
 }

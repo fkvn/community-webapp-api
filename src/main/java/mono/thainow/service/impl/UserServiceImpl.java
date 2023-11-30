@@ -5,6 +5,7 @@ import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserProvider;
 import mono.thainow.domain.user.UserStatus;
+import mono.thainow.exception.BadRequest;
 import mono.thainow.repository.UserRepository;
 import mono.thainow.rest.request.*;
 import mono.thainow.service.*;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -53,25 +55,66 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByPhoneAndPhoneRegionAndStatusNot(phone, region, UserStatus.DELETED);
     }
 
+    @Override
+    public Optional<User> findUserBySub(String sub) {
+        return userRepository.findBySubAndStatusNot(sub, UserStatus.DELETED);
+    }
+
     //	=============================================================
     @Override
     public Optional<User> findActiveUserById(Long id) {
-        return userRepository.findByIdAndStatus(id, UserStatus.ACTIVATED);
+        Optional<User> user = findUserById(id);
+        if (user.isPresent()) {
+            if (user.get().getStatus().equals(UserStatus.DISABLED))
+                throw new BadRequest("This account is disabled. Please contact the administrators!");
+
+            if (!user.get().getStatus().equals(UserStatus.ACTIVATED)) {
+                throw new NoSuchElementException();
+            }
+        }
+        return user;
     }
 
     @Override
     public Optional<User> findActiveUserByEmail(String email) {
-        return userRepository.findByEmailAndStatus(email, UserStatus.ACTIVATED);
+        Optional<User> user = findUserByEmail(email);
+        if (user.isPresent()) {
+            if (user.get().getStatus().equals(UserStatus.DISABLED))
+                throw new BadRequest("This account is disabled. Please contact the administrators!");
+
+            if (!user.get().getStatus().equals(UserStatus.ACTIVATED)) {
+                throw new NoSuchElementException();
+            }
+        }
+        return user;
     }
 
     @Override
     public Optional<User> findActiveUserByPhone(String phone, String region) {
-        return userRepository.findByPhoneAndPhoneRegionAndStatus(phone, region, UserStatus.ACTIVATED);
+        Optional<User> user = findUserByPhone(phone, region);
+        if (user.isPresent()) {
+            if (user.get().getStatus().equals(UserStatus.DISABLED))
+                throw new BadRequest("This account is disabled. Please contact the administrators!");
+
+            if (!user.get().getStatus().equals(UserStatus.ACTIVATED)) {
+                throw new NoSuchElementException();
+            }
+        }
+        return user;
     }
 
     @Override
     public Optional<User> findActiveUserBySub(String sub) {
-        return userRepository.findBySubAndStatus(sub, UserStatus.ACTIVATED);
+        Optional<User> user = findUserBySub(sub);
+        if (user.isPresent()) {
+            if (user.get().getStatus().equals(UserStatus.DISABLED))
+                throw new BadRequest("This account is disabled. Please contact the administrators!");
+
+            if (!user.get().getStatus().equals(UserStatus.ACTIVATED)) {
+                throw new NoSuchElementException();
+            }
+        }
+        return user;
     }
 
 //	@Override

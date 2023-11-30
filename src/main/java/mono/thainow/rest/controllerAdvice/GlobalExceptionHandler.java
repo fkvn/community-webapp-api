@@ -167,7 +167,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         apiError.setPath(request.getDescription(true).split(";")[0].split("=")[1]);
-        apiError.setMessage("Invalid Request Type!");
+        apiError.setMessage(!apiError.getError().isEmpty() ? apiError.getError() : "Invalid Request Type!");
 
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }

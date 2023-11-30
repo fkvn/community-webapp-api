@@ -13,7 +13,7 @@ public interface AuthService {
 
     void checkVerificationToken(VerifyTokenRequest request);
 
-    Long registerWithThaiNow(UserRequest signUpRequest);
+    Long signupWithThaiNowByEmail(SignupByEmailRequest request);
 
     JwtResponse signingWithThaiNowByEmail(SigningByEmailRequest request);
 
@@ -41,5 +41,5 @@ public interface AuthService {
 
     boolean isAccessAuthorized(Profile reviewer, Review review, boolean throwError);
 
-    Long signupWithThaiNowByEmail(SignupByEmailRequest request);
+
 }
