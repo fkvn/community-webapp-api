@@ -10,7 +10,8 @@ import mono.thainow.repository.UserRepository;
 import mono.thainow.service.PhoneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 public class PhoneServiceImpl implements PhoneService {
@@ -19,16 +20,20 @@ public class PhoneServiceImpl implements PhoneService {
     private UserRepository userRepository;
 
     @Override
+    public Boolean isPhoneExisting(String phone, String region) {
+        validatePhone(phone, region);
+        User user = userRepository.findByPhoneAndPhoneRegionAndStatusNot(phone, region,
+                UserStatus.DELETED).orElse(null);
+        return user != null;
+    }
+
+    @Override
     public Boolean isPhoneRegionValid(String region) {
         return region.length() == 2;
     }
 
     @Override
     public Boolean isPhoneValid(String phone, String region) {
-
-        Assert.isTrue(!phone.isBlank(), "Invalid Phone!");
-
-        Assert.isTrue(region.length() == 2, "Invalid Region Code");
 
         PhoneNumberUtil numberUtil = PhoneNumberUtil.getInstance();
 
@@ -47,9 +52,14 @@ public class PhoneServiceImpl implements PhoneService {
 
     @Override
     public void validatePhone(String phone, String region) {
+
+        if (isBlank(phone)) throw new BadRequest("Phone can't be empty!");
+        if (isBlank(region) || region.length() != 2) throw new BadRequest(
+                "Region Code is either " + "empty or not having exactly 2 characters");
+
         Boolean isPhoneValid = isPhoneValid(phone, region);
         if (!isPhoneValid) {
-            throw new BadRequest("Invalid Phone");
+            throw new BadRequest("Invalid Phone and Region Code!");
         }
     }
 
@@ -64,13 +74,6 @@ public class PhoneServiceImpl implements PhoneService {
         PhoneNumberUtil numberUtil = PhoneNumberUtil.getInstance();
 
         return String.format("+%d%s", numberUtil.getCountryCodeForRegion(region), phone);
-    }
-
-    @Override
-    public Boolean isPhoneExisting(String phone, String region) {
-        validatePhone(phone, region);
-        User user = userRepository.findByPhoneAndPhoneRegionAndStatusNot(phone, region, UserStatus.DELETED).orElse(null);
-        return user != null;
     }
 
 

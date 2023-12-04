@@ -25,6 +25,8 @@ import org.springframework.util.Assert;
 
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -49,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private PasswordService passwordService;
 
-//	======================================================================
+    //	======================================================================
 
     @Override
     public void sendVerificationToken(SendTokenRequest request) {
@@ -59,85 +61,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void checkVerificationToken(VerifyTokenRequest request) {
         twilioService.checkVerificationToken(request);
-    }
-
-    @Override
-    public UserDetailsImpl getAuthenticatedUser() {
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser")) {
-            return null;
-        }
-        return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
-
-    @Override
-    public String getClientIpAddress() {
-        Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
-        if (details instanceof WebAuthenticationDetails)
-            return ((WebAuthenticationDetails) details).getRemoteAddress();
-        return "unknown";
-    }
-
-    @Override
-    public boolean isAccessAuthorized(Profile profile, boolean throwError) {
-        UserDetailsImpl userDetails = getAuthenticatedUser();
-
-        boolean adminAuthorized = userDetails != null
-                && (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
-
-        boolean validRequester = userDetails != null && profile != null
-                && profile.getAccount().getId().equals(userDetails.getId());
-
-        boolean authorizedAccess = adminAuthorized || validRequester;
-
-        if (throwError && !authorizedAccess) {
-            throw new AccessForbidden();
-        }
-
-        return authorizedAccess;
-    }
-
-    @Override
-    public boolean isAccessAuthorized(Profile postOwner, Post post, boolean throwError) {
-        UserDetailsImpl userDetails = getAuthenticatedUser();
-
-        boolean adminAuthorized = userDetails != null
-                && (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
-
-        boolean validRequester = userDetails != null && postOwner != null
-                && postOwner.getAccount().getId().equals(userDetails.getId());
-
-        boolean validPostOwner = validRequester && post != null && post.getOwner().getId().equals(userDetails.getId());
-
-        boolean authorizedAccess = adminAuthorized || (validRequester && validPostOwner);
-
-        if (throwError && !authorizedAccess) {
-            throw new AccessForbidden();
-        }
-
-        return authorizedAccess;
-    }
-
-    @Override
-    public boolean isAccessAuthorized(Profile reviewer, Review review, boolean throwError) {
-        UserDetailsImpl userDetails = getAuthenticatedUser();
-
-        boolean adminAuthorized = userDetails != null
-                && (userDetails.getRole() != UserRole.ADMIN || userDetails.getRole() != UserRole.SUPERADMIN);
-
-
-        boolean validRequester = userDetails != null && review != null
-                && review.getReviewer().getId().equals(userDetails.getId());
-
-        boolean validReviewer = validRequester && review != null
-                && review.getReviewer().getId().equals(reviewer.getId());
-
-        boolean authorizedAccess = adminAuthorized || (validRequester && validReviewer);
-
-        if (throwError && !authorizedAccess) {
-            throw new AccessForbidden();
-        }
-
-        return authorizedAccess;
     }
 
     @Override
@@ -155,7 +78,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = new User();
         user.setEmail(emailService.validateEmail(email));
-        user.setPassword(passwordService.encodePassword(passwordService.validatePassword(password)));
+        user.setPassword(
+                passwordService.encodePassword(passwordService.validatePassword(password)));
         user.setFirstName(firstname);
         user.setLastName(lastname);
         user.setUsername(email);
@@ -163,38 +87,29 @@ public class AuthServiceImpl implements AuthService {
         user.setRole(UserRole.CLASSIC);
         user.setStatus(UserStatus.ACTIVATED);
 
-//		merge user
+        //		merge user
         user = userService.saveUser(user);
 
-//		create an account profile with new user
+        //		create an account profile with new user
         Profile userProfile = profileService.createUserProfile(user);
 
         return userProfile.getId();
     }
 
     @Override
-    public boolean isAdminAuthenticated() {
-        UserDetailsImpl userDetails = getAuthenticatedUser();
-        if (userDetails == null)
-            return false;
-        return userDetails.getRole() == UserRole.ADMIN || userDetails.getRole() == UserRole.SUPERADMIN;
-    }
-
-    @Override
     public JwtResponse signingWithThaiNowByEmail(SigningByEmailRequest request) {
 
         String email = request.getEmail();
-        Assert.isTrue(!email.isBlank(), "Invalid Email!");
+        if (isBlank(email)) throw new BadRequest("Invalid Email!");
 
         String password = request.getPassword();
-        Assert.isTrue(!password.isBlank(), "Invalid Password!");
+        if (isBlank(password)) throw new BadRequest("Invalid Password!");
 
         User user = userService.findActiveUserByEmail(email).get();
-        Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
-                String.format("The email linked with your %s account!",
-                        user.getProvider()));
+        if (!user.getProvider().equals(UserProvider.THAINOW)) throw new BadRequest(
+                String.format("The email linked with your %s account!", user.getProvider()));
 
-//		username uses to log in
+        //		username uses to log in
         String username = "email-login," + email.trim();
 
         JwtResponse res = signedJWTAuth(username, password);
@@ -208,16 +123,16 @@ public class AuthServiceImpl implements AuthService {
 
         String phone = request.getPhone();
         String region = request.getRegion();
-        Assert.isTrue(!phone.isBlank() && !region.isBlank(), "Invalid Phone!");
+        Assert.isTrue(isBlank(phone) && isBlank(region), "Invalid Phone!");
 
         String password = request.getPassword();
-        Assert.isTrue(!password.isBlank(), "Invalid Password!");
+        Assert.isTrue(isBlank(password), "Invalid Password!");
 
         User user = userService.findActiveUserByPhone(phone, region).get();
         Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
                 String.format("The email linked with your %s account!", user.getProvider()));
 
-//		username uses to log in
+        //		username uses to log in
         String username = "phone-login," + phone + "," + region;
 
         return signedJWTAuth(username, password);
@@ -229,26 +144,25 @@ public class AuthServiceImpl implements AuthService {
         String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
         Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
 
-//		email not exist -> new user -> sign up
+        //		email not exist -> new user -> sign up
         if (!emailService.isEmailExisting(email)) {
             User user = userService.fetchNewUserFromAccessByGoogleRequest(request);
 
-//			merge user
+            //			merge user
             user = userService.saveUser(user);
 
-//			create an account profile with new user
+            //			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
             User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.GOOGLE),
-                    String.format("The email linked with your %s account!",
-                            user.getProvider()));
+                    String.format("The email linked with your %s account!", user.getProvider()));
 
-//			this is to keep posted with password change from GOOGLE account
+            //			this is to keep posted with password change from GOOGLE account
             String password = request.getSub();
             user.setPassword(passwordService.encodePassword(password));
 
-//          merge user
+            //          merge user
             userService.saveUser(user);
         }
 
@@ -264,26 +178,25 @@ public class AuthServiceImpl implements AuthService {
         String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
         Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
 
-//		email not exist -> new user -> sign up
+        //		email not exist -> new user -> sign up
         if (!emailService.isEmailExisting(email)) {
             User user = userService.fetchNewUserFromAccessByAppleRequest(request);
 
-//			merge user
+            //			merge user
             user = userService.saveUser(user);
 
-//			create an account profile with new user
+            //			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
             User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.APPLE),
-                    String.format("The email linked with your %s account!",
-                            user.getProvider()));
+                    String.format("The email linked with your %s account!", user.getProvider()));
 
-//			this is to keep posted with password change from APPLE account
+            //			this is to keep posted with password change from APPLE account
             String password = request.getSub();
             user.setPassword(passwordService.encodePassword(password));
 
-//            merge user
+            //            merge user
             userService.saveUser(user);
         }
 
@@ -299,26 +212,25 @@ public class AuthServiceImpl implements AuthService {
         String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
         Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
 
-//		email not exist -> new user -> sign up
+        //		email not exist -> new user -> sign up
         if (!emailService.isEmailExisting(email)) {
             User user = userService.fetchNewUserFromAccessByFacebookRequest(request);
 
-//			merge user
+            //			merge user
             user = userService.saveUser(user);
 
-//			create an account profile with new user
+            //			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
             User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.FACEBOOK),
-                    String.format("The email linked with your %s account!",
-                            user.getProvider()));
+                    String.format("The email linked with your %s account!", user.getProvider()));
 
-//			this is to keep posted with password change from FACEBOOK account
+            //			this is to keep posted with password change from FACEBOOK account
             String password = request.getId();
             user.setPassword(passwordService.encodePassword(password));
 
-//            merge user
+            //            merge user
             userService.saveUser(user);
         }
 
@@ -333,26 +245,26 @@ public class AuthServiceImpl implements AuthService {
         String email = Optional.ofNullable(request.getEmail()).orElse("").trim();
         Assert.isTrue(!email.isEmpty(), "Email can't be empty!");
 
-//		email not exist -> new user -> sign up
+        //		email not exist -> new user -> sign up
         if (!emailService.isEmailExisting(email)) {
             User user = userService.fetchNewUserFromAccessByLineRequest(request);
 
-//			merge user
+            //			merge user
             user = userService.saveUser(user);
 
-//			create an account profile with new user
+            //			create an account profile with new user
             profileService.createUserProfile(user);
         } else {
             User user = userService.findActiveUserByEmail(email).get();
             Assert.isTrue(user.getProvider().equals(UserProvider.LINE),
-                    String.format("The email %s linked with your %s account!",
-                            user.getEmail(), user.getProvider()));
+                    String.format("The email %s linked with your %s account!", user.getEmail(),
+                            user.getProvider()));
 
-//			this is to keep posted with password change from GOOGLE account
+            //			this is to keep posted with password change from GOOGLE account
             String password = request.getSub();
             user.setPassword(passwordService.encodePassword(password));
 
-//            merge user
+            //            merge user
             userService.saveUser(user);
         }
 
@@ -378,10 +290,101 @@ public class AuthServiceImpl implements AuthService {
         UserProfile profile = profileService.findUserProfileByAccount(account);
 
         JwtResponse jwtClaims = new JwtResponse(jwt, profile, userDetails);
-// List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-// 		.collect(Collectors.toList());
+        // List<String> roles = userDetails.getAuthorities().stream().map(item -> item
+        // .getAuthority())
+        // 		.collect(Collectors.toList());
 
         return jwtClaims;
+    }
+
+    @Override
+    public UserDetailsImpl getAuthenticatedUser() {
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+                .equals("anonymousUser")) {
+            return null;
+        }
+        return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+    }
+
+    @Override
+    public String getClientIpAddress() {
+        Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
+        if (details instanceof WebAuthenticationDetails)
+            return ((WebAuthenticationDetails) details).getRemoteAddress();
+        return "unknown";
+    }
+
+    @Override
+    public boolean isAccessAuthorized(Profile profile, boolean throwError) {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+
+        boolean adminAuthorized = userDetails != null && (userDetails.getRole() != UserRole.ADMIN ||
+                userDetails.getRole() != UserRole.SUPERADMIN);
+
+        boolean validRequester = userDetails != null && profile != null &&
+                profile.getAccount().getId().equals(userDetails.getId());
+
+        boolean authorizedAccess = adminAuthorized || validRequester;
+
+        if (throwError && !authorizedAccess) {
+            throw new AccessForbidden();
+        }
+
+        return authorizedAccess;
+    }
+
+    @Override
+    public boolean isAdminAuthenticated() {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+        if (userDetails == null) return false;
+        return userDetails.getRole() == UserRole.ADMIN ||
+                userDetails.getRole() == UserRole.SUPERADMIN;
+    }
+
+    @Override
+    public boolean isAccessAuthorized(Profile postOwner, Post post, boolean throwError) {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+
+        boolean adminAuthorized = userDetails != null && (userDetails.getRole() != UserRole.ADMIN ||
+                userDetails.getRole() != UserRole.SUPERADMIN);
+
+        boolean validRequester = userDetails != null && postOwner != null &&
+                postOwner.getAccount().getId().equals(userDetails.getId());
+
+        boolean validPostOwner = validRequester && post != null &&
+                post.getOwner().getId().equals(userDetails.getId());
+
+        boolean authorizedAccess = adminAuthorized || (validRequester && validPostOwner);
+
+        if (throwError && !authorizedAccess) {
+            throw new AccessForbidden();
+        }
+
+        return authorizedAccess;
+    }
+
+    @Override
+    public boolean isAccessAuthorized(Profile reviewer, Review review, boolean throwError) {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+
+        boolean adminAuthorized = userDetails != null && (userDetails.getRole() != UserRole.ADMIN ||
+                userDetails.getRole() != UserRole.SUPERADMIN);
+
+
+        boolean validRequester = userDetails != null && review != null &&
+                review.getReviewer().getId().equals(userDetails.getId());
+
+        boolean validReviewer = validRequester && review != null &&
+                review.getReviewer().getId().equals(reviewer.getId());
+
+        boolean authorizedAccess = adminAuthorized || (validRequester && validReviewer);
+
+        if (throwError && !authorizedAccess) {
+            throw new AccessForbidden();
+        }
+
+        return authorizedAccess;
     }
 
 }

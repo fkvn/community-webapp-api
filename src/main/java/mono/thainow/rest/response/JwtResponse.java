@@ -42,14 +42,6 @@ public class JwtResponse {
         this.userDetails = userDetails;
     }
 
-    private Collection<String> getAuthorities() {
-        Collection<String> authorities = userDetails.getAuthorities()
-                .stream()
-                .map(authority -> authority.getAuthority())
-                .collect(Collectors.toList());
-        return authorities;
-    }
-
     @SuppressWarnings("unused")
     public Map<String, Object> getAccount() {
         Map<String, Object> userInfo = new HashMap<>();
@@ -60,11 +52,18 @@ public class JwtResponse {
         return userInfo;
     }
 
+    private Collection<String> getAuthorities() {
+        Collection<String> authorities =
+                userDetails.getAuthorities().stream().map(authority -> authority.getAuthority())
+                        .collect(Collectors.toList());
+        return authorities;
+    }
+
     public Map<String, Object> getProfile() {
         Map<String, Object> profileInfo = new HashMap<>();
 
         profileInfo.put("id", this.userProfile.getId());
-        profileInfo.put("name", this.userDetails.getUsername());
+        profileInfo.put("username", this.userDetails.getUsername());
         profileInfo.put("picture", this.getUserDetails().getPicture());
         profileInfo.put("type", this.userProfile.getType());
         profileInfo.put("status", this.userDetails.getStatus());

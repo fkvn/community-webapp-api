@@ -52,7 +52,7 @@ public class UserDetailsImpl implements UserDetails {
 
     private String password;
 
-  
+
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(User user, Collection<? extends GrantedAuthority> authorities) {
@@ -103,6 +103,11 @@ public class UserDetailsImpl implements UserDetails {
     @JsonIgnore
     public boolean isEnabled() {
         return this.getStatus() == UserStatus.ACTIVATED;
+    }
+
+
+    public boolean isAdmin() {
+        return this.getRole() == UserRole.ADMIN || this.getRole() == UserRole.SUPERADMIN;
     }
 
     @Override

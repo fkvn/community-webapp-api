@@ -10,7 +10,6 @@ import mono.thainow.view.View;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
-import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -33,14 +32,14 @@ public class User implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-//	Basic Information
+    //	Basic Information
 
     @Id
     @GeneratedValue
+    @JsonProperty("accountId")
     private Long id;
 
     @Column(name = "USER_USERNAME")
-    @JsonProperty("name")
     private String username = "";
 
     @OneToOne
@@ -51,7 +50,7 @@ public class User implements Serializable {
     @Column(name = "USER_STATUS")
     private UserStatus status = UserStatus.DISABLED;
 
-//  Detail Information
+    //  Detail Information
 
     @NotNull
     @Column(name = "USER_ISSUER")
@@ -68,7 +67,7 @@ public class User implements Serializable {
     @UpdateTimestamp
     @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
     @Column(name = "USER_UPDATED_ON")
-//    @JsonView(View.Detail.class)
+    //    @JsonView(View.Detail.class)
     private LocalDateTime updatedOn;
 
     @Email(message = "Email is not valid")
@@ -100,7 +99,7 @@ public class User implements Serializable {
     private String phoneRegion;
 
     @Column(name = "USER_WEBSITE")
-//	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Website url must be a valid URL")
+    //	@URL(regexp = "(?i)^(?:http://|https://).*", message = "Website url must be a valid URL")
     @JsonView(View.Detail.class)
     private String website;
 
@@ -108,9 +107,19 @@ public class User implements Serializable {
     @JsonView(View.Detail.class)
     private String firstName = "";
 
+    @Column(name = "IS_USER_FIRSTNAME_PUBLIC")
+    @JsonProperty("isFirstNamePublic")
+    @JsonView(View.Detail.class)
+    private boolean firstNamePublic = false;
+
     @Column(name = "USER_LASTNAME")
     @JsonView(View.Detail.class)
     private String lastName = "";
+
+    @Column(name = "IS_USER_LASTNAME_PUBLIC")
+    @JsonProperty("isLastNamePublic")
+    @JsonView(View.Detail.class)
+    private boolean lastNamePublic = false;
 
     @Column(name = "IS_USER_DESCRIPTION_PUBLIC")
     @JsonProperty("isDescriptionPublic")
@@ -137,7 +146,7 @@ public class User implements Serializable {
     @JsonView(View.Detail.class)
     private boolean websitePublic = false;
 
-//	Full Detail Information
+    //	Full Detail Information
 
     @NotNull
     @Column(name = "USER_SUB")
@@ -169,13 +178,13 @@ public class User implements Serializable {
     private Set<UserPrivilege> privileges = new HashSet<>();
 
 
-//	Write ONLY information
+    //	Write ONLY information
 
     @Column(name = "USER_PASSWORD")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-//	Configuration Setting
+    //	Configuration Setting
 
     @PrePersist
     private void validateUser() {
@@ -183,8 +192,5 @@ public class User implements Serializable {
         if (this.fullName.equals("")) {
             this.setFullName(this.firstName + " " + this.lastName);
         }
-
-        Assert.isTrue(this.getPassword() != null, "User password can't be null");
     }
-
 }

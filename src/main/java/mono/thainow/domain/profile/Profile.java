@@ -42,14 +42,15 @@ public abstract class Profile implements Serializable {
     @GenericField(name = "profileRevieweeId")
     @GenericField(name = "reviewerId")
     @GenericField(name = "blockerId")
-    @JsonProperty("profileId")
+    @JsonProperty("id")
     private Long id;
 
     @ManyToOne
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "accountId")
     @JsonIdentityReference(alwaysAsId = true)
     @JsonProperty("accountId")
     private User account;
+
     //	Request ONLY
     @JsonIgnore
     @OneToMany(mappedBy = "reviewer", fetch = FetchType.LAZY)

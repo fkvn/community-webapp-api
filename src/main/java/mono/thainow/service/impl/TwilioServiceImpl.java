@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Service
 public class TwilioServiceImpl implements TwilioService {
 
@@ -24,7 +26,7 @@ public class TwilioServiceImpl implements TwilioService {
     public void sendVerificationToken(SendTokenRequest request) {
 
         String channel = request.getChannel();
-        Assert.isTrue(!channel.isBlank() && (channel.equals("email") || channel.equals("sms")),
+        Assert.isTrue(isBlank(channel) && (channel.equals("email") || channel.equals("sms")),
                 "Only Email and SMS are supported at the moment!");
 
         String receiver = "";
@@ -32,15 +34,15 @@ public class TwilioServiceImpl implements TwilioService {
         switch (channel.trim()) {
             case "email": {
                 String email = request.getEmail();
-                Assert.isTrue(!email.isBlank(), "Email can't be empty");
-                receiver = email.trim();
+                Assert.isTrue(isBlank(email), "Email can't be empty");
+                receiver = email;
             }
             break;
 
             case "sms": {
                 String phone = request.getPhone();
                 String region = request.getRegion();
-                receiver = phoneService.getValidatedPhoneNumberWithRegionCode(phone.trim(), region.trim());
+                receiver = phoneService.getValidatedPhoneNumberWithRegionCode(phone, region);
             }
             break;
 
@@ -48,10 +50,11 @@ public class TwilioServiceImpl implements TwilioService {
                 break;
         }
 
-//		send verification token
-        Verification verification = Verification.creator(twilioVerification.getServiceID(), receiver, channel).create();
+        //		send verification token
+        Verification verification =
+                Verification.creator(twilioVerification.getServiceID(), receiver, channel).create();
 
-//		assert the verification token was sent
+        //		assert the verification token was sent
         Assert.isTrue(verification != null && verification.getStatus().equals("pending"),
                 "Sending Verification Failed");
 
@@ -61,28 +64,28 @@ public class TwilioServiceImpl implements TwilioService {
     public void checkVerificationToken(VerifyTokenRequest request) {
 
         String channel = request.getChannel();
-        Assert.isTrue(!channel.isBlank() && (channel.equals("email") || channel.equals("sms")),
+        Assert.isTrue(isBlank(channel) && (channel.equals("email") || channel.equals("sms")),
                 "Only Email and SMS are supported at the moment!");
 
         String token = request.getOtpToken();
-        Assert.isTrue(!token.isBlank(), "Token can't be empty!");
+        Assert.isTrue(isBlank(token), "Token can't be empty!");
 
         String receiver = "";
 
-        switch (channel.trim()) {
+        switch (channel) {
 
             case "email": {
                 String email = request.getEmail();
-                Assert.isTrue(!email.isBlank(), "Email can't be empty");
-                receiver = email.trim();
+                Assert.isTrue(isBlank(email), "Email can't be empty");
+                receiver = email;
             }
             break;
 
             case "sms": {
                 String phone = request.getPhone();
                 String region = request.getRegion();
-                Assert.isTrue(!phone.isBlank() && !region.isBlank(), "Phone or Region can't be empty!");
-                receiver = phoneService.getValidatedPhoneNumberWithRegionCode(phone.trim(), region.trim());
+                Assert.isTrue(isBlank(phone) && isBlank(region), "Phone or Region can't be empty!");
+                receiver = phoneService.getValidatedPhoneNumberWithRegionCode(phone, region);
             }
             break;
 
@@ -90,10 +93,12 @@ public class TwilioServiceImpl implements TwilioService {
                 break;
         }
 
-        VerificationCheck verificationCheck = VerificationCheck.creator(twilioVerification.getServiceID(), token.trim())
-                .setTo(receiver).create();
+        VerificationCheck verificationCheck =
+                VerificationCheck.creator(twilioVerification.getServiceID(), token.trim())
+                        .setTo(receiver).create();
 
-        Assert.isTrue(verificationCheck.getStatus().equals("approved"), "Token Verification Failed. Please try again or request a new code!!!");
+        Assert.isTrue(verificationCheck.getStatus().equals("approved"),
+                "Token Verification Failed. Please try again or request a new code!!!");
     }
 
 }

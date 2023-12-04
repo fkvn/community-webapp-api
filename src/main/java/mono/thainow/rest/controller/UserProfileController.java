@@ -6,12 +6,10 @@ import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.company.CompanyStatus;
 import mono.thainow.domain.profile.UserProfile;
-import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.repository.ProfileRepository;
-import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.rest.request.UserRequest;
 import mono.thainow.service.*;
 import mono.thainow.view.View;
@@ -134,36 +132,6 @@ public class UserProfileController {
 
         profileService.removeProfile(profile, removeAccount);
 
-    }
-
-    @PostMapping("(/{profileId}/picture")
-    @ResponseStatus(HttpStatus.CREATED)
-    @AuthenticatedAccess
-    public Storage uploadProfile(@PathVariable Long profileId, @Valid @RequestBody StorageRequest newPicture) {
-
-//		get profile
-        UserProfile profile = (UserProfile) profileService.findProfileById(profileId);
-
-        if (!authService.isAdminAuthenticated()) {
-            Assert.isTrue(profile.getAccount().getStatus() == UserStatus.ACTIVATED, "Invalid Profile!");
-        }
-
-        authService.isAccessAuthorized(profile, true);
-
-//		get storage
-        Storage picture = storageService.fetchStorageFromRequest(newPicture);
-        picture = storageService.saveStorage(picture);
-
-//		update account
-        User account = profile.getAccount();
-        account.setPicture(picture);
-        account = userService.saveUser(account);
-
-//		update profile
-        profile.setAccount(account);
-        profile = (UserProfile) profileService.saveProfile(profile);
-
-        return picture;
     }
 
     @PatchMapping("/{profileId}/activate")

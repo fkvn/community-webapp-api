@@ -19,6 +19,8 @@ import org.springframework.util.Assert;
 import javax.validation.Valid;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Service
 public class EmailServiceImpl implements EmailService {
 
@@ -35,6 +37,13 @@ public class EmailServiceImpl implements EmailService {
     //	=============================================================
 
     @Override
+    public Boolean isEmailExisting(String email) {
+        User user = userRepository.findByEmailAndStatusNot(validateEmail(email), UserStatus.DELETED)
+                .orElse(null);
+        return user != null;
+    }
+
+    @Override
     public Boolean isEmailValid(String email) {
         return EmailValidator.getInstance().isValid(email);
     }
@@ -44,13 +53,6 @@ public class EmailServiceImpl implements EmailService {
         Boolean isEmailValid = isEmailValid(email);
         if (!isEmailValid) throw new BadRequest("Invalid Email!");
         return email;
-    }
-
-    @Override
-    public Boolean isEmailExisting(String email) {
-        Assert.isTrue(isEmailValid(email), "Invalid Email");
-        User user = userRepository.findByEmailAndStatusNot(email, UserStatus.DELETED).orElse(null);
-        return user != null;
     }
 
 
@@ -87,15 +89,14 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public EmailDetails fetchEmailFromRequest(@Valid EmailRequest request) {
 
-        String email = Optional.ofNullable(request.getRecipient()).orElse("").trim();
-
-        Assert.isTrue(!email.isBlank(), "Email can't be blank!");
+        String email = Optional.ofNullable(request.getRecipient()).orElse("");
+        Assert.isTrue(isBlank(email), "Email can't be blank!");
         Assert.isTrue(isEmailValid(email), "Invalid Email");
 
         EmailDetails emailDetails = new EmailDetails();
 
-        String subject = Optional.ofNullable(request.getSubject()).orElse("ThaiNow Report").trim();
-        String msgBody = Optional.ofNullable(request.getMsgBody()).orElse("").trim();
+        String subject = Optional.ofNullable(request.getSubject()).orElse("ThaiNow Report");
+        String msgBody = Optional.ofNullable(request.getMsgBody()).orElse("");
 
         emailDetails.setSubject(subject);
         emailDetails.setRecipient(email);
