@@ -37,12 +37,14 @@ public class UserController {
         return userService.findUserByPhone(phone, region).get();
     }
 
-    @PostMapping("/{userId}/password")
+    @PostMapping("/{accountId}/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changePassword(@PathVariable Long userId,
-                               @Valid @RequestBody ChangePasswordRequest request) {
-        userService.changePassword(userId, request.getPassword());
+    public void forgotPassword(@PathVariable Long accountId,
+                               @Valid @RequestBody ChangePasswordRequest request,
+                               @RequestParam(defaultValue = "false") boolean isVerify) {
+        userService.changePassword(accountId, request, isVerify);
     }
+
 
     @PatchMapping("/{userId}/activate")
     @ResponseStatus(HttpStatus.NO_CONTENT)

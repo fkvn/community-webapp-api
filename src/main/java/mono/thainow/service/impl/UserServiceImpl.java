@@ -43,6 +43,31 @@ public class UserServiceImpl implements UserService {
     //	=============================================================
 
     @Override
+    public void changePassword(Long userId, ChangePasswordRequest request, boolean isVerify) {
+
+        User user = findUserById(userId).get();
+
+        if (!user.getProvider().equals(UserProvider.THAINOW)) throw new BadRequest(
+                String.format("Invalid " + "Request! This profile is managed by %s.",
+                        user.getProvider()));
+
+        String newPassword = request.getNewPassword();
+        if (isBlank(newPassword)) throw new BadRequest("Password can't be empty!");
+        String encodedNewPassword =
+                passwordService.encodePassword(passwordService.validatePassword(newPassword));
+
+        if (isVerify) {
+            String currentPassword = request.getCurrentPassword();
+            if (!passwordService.matchPassword(currentPassword, user.getPassword()))
+                throw new BadRequest("Invalid" + " Current Password");
+        }
+
+        user.setPassword(encodedNewPassword);
+
+        saveUser(user);
+    }
+
+    @Override
     public Optional<User> findUserById(Long id) {
         return userRepository.findById(id);
     }
@@ -144,6 +169,13 @@ public class UserServiceImpl implements UserService {
     //		return user.getProfileUrl();
     //
     //	}
+
+    @Override
+    public void activateUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        user.get().setStatus(UserStatus.ACTIVATED);
+        saveUser(user.get());
+    }
 
     @Override
     public User fetchUserFromUserRequest(User user, UserRequest request) {
@@ -351,6 +383,22 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    //    @Override
+    //    public String encodePassword(String password, boolean validate) {
+    //
+    //        if (validate) {
+    //
+    //            String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
+    //            Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+    //            Matcher matcher = pattern.matcher(password);
+    //
+    //            Assert.isTrue(matcher.matches(),
+    //                    "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
+    //        }
+    //
+    //        return encoder.encode(password);
+    //    }
+
     @Override
     public User fetchNewUserFromAccessByLineRequest(AccessByLineRequest request) {
         User user = new User();
@@ -378,29 +426,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    //    @Override
-    //    public String encodePassword(String password, boolean validate) {
-    //
-    //        if (validate) {
-    //
-    //            String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-    //            Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
-    //            Matcher matcher = pattern.matcher(password);
-    //
-    //            Assert.isTrue(matcher.matches(),
-    //                    "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
-    //        }
-    //
-    //        return encoder.encode(password);
-    //    }
-
-    @Override
-    public void activateUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        user.get().setStatus(UserStatus.ACTIVATED);
-        saveUser(user.get());
-    }
-
     @Override
     public User saveUser(User user) {
         return userRepository.save(user);
@@ -412,22 +437,6 @@ public class UserServiceImpl implements UserService {
         saveUser(account);
     }
 
-    @Override
-    public void changePassword(Long userId, String password) {
-
-        Assert.isTrue(isBlank(password), "Invalid credentials");
-
-        User user = findUserById(userId).get();
-
-        Assert.isTrue(user.getProvider().equals(UserProvider.THAINOW),
-                String.format("Invalid " + "Request! This profile is managed by %s.",
-                        user.getProvider()));
-
-        user.setPassword(
-                passwordService.encodePassword(passwordService.validatePassword(password)));
-
-        saveUser(user);
-    }
 
     //	@Override
     //	public User fetchUserFromUpdateRequest(User user, UserRequest request) {

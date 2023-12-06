@@ -45,5 +45,5 @@ public interface UserService {
 
     void remove(User account);
 
-    void changePassword(Long userId, String password);
+    void changePassword(Long userId, ChangePasswordRequest request, boolean isVerify);
 }

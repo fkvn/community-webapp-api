@@ -27,7 +27,8 @@ public class PasswordServiceImpl implements PasswordService {
     public String validatePassword(String password) {
         Boolean isPasswordValid = isPasswordValid(password);
         if (!isPasswordValid) {
-            throw new BadRequest("8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
+            throw new BadRequest(
+                    "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
         }
         return password;
     }
@@ -35,5 +36,10 @@ public class PasswordServiceImpl implements PasswordService {
     @Override
     public String encodePassword(String password) {
         return encoder.encode(password);
+    }
+
+    @Override
+    public boolean matchPassword(String rawPassword, String encodedPassword) {
+        return encoder.matches(rawPassword, encodedPassword);
     }
 }

@@ -7,4 +7,6 @@ public interface PasswordService {
     String validatePassword(String password);
 
     String encodePassword(String password);
+
+    boolean matchPassword(String rawPassword, String encodedPassword);
 }
