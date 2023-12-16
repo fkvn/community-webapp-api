@@ -1,4 +1,4 @@
-package mono.thainow.domain.user;
+package mono.thainow.domain.notification;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
@@ -6,8 +6,8 @@ import mono.thainow.view.View;
 
 @Getter
 @JsonView(View.Basic.class)
-public enum UserRole {
+public enum NotificationVia {
 
-    SUPERADMIN, ADMIN, STAFF, CLASSIC, BUSINESS, CONTRIBUTOR
+    EMAIL, SMS
 
 }

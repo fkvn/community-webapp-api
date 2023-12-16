@@ -3,6 +3,7 @@ package mono.thainow.service;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.review.Review;
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.*;
 import mono.thainow.rest.response.JwtResponse;
 import mono.thainow.service.impl.UserDetailsImpl;
@@ -33,13 +34,17 @@ public interface AuthService {
 
     String getClientIpAddress();
 
-    boolean isAccessAuthorized(Profile profile, boolean throwError);
-
     boolean isAdminAuthenticated();
 
-    boolean isAccessAuthorized(Profile postOwner, Post post, boolean throwError);
+    Profile getAuthorizedProfile(Long profileId, boolean throwError) throws AccessForbidden;
 
-    boolean isAccessAuthorized(Profile reviewer, Review review, boolean throwError);
+    boolean getAuthorizedProfile(Profile profile, boolean throwError) throws AccessForbidden;
+
+    boolean getAuthorizedProfile(Profile postOwner, Post post, boolean throwError)
+            throws AccessForbidden;
+
+    boolean getAuthorizedProfile(Profile reviewer, Review review, boolean throwError)
+            throws AccessForbidden;
 
 
 }

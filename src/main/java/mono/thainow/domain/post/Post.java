@@ -1,39 +1,23 @@
 package mono.thainow.domain.post;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.*;
+import mono.thainow.domain.notification.NotificationVia;
+import mono.thainow.domain.profile.Profile;
+import mono.thainow.domain.review.PostReview;
+import mono.thainow.view.View;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import mono.thainow.domain.profile.Profile;
-import mono.thainow.domain.review.PostReview;
-import mono.thainow.view.View;
 
 @RequiredArgsConstructor
 @Getter
@@ -47,68 +31,74 @@ import mono.thainow.view.View;
 @Indexed
 public abstract class Post implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @IndexedEmbedded(includePaths = {"reviewOfPostId"})
 
-	@Id
-	@GeneratedValue
-	@GenericField
-	@GenericField(name = "postId")
-	@GenericField(name = "postRevieweeId")
-	@GenericField(name = "blockedPostId")
-	private Long id;
+    public List<PostReview> reviews;
+    @Id
+    @GeneratedValue
+    @GenericField
+    @GenericField(name = "postId")
+    @GenericField(name = "postReviewedId")
+    @GenericField(name = "blockedPostId")
+    private Long id;
 
-	@ManyToOne
-	@JsonIgnore
-	@IndexedEmbedded( includePaths = { "postOwnerId"})
-	private Profile owner;
+    @ManyToOne
+    @JsonIgnore
+    @IndexedEmbedded(includePaths = {"postOwnerId"})
+    private Profile owner;
 
-	public Profile getPostOwner() {
-		return this.getOwner();
-	};
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    @IndexedEmbedded(includePaths = {"blockerId"})
+    private List<Profile> blockers;
 
-	@JsonProperty("type")
-	public PostType getType() {
-		return PostType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
-	}
+    @Column(name = "IS_RECEIVE_NOTIFICATION")
+    private boolean isReceiveNotification = false;
 
-	@JsonIgnore
-	public abstract PostStatus getStatus();
+    @Column(name = "POST_NOTIFICATION_VIA")
+    @Enumerated(EnumType.STRING)
+    private NotificationVia notificationVia;
 
-	@JsonIgnore
-	@OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
-	@IndexedEmbedded( includePaths = { "reviewOfPostId" })
-	public List<PostReview> reviews;
-	
-	
-	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY)
-	@IndexedEmbedded( includePaths = { "blockerId" })
-	private List<Profile> blockers;
+    @Column(name = "IS_POST_AS_ANONYMOUS")
+    private boolean isPostAsAnonymous = false;
 
-	public int getTotalReview() {
-		return reviews.size();
-	}
+    @Enumerated(EnumType.STRING)
+    @Column(name = "POST_STATUS")
+    @KeywordField
+    private PostStatus status = PostStatus.DISABLED;
 
-	public Double getAvgRating() {
-		try {
+    @JsonProperty("type")
+    public PostType getType() {
+        return PostType.valueOf(this.getClass().getAnnotation(DiscriminatorValue.class).value());
+    }
 
-			BigDecimal avgRating = new BigDecimal(
-					this.reviews.stream().reduce(0, (total, e) -> total + e.getRate(), Integer::sum)
-							/ (double) reviews.size()).setScale(1, RoundingMode.HALF_UP);
+    public long getTotalReviewer() {
+        return reviews.size();
+    }
 
-			return avgRating.doubleValue();
-		} catch (Exception e) {
-			return 0.0;
-		}
-	}
+    // comments including replies, etc.
+    public long getTotalComments() {
+        return reviews.size();
+    }
 
-//	public Long totalReview = (long) 0;
-//	
-//	public Double avgRate = (double) 0;
+    public Double getAvgReviewRating() {
+        try {
+            BigDecimal avgRating = BigDecimal.valueOf(this.reviews.stream()
+                    .reduce(0, (total, e) -> total + e.getRate(), Integer::sum) /
+                    (double) reviews.size()).setScale(1, RoundingMode.HALF_UP);
 
-	public abstract Object getInfo();
+            return avgRating.doubleValue();
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    public abstract Object getDetails();
 
 }

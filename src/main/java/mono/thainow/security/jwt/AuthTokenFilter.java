@@ -1,5 +1,6 @@
 package mono.thainow.security.jwt;
 
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.service.impl.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             //			System.out.println(e instanceof BadCredentialsException );
             //			System.out.println(e.getLocalizedMessage());
             logger.error(e.getLocalizedMessage());
+            throw new AccessForbidden(e.getLocalizedMessage());
         }
         filterChain.doFilter(request, response);
 

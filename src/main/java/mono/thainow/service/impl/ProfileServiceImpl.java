@@ -36,8 +36,8 @@ public class ProfileServiceImpl implements ProfileService {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private CompanyService companyService;
+    //    @Autowired
+    //    private CompanyService companyService;
 
     @Autowired
     private EmailService emailService;
@@ -105,8 +105,9 @@ public class ProfileServiceImpl implements ProfileService {
     //	}
 
     @Override
-    public Profile findProfileById(Long profileId) {
-        return profileDao.findProfileById(profileId);
+    public Profile findProfileById(Long id) {
+        return profileRepository.findById(id).get();
+        //        return profileDao.findProfileById(profileId);
     }
 
     @Override
@@ -147,7 +148,7 @@ public class ProfileServiceImpl implements ProfileService {
     public void removeBusinessProfile(BusinessProfile businessProfile) {
 
         //		remove company
-        companyService.remove(businessProfile.getCompany());
+        //        companyService.remove(businessProfile.getCompany());
 
         //		remove related post
         List<Post> posts = postService.findPostsByProfile(businessProfile);
@@ -162,7 +163,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         //		block company
         profile.getCompany().setStatus(CompanyStatus.DISABLED);
-        companyService.saveCompany(profile.getCompany());
+        //        companyService.saveCompany(profile.getCompany());
 
         return profile;
     }
@@ -183,7 +184,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         //		activate company
         profile.getCompany().setStatus(CompanyStatus.REGISTERED);
-        companyService.saveCompany(profile.getCompany());
+        //        companyService.saveCompany(profile.getCompany());
 
         return profile;
     }

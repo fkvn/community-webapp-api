@@ -4,6 +4,7 @@ import mono.thainow.annotation.AuthenticatedAccess;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.review.Review;
 import mono.thainow.domain.review.ReviewType;
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.rest.request.ReviewRequest;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.ProfileService;
@@ -32,18 +33,19 @@ public class ReviewController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @AuthenticatedAccess
-    public Long createPostReview(@Valid @RequestBody ReviewRequest request) {
+    public Long createPostReview(@Valid @RequestBody ReviewRequest request) throws AccessForbidden {
 
         Long reviewerId = Optional.ofNullable(request.getReviewerId()).orElse(null);
         Assert.isTrue(reviewerId != null, "Missing profile information!");
 
         ReviewType type = Optional.ofNullable(request.getType()).orElse(null);
 
-        Assert.isTrue(type != null && (type == ReviewType.POST_REVIEW || type == ReviewType.PROFILE_REVIEW),
+        Assert.isTrue(type != null &&
+                        (type == ReviewType.POST_REVIEW || type == ReviewType.PROFILE_REVIEW),
                 "Invalid Review Type!");
 
         Profile reviewer = profileService.findProfileById(reviewerId);
-        authService.isAccessAuthorized(reviewer, true);
+        authService.getAuthorizedProfile(reviewer, true);
 
         Review newReview = reviewService.createReview(reviewer, request);
 
@@ -54,7 +56,8 @@ public class ReviewController {
     @PatchMapping("/{reviewId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @AuthenticatedAccess
-    public void updateReview(@PathVariable Long reviewId, @Valid @RequestBody ReviewRequest request) {
+    public void updateReview(@PathVariable Long reviewId, @Valid @RequestBody ReviewRequest request)
+            throws AccessForbidden {
 
         Long profileId = Optional.ofNullable(request.getReviewerId()).orElse(null);
         Assert.isTrue(profileId != null, "Missing profile information!");
@@ -63,7 +66,7 @@ public class ReviewController {
 
         Review review = reviewService.findActiveReviewById(reviewId);
 
-        authService.isAccessAuthorized(reviewer, review, true);
+        authService.getAuthorizedProfile(reviewer, review, true);
 
         reviewService.updateReview(review, request);
     }

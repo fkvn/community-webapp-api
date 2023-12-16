@@ -33,20 +33,21 @@ public abstract class Profile implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-//	Basic Information
+    //	Basic Information
 
     @Id
     @GeneratedValue
     @GenericField(name = "id")
     @GenericField(name = "postOwnerId")
-    @GenericField(name = "profileRevieweeId")
+    @GenericField(name = "profileReviewedId")
     @GenericField(name = "reviewerId")
     @GenericField(name = "blockerId")
     @JsonProperty("id")
     private Long id;
 
     @ManyToOne
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "accountId")
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
+            property = "accountId")
     @JsonIdentityReference(alwaysAsId = true)
     @JsonProperty("accountId")
     private User account;
@@ -87,8 +88,9 @@ public abstract class Profile implements Serializable {
     public Double getAvgRating() {
         try {
 
-            BigDecimal avgRating = BigDecimal.valueOf(this.reviews.stream().reduce(0, (total, e) -> total + e.getRate(), Integer::sum)
-                    / (double) reviews.size()).setScale(1, RoundingMode.HALF_UP);
+            BigDecimal avgRating = BigDecimal.valueOf(this.reviews.stream()
+                    .reduce(0, (total, e) -> total + e.getRate(), Integer::sum) /
+                    (double) reviews.size()).setScale(1, RoundingMode.HALF_UP);
 
             return avgRating.doubleValue();
         } catch (Exception e) {

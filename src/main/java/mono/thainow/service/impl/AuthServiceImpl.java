@@ -316,7 +316,50 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean isAccessAuthorized(Profile profile, boolean throwError) {
+    public boolean isAdminAuthenticated() {
+        UserDetailsImpl userDetails = getAuthenticatedUser();
+        if (userDetails == null) return false;
+        return userDetails.getRole() == UserRole.ADMIN ||
+                userDetails.getRole() == UserRole.SUPERADMIN;
+    }
+
+    @Override
+    public Profile getAuthorizedProfile(Long profileId, boolean throwError) throws AccessForbidden {
+
+        UserDetailsImpl requester = getAuthenticatedUser();
+        Profile requesterProfile = profileService.findProfileById(profileId);
+
+        boolean isRequesterAdmin = requester != null && requester.getRole() == UserRole.ADMIN ||
+                requester.getRole() == UserRole.SUPERADMIN;
+
+        if (isRequesterAdmin) return requesterProfile;
+
+        boolean isValidRequester = requesterProfile.getAccount().getId().equals(requester.getId());
+
+        // if not admin, they ONLY can request under their account
+        if (isValidRequester) {
+
+            // ONLY allow active Profile to make request
+            switch (requesterProfile.getType()) {
+                case USER_PROFILE: {
+                    if (requester.getStatus() == UserStatus.ACTIVATED) return requesterProfile;
+                }
+                break;
+                default:
+                    break;
+            }
+        }
+
+        if (throwError) {
+            throw new AccessForbidden();
+        }
+
+        return null;
+    }
+
+    @Override
+    public boolean getAuthorizedProfile(Profile profile, boolean throwError)
+            throws AccessForbidden {
         UserDetailsImpl userDetails = getAuthenticatedUser();
 
         boolean adminAuthorized = userDetails != null && (userDetails.getRole() != UserRole.ADMIN ||
@@ -334,16 +377,10 @@ public class AuthServiceImpl implements AuthService {
         return authorizedAccess;
     }
 
-    @Override
-    public boolean isAdminAuthenticated() {
-        UserDetailsImpl userDetails = getAuthenticatedUser();
-        if (userDetails == null) return false;
-        return userDetails.getRole() == UserRole.ADMIN ||
-                userDetails.getRole() == UserRole.SUPERADMIN;
-    }
 
     @Override
-    public boolean isAccessAuthorized(Profile postOwner, Post post, boolean throwError) {
+    public boolean getAuthorizedProfile(Profile postOwner, Post post, boolean throwError)
+            throws AccessForbidden {
         UserDetailsImpl userDetails = getAuthenticatedUser();
 
         boolean adminAuthorized = userDetails != null && (userDetails.getRole() != UserRole.ADMIN ||
@@ -365,7 +402,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean isAccessAuthorized(Profile reviewer, Review review, boolean throwError) {
+    public boolean getAuthorizedProfile(Profile reviewer, Review review, boolean throwError)
+            throws AccessForbidden {
         UserDetailsImpl userDetails = getAuthenticatedUser();
 
         boolean adminAuthorized = userDetails != null && (userDetails.getRole() != UserRole.ADMIN ||

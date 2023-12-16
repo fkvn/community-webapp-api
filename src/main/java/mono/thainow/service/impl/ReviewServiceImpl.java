@@ -1,13 +1,5 @@
 package mono.thainow.service.impl;
 
-import java.util.Optional;
-
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import mono.thainow.dao.ReviewDao;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.profile.Profile;
@@ -20,316 +12,322 @@ import mono.thainow.rest.request.ReviewRequest;
 import mono.thainow.service.PostService;
 import mono.thainow.service.ProfileService;
 import mono.thainow.service.ReviewService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import javax.validation.Valid;
+import java.util.Optional;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
 
-	@Autowired
-	ReviewDao reviewDao;
+    @Autowired
+    ReviewDao reviewDao;
 
-	@Autowired
-	PostService postService;
+    @Autowired
+    PostService postService;
 
-	@Autowired
-	ProfileService profileService;
+    @Autowired
+    ProfileService profileService;
 
-	@Override
-	public Review createReview(Profile reviewer, ReviewRequest request) {
+    @Override
+    public Review createReview(Profile reviewer, ReviewRequest request) {
 
-		
 
-		switch (request.getType()) {
-		case POST_REVIEW: {
-			Long postReviewId = Optional.ofNullable(request.getPostId()).orElse(null);
-			Assert.isTrue(postReviewId != null, "Invalid Reviewee");
+        switch (request.getType()) {
+            case POST_REVIEW: {
+                Long postReviewId = Optional.ofNullable(request.getPostId()).orElse(null);
+                Assert.isTrue(postReviewId != null, "Invalid Reviewee");
 
-			Post reviewee = postService.findPostById(postReviewId);
+                Post reviewed = postService.findPostById(postReviewId);
 
-			Assert.isTrue(!reviewee.getOwner().getId().equals(reviewer.getId()),
-					"Post owner can't review their own posts!");
+                Assert.isTrue(!reviewed.getOwner().getId().equals(reviewer.getId()),
+                        "Post owner can't review their own posts!");
 
-			PostReview review = new PostReview(reviewer, reviewee);
-			return saveReview(fetchReviewFromRequest(review, request));
-		}
+                PostReview review = new PostReview(reviewer, reviewed);
+                return saveReview(fetchReviewFromRequest(review, request));
+            }
 
-	
-		case PROFILE_REVIEW: {
-			Long profileReviewId = Optional.ofNullable(request.getProfileId()).orElse(null);
-			Assert.isTrue(profileReviewId != null, "Invalid Reviewee");
 
-			Profile reviewee = profileService.findProfileById(profileReviewId);
-			Assert.isTrue(!reviewer.getAccount().getId().equals(reviewee.getAccount().getId()),
-					"User can't review their own profiles!");
+            case PROFILE_REVIEW: {
+                Long profileReviewId = Optional.ofNullable(request.getProfileId()).orElse(null);
+                Assert.isTrue(profileReviewId != null, "Invalid Reviewee");
 
-			ProfileReview review = new ProfileReview(reviewer, reviewee);
-			
-			return saveReview(fetchReviewFromRequest(review, request));
-		}
-	
-		default:
-			throw new BadRequest("Invalid Review Type!");
-		}
+                Profile reviewee = profileService.findProfileById(profileReviewId);
+                Assert.isTrue(!reviewer.getAccount().getId().equals(reviewee.getAccount().getId()),
+                        "User can't review their own profiles!");
 
-		
+                ProfileReview review = new ProfileReview(reviewer, reviewee);
 
-//		return review;
-	}
+                return saveReview(fetchReviewFromRequest(review, request));
+            }
 
-	@Override
-	public Review saveReview(Review newReview) {
-		return reviewDao.saveReview(newReview);
-	}
+            default:
+                throw new BadRequest("Invalid Review Type!");
+        }
 
-	@Override
-	public Review fetchReviewFromRequest(Review review, ReviewRequest request) {
 
-//		rate
-		int rate = Optional.ofNullable(request.getRate()).orElse(5);
-		review.setRate(rate);
+        //		return review;
+    }
 
-//		comment
-		String comment = Optional.ofNullable(request.getComment()).orElse("").trim();
-		review.setComment(comment);
+    @Override
+    public Review fetchReviewFromRequest(Review review, ReviewRequest request) {
 
-//		review status
-		review.setStatus(ReviewStatus.ACTIVATED);
+        //		rate
+        int rate = Optional.ofNullable(request.getRate()).orElse(5);
+        review.setRate(rate);
 
-		return review;
-	}
+        //		comment
+        String comment = Optional.ofNullable(request.getComment()).orElse("").trim();
+        review.setComment(comment);
 
-//	@Override
-//	public Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request) {
-//
-////		rate
-//		Integer rate = Optional.ofNullable(request.getRate()).orElse(null);
-//		if (rate != null) {
-//			review.setRate(rate);
-//		}
-//
-////		comment
-//		String comment = Optional.ofNullable(request.getComment()).orElse(null).trim();
-//		if (comment != null) {
-//			review.setComment(comment);
-//		}
-//
-//		return review;
-//	}
+        //		review status
+        review.setStatus(ReviewStatus.ACTIVATED);
 
-	@Override
-	public Review findActiveReviewById(Long reviewId) {
-		return reviewDao.findActiveReviewById(reviewId);
-	}
+        return review;
+    }
 
-	@Override
-	public void updateReview(Review review, @Valid ReviewRequest request) {
-		saveReview(fetchReviewFromRequest(review, request));
-	}
+    @Override
+    public Review saveReview(Review newReview) {
+        return reviewDao.saveReview(newReview);
+    }
 
-	
-	@Override
-	public void deleteReview(Review review) {
-		reviewDao.removeReview(review);
-	}
+    //	@Override
+    //	public Review fetchReviewFromUpdateRequest(Review review, ReviewRequest request) {
+    //
+    ////		rate
+    //		Integer rate = Optional.ofNullable(request.getRate()).orElse(null);
+    //		if (rate != null) {
+    //			review.setRate(rate);
+    //		}
+    //
+    ////		comment
+    //		String comment = Optional.ofNullable(request.getComment()).orElse(null).trim();
+    //		if (comment != null) {
+    //			review.setComment(comment);
+    //		}
+    //
+    //		return review;
+    //	}
 
-//	@Autowired
-//	private PostDao postDao;
-//
-//	@Autowired
-//	private DealService dealService;
-//
-//	@Autowired
-//	private JobService jobService;
-//
-//	@Autowired
-//	private HousingService housingService;
-//
-//	@Autowired
-//	private MarketplaceService marketplaceService;
-//
-////	=============================================================
-//
-//	@Override
-//	public List<Post> getPosts(Profile profile) {
-//		return postDao.getPosts(profile);
-//	}
-//
-//	@Override
-//	public List<Post> getPosts(Profile postOwner, PostType postType) {
-//		return postDao.getPosts(postOwner, postType);
-//	}
-//
-//	@Override
-//	public void removePosts(List<Post> posts) {
-//		posts.forEach(post -> {
-//			removePost(post);
-//		});
-//	}
-//
-//	@Override
-//	public void disablePost(List<Post> posts) {
-//		posts.forEach(post -> {
-//			disablePost(post);
-//		});
-//	}
-////	=============================================================
-//
-//	@Override
-//	public Post getPost(Long postId) {
-//		return postDao.getPost(postId);
-//	}
-//
-//	@Override
-//	public Post getPost(PostType type, Object entity) {
-//		return postDao.getPost(type, entity);
-//	}
-//
-//	@Override
-//	public Post getValidPost(Long postId, PostType type) {
-//		return postDao.getValidPost(postId, type);
-//	}
-//
-//	@Override
-//	public Post createPost(Profile owner, PostRequest request) {
-//
-//		Post newPost = null;
-//
-//		switch (request.getPostType()) {
-//		case DEAL_POST: {
-//			Deal deal = dealService.createDeal((DealRequest) request);
-//			newPost = new DealPost(owner, deal);
-//		}
-//			break;
-//		case JOB_POST: {
-//			Job job = jobService.createJob((JobRequest) request);
-//			newPost = new JobPost(owner, job);
-//		}
-//			break;
-//		case HOUSING_POST: {
-//			Housing housing = housingService.createHousing((HousingRequest) request);
-//			newPost = new HousingPost(owner, housing);
-//		}
-//			break;
-//		case MARKETPLACE_POST: {
-//			Marketplace marketplace = marketplaceService.createMarketplace((MarketplaceRequest) request);
-//			newPost = new MarketplacePost(owner, marketplace);
-//		}
-//			break;
-//		default:
-//			break;
-//		}
-//
-//		Assert.isTrue(newPost != null, "Failed to create new post!");
-//
-//		newPost = savePost(newPost);
-//
-//		return newPost;
-//	}
-//
-//	@Override
-//	public void updatePost(Post post, Object request) {
-//
-//		switch (post.getType()) {
-//		case DEAL_POST: {
-//			dealService.updateDeal(((DealPost) post).getDeal(), (DealRequest) request);
-//		}
-//			break;
-//		case JOB_POST: {
-//			jobService.updateJob(((JobPost) post).getJob(), (JobRequest) request);
-//		}
-//			break;
-//		case HOUSING_POST: {
-//			housingService.updateHousing(((HousingPost) post).getHousing(), (HousingRequest) request);
-//		}
-//			break;
-//		case MARKETPLACE_POST: {
-//			marketplaceService.updateMarketplace(((MarketplacePost) post).getMarketplace(),
-//					(MarketplaceRequest) request);
-//		}
-//			break;
-//		default:
-//			break;
-//		}
-//
-//	}
-//
-//	@Override
-//	public void removePost(Post post) {
-//
-////		remove related entity
-//		switch (post.getType()) {
-//		case DEAL_POST:
-//			dealService.remove(((DealPost) post).getDeal());
-//			break;
-//		case JOB_POST:
-//			jobService.remove(((JobPost) post).getJob());
-//			break;
-//		case HOUSING_POST:
-//			housingService.remove(((HousingPost) post).getHousing());
-//			break;
-//		case MARKETPLACE_POST:
-//			marketplaceService.remove(((MarketplacePost) post).getMarketplace());
-//			break;
-//		default:
-//			break;
-//		}
-//
-////		delete post
-//		postDao.deletePost(post.getId());
-//
-//	}
-//
-//	@Override
-//	public Post activatePost(Post post) {
-//
-//		switch (post.getType()) {
-//		case DEAL_POST:
-//			dealService.activateDeal(((DealPost) post).getDeal());
-//			break;
-//		case JOB_POST:
-//			jobService.activateJob(((JobPost) post).getJob());
-//			break;
-//		case HOUSING_POST:
-//			housingService.activateHousing(((HousingPost) post).getHousing());
-//			break;
-//		case MARKETPLACE_POST:
-//			marketplaceService.activateMarketplace(((MarketplacePost) post).getMarketplace());
-//			break;
-//		default:
-//			break;
-//		}
-//
-//		return post;
-//	}
-//
-//	@Override
-//	public void disablePost(Post post) {
-//
-//		switch (post.getType()) {
-//		case DEAL_POST: {
-//			dealService.disableDeal(((DealPost) post).getDeal());
-//		}
-//			break;
-//		case JOB_POST: {
-//			jobService.disableJob(((JobPost) post).getJob());
-//		}
-//			break;
-//		case HOUSING_POST: {
-//			housingService.disableHousing(((HousingPost) post).getHousing());
-//		}
-//			break;
-//		case MARKETPLACE_POST: {
-//			marketplaceService.disableMarketplace(((MarketplacePost) post).getMarketplace());
-//		}
-//			break;
-//		default:
-//			break;
-//		}
-//
-//	}
-//
-//	@Override
-//	public Post savePost(Post post) {
-//		return postDao.savePost(post);
-//	}
+    @Override
+    public Review findActiveReviewById(Long reviewId) {
+        return reviewDao.findActiveReviewById(reviewId);
+    }
+
+    @Override
+    public void updateReview(Review review, @Valid ReviewRequest request) {
+        saveReview(fetchReviewFromRequest(review, request));
+    }
+
+
+    @Override
+    public void deleteReview(Review review) {
+        reviewDao.removeReview(review);
+    }
+
+    //	@Autowired
+    //	private PostDao postDao;
+    //
+    //	@Autowired
+    //	private DealService dealService;
+    //
+    //	@Autowired
+    //	private JobService jobService;
+    //
+    //	@Autowired
+    //	private HousingService housingService;
+    //
+    //	@Autowired
+    //	private MarketplaceService marketplaceService;
+    //
+    ////	=============================================================
+    //
+    //	@Override
+    //	public List<Post> getPosts(Profile profile) {
+    //		return postDao.getPosts(profile);
+    //	}
+    //
+    //	@Override
+    //	public List<Post> getPosts(Profile postOwner, PostType postType) {
+    //		return postDao.getPosts(postOwner, postType);
+    //	}
+    //
+    //	@Override
+    //	public void removePosts(List<Post> posts) {
+    //		posts.forEach(post -> {
+    //			removePost(post);
+    //		});
+    //	}
+    //
+    //	@Override
+    //	public void disablePost(List<Post> posts) {
+    //		posts.forEach(post -> {
+    //			disablePost(post);
+    //		});
+    //	}
+    ////	=============================================================
+    //
+    //	@Override
+    //	public Post getPost(Long postId) {
+    //		return postDao.getPost(postId);
+    //	}
+    //
+    //	@Override
+    //	public Post getPost(PostType type, Object entity) {
+    //		return postDao.getPost(type, entity);
+    //	}
+    //
+    //	@Override
+    //	public Post getValidPost(Long postId, PostType type) {
+    //		return postDao.getValidPost(postId, type);
+    //	}
+    //
+    //	@Override
+    //	public Post createPost(Profile owner, PostRequest request) {
+    //
+    //		Post newPost = null;
+    //
+    //		switch (request.getPostType()) {
+    //		case DEAL_POST: {
+    //			Deal deal = dealService.createDeal((DealRequest) request);
+    //			newPost = new DealPost(owner, deal);
+    //		}
+    //			break;
+    //		case JOB_POST: {
+    //			Job job = jobService.createJob((JobRequest) request);
+    //			newPost = new JobPost(owner, job);
+    //		}
+    //			break;
+    //		case HOUSING_POST: {
+    //			Housing housing = housingService.createHousing((HousingRequest) request);
+    //			newPost = new HousingPost(owner, housing);
+    //		}
+    //			break;
+    //		case MARKETPLACE_POST: {
+    //			Marketplace marketplace = marketplaceService.createMarketplace(
+	//			(MarketplaceRequest) request);
+    //			newPost = new MarketplacePost(owner, marketplace);
+    //		}
+    //			break;
+    //		default:
+    //			break;
+    //		}
+    //
+    //		Assert.isTrue(newPost != null, "Failed to create new post!");
+    //
+    //		newPost = savePost(newPost);
+    //
+    //		return newPost;
+    //	}
+    //
+    //	@Override
+    //	public void updatePost(Post post, Object request) {
+    //
+    //		switch (post.getType()) {
+    //		case DEAL_POST: {
+    //			dealService.updateDeal(((DealPost) post).getDeal(), (DealRequest) request);
+    //		}
+    //			break;
+    //		case JOB_POST: {
+    //			jobService.updateJob(((JobPost) post).getJob(), (JobRequest) request);
+    //		}
+    //			break;
+    //		case HOUSING_POST: {
+    //			housingService.updateHousing(((HousingPost) post).getHousing(), (HousingRequest)
+	//			request);
+    //		}
+    //			break;
+    //		case MARKETPLACE_POST: {
+    //			marketplaceService.updateMarketplace(((MarketplacePost) post).getMarketplace(),
+    //					(MarketplaceRequest) request);
+    //		}
+    //			break;
+    //		default:
+    //			break;
+    //		}
+    //
+    //	}
+    //
+    //	@Override
+    //	public void removePost(Post post) {
+    //
+    ////		remove related entity
+    //		switch (post.getType()) {
+    //		case DEAL_POST:
+    //			dealService.remove(((DealPost) post).getDeal());
+    //			break;
+    //		case JOB_POST:
+    //			jobService.remove(((JobPost) post).getJob());
+    //			break;
+    //		case HOUSING_POST:
+    //			housingService.remove(((HousingPost) post).getHousing());
+    //			break;
+    //		case MARKETPLACE_POST:
+    //			marketplaceService.remove(((MarketplacePost) post).getMarketplace());
+    //			break;
+    //		default:
+    //			break;
+    //		}
+    //
+    ////		delete post
+    //		postDao.deletePost(post.getId());
+    //
+    //	}
+    //
+    //	@Override
+    //	public Post activatePost(Post post) {
+    //
+    //		switch (post.getType()) {
+    //		case DEAL_POST:
+    //			dealService.activateDeal(((DealPost) post).getDeal());
+    //			break;
+    //		case JOB_POST:
+    //			jobService.activateJob(((JobPost) post).getJob());
+    //			break;
+    //		case HOUSING_POST:
+    //			housingService.activateHousing(((HousingPost) post).getHousing());
+    //			break;
+    //		case MARKETPLACE_POST:
+    //			marketplaceService.activateMarketplace(((MarketplacePost) post).getMarketplace());
+    //			break;
+    //		default:
+    //			break;
+    //		}
+    //
+    //		return post;
+    //	}
+    //
+    //	@Override
+    //	public void disablePost(Post post) {
+    //
+    //		switch (post.getType()) {
+    //		case DEAL_POST: {
+    //			dealService.disableDeal(((DealPost) post).getDeal());
+    //		}
+    //			break;
+    //		case JOB_POST: {
+    //			jobService.disableJob(((JobPost) post).getJob());
+    //		}
+    //			break;
+    //		case HOUSING_POST: {
+    //			housingService.disableHousing(((HousingPost) post).getHousing());
+    //		}
+    //			break;
+    //		case MARKETPLACE_POST: {
+    //			marketplaceService.disableMarketplace(((MarketplacePost) post).getMarketplace());
+    //		}
+    //			break;
+    //		default:
+    //			break;
+    //		}
+    //
+    //	}
+    //
+    //	@Override
+    //	public Post savePost(Post post) {
+    //		return postDao.savePost(post);
+    //	}
 
 }

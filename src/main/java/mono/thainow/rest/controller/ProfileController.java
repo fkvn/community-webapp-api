@@ -15,7 +15,10 @@ import mono.thainow.exception.AccessForbidden;
 import mono.thainow.repository.ProfileRepository;
 import mono.thainow.rest.request.ModifyProfileRequest;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.service.*;
+import mono.thainow.service.AuthService;
+import mono.thainow.service.ProfileService;
+import mono.thainow.service.StorageService;
+import mono.thainow.service.UserService;
 import mono.thainow.service.impl.UserDetailsImpl;
 import mono.thainow.view.View;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +43,8 @@ public class ProfileController {
     private StorageService storageService;
 
 
-    @Autowired
-    private CompanyService companyService;
+    //    @Autowired
+    //    private CompanyService companyService;
 
     @Autowired
     private AuthService authService;
@@ -110,7 +113,8 @@ public class ProfileController {
     @ResponseStatus(HttpStatus.CREATED)
     @AuthenticatedAccess
     public Storage uploadProfilePicture(@PathVariable Long id,
-                                        @Valid @RequestBody StorageRequest newPicture) {
+                                        @Valid @RequestBody StorageRequest newPicture)
+            throws AccessForbidden {
 
 
         UserProfile profile = (UserProfile) validateModifyProfileRequest(id);
@@ -137,7 +141,7 @@ public class ProfileController {
     }
 
     // Helper Method
-    private Profile validateModifyProfileRequest(Long profileId) {
+    private Profile validateModifyProfileRequest(Long profileId) throws AccessForbidden {
         UserDetailsImpl requester = authService.getAuthenticatedUser();
         UserProfile profile = (UserProfile) profileRepository.findById(profileId).get();
 
@@ -152,7 +156,8 @@ public class ProfileController {
     @ResponseStatus(HttpStatus.CREATED)
     @AuthenticatedAccess
     public void updateProfile(@PathVariable Long id,
-                              @Valid @RequestBody ModifyProfileRequest request) {
+                              @Valid @RequestBody ModifyProfileRequest request)
+            throws AccessForbidden {
         UserProfile profile = (UserProfile) validateModifyProfileRequest(id);
         profileService.modifyProfile(profile, request);
     }
