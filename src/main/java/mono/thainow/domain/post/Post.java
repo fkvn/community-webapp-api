@@ -1,13 +1,20 @@
 package mono.thainow.domain.post;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import mono.thainow.domain.notification.NotificationVia;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.review.PostReview;
 import mono.thainow.view.View;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
@@ -17,29 +24,22 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Getter
 @Setter
-@ToString
 @EqualsAndHashCode
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "POST_TYPE", discriminatorType = DiscriminatorType.STRING)
 @JsonView(View.Basic.class)
 @Indexed
+@Audited(withModifiedFlag = true)
 public abstract class Post implements Serializable {
-
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
-    @JsonIgnore
-    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
-    @IndexedEmbedded(includePaths = {"reviewOfPostId"})
 
-    public List<PostReview> reviews;
     @Id
     @GeneratedValue
     @GenericField
@@ -49,7 +49,6 @@ public abstract class Post implements Serializable {
     private Long id;
 
     @ManyToOne
-    @JsonIgnore
     @IndexedEmbedded(includePaths = {"postOwnerId"})
     private Profile owner;
 
@@ -72,6 +71,21 @@ public abstract class Post implements Serializable {
     @Column(name = "POST_STATUS")
     @KeywordField
     private PostStatus status = PostStatus.DISABLED;
+
+    @CreationTimestamp
+    @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
+    @Column(name = "POST_CREATED_ON")
+    private LocalDateTime createdOn;
+    
+    @UpdateTimestamp
+    @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
+    @Column(name = "POST_UPDATED_ON")
+    private LocalDateTime updatedOn;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @IndexedEmbedded(includePaths = {"reviewOfPostId"})
+    private List<PostReview> reviews;
 
     @JsonProperty("type")
     public PostType getType() {
@@ -99,6 +113,8 @@ public abstract class Post implements Serializable {
         }
     }
 
+    //
     public abstract Object getDetails();
+
 
 }

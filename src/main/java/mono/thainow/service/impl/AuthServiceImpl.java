@@ -339,7 +339,7 @@ public class AuthServiceImpl implements AuthService {
         // if not admin, they ONLY can request under their account
         if (isValidRequester) {
 
-            // ONLY allow active Profile to make request
+            // ONLY allow activated Profile to make request
             switch (requesterProfile.getType()) {
                 case USER_PROFILE: {
                     if (requester.getStatus() == UserStatus.ACTIVATED) return requesterProfile;

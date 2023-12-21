@@ -2,40 +2,37 @@ package mono.thainow.service.impl;
 
 import mono.thainow.dao.PostDao;
 import mono.thainow.domain.post.Post;
-import mono.thainow.domain.post.PostType;
+import mono.thainow.domain.post.PostStatus;
+import mono.thainow.domain.post.guideBook.GuideBook;
+import mono.thainow.domain.post.guideBook.GuideBookPost;
 import mono.thainow.domain.profile.Profile;
-import mono.thainow.domain.review.PostReview;
+import mono.thainow.exception.BadRequest;
+import mono.thainow.repository.PostRepository;
+import mono.thainow.rest.request.NewGuideBookPostRequest;
+import mono.thainow.rest.request.PatchGuideBookPostRequest;
 import mono.thainow.rest.request.PostRequest;
+import mono.thainow.service.GuideBookService;
 import mono.thainow.service.PostService;
-import mono.thainow.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 public class PostServiceImpl implements PostService {
 
     @Autowired
-    private PostDao postDao;
-
-    //	@Autowired
-    //	private DealService dealService;
-    //
-    //	@Autowired
-    //	private JobService jobService;
-    //
-    //	@Autowired
-    //	private HousingService housingService;
-    //
-    //	@Autowired
-    //	private MarketplaceService marketplaceService;
-
+    GuideBookService guideBookService;
 
     @Autowired
-    private ReviewService reviewService;
+    private PostDao postDao;
+
+    @Autowired
+    private PostRepository postRepository;
+
 
     //	=============================================================
 
@@ -45,62 +42,24 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void removePosts(List<Post> posts) {
-        posts.forEach(post -> {
-            removePost(post);
-        });
+    public Post findPostById(Long id) {
+        return postRepository.findByIdAndStatusNot(id, PostStatus.REMOVED).get();
     }
 
-    @Override
-    public Post findPostById(Long postId) {
-        return postDao.findPostById(postId);
-    }
 
-    //	@Override
-    //	public void disablePost(List<Post> posts) {
-    //		posts.forEach(post -> {
-    //			disablePost(post);
-    //		});
-    //	}
     //	=============================================================
 
-    @Override
-    public Post findValidPost(Long postId, PostType type) {
-        return postDao.findValidPost(postId, type);
-    }
-
-    //	@Override
-    //	public Post getPost(PostType type, Object entity) {
-    //		return postDao.getPost(type, entity);
-    //	}
 
     @Override
-    public Post activatePost(Post post) {
-
-        switch (post.getType()) {
-            //            case DEAL_POST:
-            //                dealService.activateDeal(((DealPost) post).getDeal());
-            //                break;
-            //            case JOB_POST:
-            //                jobService.activateJob(((JobPost) post).getJob());
-            //                break;
-            //            case HOUSING_POST:
-            //                housingService.activateHousing(((HousingPost) post).getHousing());
-            //                break;
-            //            case MARKETPLACE_POST:
-            //                marketplaceService.activateMarketplace(((MarketplacePost) post)
-            //                .getMarketplace());
-            //                break;
-            //            default:
-            //                break;
-        }
-
-        return post;
+    public void activatePost(Post post) {
+        // post will be in private once it is activated again
+        // owner would need to set it to public if needed
+        post.setStatus(PostStatus.PRIVATE);
+        savePost(post);
     }
 
     @Override
     public Post createPost(Profile owner, PostRequest request) {
-
         Post newPost = null;
 
         switch (request.getPostType()) {
@@ -127,21 +86,61 @@ public class PostServiceImpl implements PostService {
             //                newPost = new MarketplacePost(owner, marketplace);
             //            }
             //            break;
+            case GUIDEBOOK_POST: {
+                GuideBook guideBook = ((NewGuideBookPostRequest) request).getGuideBook();
+                if (guideBook == null) throw new BadRequest("GuideBook information is required!");
+                if (isBlank(guideBook.getTitle()))
+                    throw new BadRequest("GuideBook Title is required!");
+                if (guideBook.getCategory() == null)
+                    throw new BadRequest("GuideBook Category is required!");
+
+                // merge db
+                guideBook = guideBookService.saveGuideBook(guideBook);
+
+                // merge db
+                newPost = new GuideBookPost(owner, guideBook);
+
+                try {
+                    newPost = savePost(newPost);
+                } catch (Exception e) {
+                    // rollback if errors occur
+                    guideBookService.deleteGuideBook(guideBook);
+                    throw e;
+                }
+
+            }
+            break;
             default:
-                break;
+                throw new BadRequest("Failed to create new post!");
         }
-
-        Assert.isTrue(newPost != null, "Failed to create new post!");
-
-        newPost = savePost(newPost);
 
         return newPost;
     }
 
     @Override
-    public void updatePost(Post post, Object request) {
+    public void patchPost(Post post, PostRequest request) {
+
+        Optional.ofNullable(request.getIsPostAsAnonymous()).ifPresent(post::setPostAsAnonymous);
+        Optional.ofNullable(request.getNotificationVia()).ifPresent(post::setNotificationVia);
 
         switch (post.getType()) {
+            case GUIDEBOOK_POST: {
+
+                PatchGuideBookPostRequest patchGuideBookPostRequest =
+                        (PatchGuideBookPostRequest) request;
+
+                if (patchGuideBookPostRequest.getGuideBook() != null) {
+                    GuideBookPost guideBookPost = (GuideBookPost) post;
+
+                    GuideBook patchedGuideBook =
+                            guideBookService.patchGuideBook(guideBookPost.getGuideBook(),
+                                    patchGuideBookPostRequest.getGuideBook());
+
+                    guideBookPost.setGuideBook(patchedGuideBook);
+                }
+
+            }
+            break;
             //            case DEAL_POST: {
             //                dealService.updateDeal(((DealPost) post).getDeal(), (DealRequest)
             //                request);
@@ -166,87 +165,31 @@ public class PostServiceImpl implements PostService {
                 break;
         }
 
+        savePost(post);
+
     }
 
     @Override
     public void disablePost(Post post) {
-
-        switch (post.getType()) {
-            //            case DEAL_POST: {
-            //                dealService.disableDeal(((DealPost) post).getDeal());
-            //            }
-            //            break;
-            //            case JOB_POST: {
-            //                jobService.disableJob(((JobPost) post).getJob());
-            //            }
-            //            break;
-            //            case HOUSING_POST: {
-            //                housingService.disableHousing(((HousingPost) post).getHousing());
-            //            }
-            //            break;
-            //            case MARKETPLACE_POST: {
-            //                marketplaceService.disableMarketplace(((MarketplacePost) post)
-            //                .getMarketplace());
-            //            }
-            //            break;
-            default:
-                break;
-        }
-
+        // soft disabled and doesn't affect the dependency, such as blockers or reviews.
+        post.setStatus(PostStatus.DISABLED);
+        savePost(post);
     }
 
     @Override
     public void removePost(Post post) {
-
-        //		remove related entity
-        switch (post.getType()) {
-            //            case DEAL_POST:
-            //                dealService.removeDeal(((DealPost) post).getDeal());
-            //                break;
-            //            case JOB_POST:
-            //                jobService.removeJob(((JobPost) post).getJob());
-            //                break;
-            //            case HOUSING_POST:
-            //                housingService.removeHousing(((HousingPost) post).getHousing());
-            //                break;
-            //            case MARKETPLACE_POST:
-            //                marketplaceService.removeMarketplace(((MarketplacePost) post)
-            //                .getMarketplace());
-            //                break;
-            default:
-                break;
-        }
-
-        //		delete remove
-        List<PostReview> reviews = Optional.ofNullable(post.getReviews()).orElse(null);
-        if (reviews != null) {
-            reviews.forEach(review -> reviewService.deleteReview(review));
-        }
-
-        //		remove attached
-        post.setReviews(null);
-
-        //		delete post
-        //		postDao.deletePostById(post.getId());
-        deletePost(post);
-
+        // soft deleted and doesn't affect the dependency, such as blockers or reviews.
+        post.setStatus(PostStatus.REMOVED);
+        savePost(post);
     }
 
     @Override
     public void deletePost(Post post) {
-        postDao.deletePost(post);
-
+        postRepository.delete(post);
     }
 
     @Override
     public Post savePost(Post post) {
-        return postDao.savePost(post);
+        return postRepository.save(post);
     }
-
-    //    @Override
-    //    public List<Post> getPosts(Profile postOwner, PostType postType, String sort, int page,
-    //                               int limit, boolean ownerRequest) {
-    //        return postDao.getPosts(postOwner, postType, sort, page, limit, ownerRequest);
-    //    }
-
 }

@@ -175,14 +175,19 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "USER_PRIVILEGES", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "USER_PRIVILEGES", nullable = false)
+    @JsonView(View.FullDetail.class)
     private Set<UserPrivilege> privileges = new HashSet<>();
-
-
-    //	Write ONLY information
-
     @Column(name = "USER_PASSWORD")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    //	Write ONLY information
+
+    @Transient
+    @JsonView(View.FullDetail.class)
+    public boolean isAdmin() {
+        return this.getRole() == UserRole.ADMIN || this.getRole() == UserRole.SUPERADMIN;
+    }
 
     //	Configuration Setting
 

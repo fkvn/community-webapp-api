@@ -1,5 +1,5 @@
 package mono.thainow.domain.post;
 
 public enum PostStatus {
-	AVAILABLE, PRIVATE, DISABLED, REMOVED
+    PUBLIC, PRIVATE, DISABLED, REMOVED
 }

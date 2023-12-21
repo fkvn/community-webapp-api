@@ -3,20 +3,21 @@ package mono.thainow.rest.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
+import mono.thainow.annotation.CreateGuideBookAccess;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.PostType;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.exception.AccessForbidden;
-import mono.thainow.rest.request.GuideBookRequest;
+import mono.thainow.rest.request.NewGuideBookPostRequest;
+import mono.thainow.rest.request.PatchGuideBookPostRequest;
 import mono.thainow.rest.request.PostRequest;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.PostService;
-import mono.thainow.service.ProfileService;
+import mono.thainow.service.impl.UserDetailsImpl;
 import mono.thainow.view.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,56 +33,38 @@ public class PostController {
     @Autowired
     PostService postService;
 
-    @Autowired
-    ProfileService profileService;
-
-    @GetMapping("/{postId}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     @JsonView(View.Detail.class)
-    public Post findPost(@PathVariable Long postId,
-                         @RequestParam(defaultValue = "-1") Long profileId,
-                         @RequestParam PostType type) throws AccessForbidden {
+    public Post findPost(@PathVariable Long id) {
 
-        if (authService.isAdminAuthenticated()) {
-            return postService.findPostById(postId);
-        }
+        Post post = postService.findPostById(id);
 
-        Post post = postService.findValidPost(postId, type);
+        UserDetailsImpl requesterAccount = authService.getAuthenticatedUser();
 
-        Profile requester = null;
+        boolean isAdmin = requesterAccount != null && requesterAccount.isAdmin();
+        boolean isPostOwner = requesterAccount != null &&
+                requesterAccount.getId().equals(post.getOwner().getAccount().getId());
 
-        if (profileId >= 0) {
-            requester = profileService.findProfileById(profileId);
-            Assert.isTrue(!post.getBlockers().contains(requester),
-                    "You have blocked this post in the past. Contact the administrator if you " +
-                            "need other helps!");
-        }
+        // anonymous and not authenticated only can see public post
+        if (!isAdmin && !isPostOwner && post.getStatus() != PostStatus.PUBLIC)
+            throw new AccessForbidden();
 
-        if (post.getStatus() == PostStatus.PRIVATE) {
-            if (requester == null) throw new AccessForbidden();
-            authService.getAuthorizedProfile(requester, post, true);
-        }
+        // only admin can view the disabled post
+        if (!isAdmin && post.getStatus() == PostStatus.DISABLED) throw new AccessForbidden();
 
         return post;
     }
 
+    @PostMapping("/guidebooks")
+    @ResponseStatus(HttpStatus.CREATED)
+    //    @CreateGuideBookAccess
+    public Long createGuideBookPost(@NotNull @RequestParam Long profileId,
+                                    @Valid @RequestBody NewGuideBookPostRequest request) {
 
-    //	@GetMapping
-    //	@ResponseStatus(HttpStatus.OK)
-    //	@JsonView(View.Basic.class)
-    //	public List<Post> getPosts(@RequestParam Long profileId, @RequestParam PostType postType,
-    //			@RequestParam(defaultValue = "Date") String sort, @RequestParam(defaultValue =
-    //			"1") int page,
-    //			@RequestParam(defaultValue = "20") int limit) {
-    //
-    //		Profile postOwner = profileService.findProfileById(profileId);
-    //
-    //		boolean ownerRequest = AuthUtil.getAuthenticatedUser() != null && AuthUtil
-    //		.authorizedAccess(postOwner, false);
-    //
-    //		return postService.getPosts(postOwner, postType, sort, page, limit, ownerRequest);
-    //
-    //	}
+        request.setPostType(PostType.GUIDEBOOK_POST);
+        return createPostFromRequest(profileId, request);
+    }
 
     //	Helper
     private Long createPostFromRequest(Long profileId, PostRequest request) {
@@ -93,17 +76,70 @@ public class PostController {
         return newPost.getId();
     }
 
-    @PostMapping("/guidebooks")
-    @ResponseStatus(HttpStatus.CREATED)
-    //    @ContributorAccess
-    public Long createGuideBookPost(@NotNull @RequestParam Long profileId,
-                                    @Valid @RequestBody GuideBookRequest request) {
+    @PatchMapping("/guidebooks/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @CreateGuideBookAccess
+    public void PatchGuideBookPost(@PathVariable Long id, @NotNull @RequestParam Long profileId,
+                                   @Valid @RequestBody PatchGuideBookPostRequest request) {
 
-        request.isPostAsAnonymous();
-        request.getNotificationVia();
+        request.setPostType(PostType.GUIDEBOOK_POST);
+        patchPostFromRequest(id, profileId, request);
+    }
 
-        return null;
+    //	Helper
+    private void patchPostFromRequest(Long postId, Long profileId, PostRequest request) {
 
+        Post post = postService.findPostById(postId);
+
+        // only owner or admin can edit post
+        Profile requesterProfile = authService.getAuthorizedProfile(profileId, false);
+
+        if (requesterProfile == null) throw new AccessForbidden();
+
+        // only admin can edit the DISABLED POST
+        if (!requesterProfile.getAccount().isAdmin() && post.getStatus() == PostStatus.DISABLED)
+            throw new AccessForbidden();
+
+        postService.patchPost(post, request);
+    }
+
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AuthenticatedAccess
+    public void deletePost(@PathVariable Long id,
+                           @RequestParam(defaultValue = "false") Boolean isHardDelete) {
+
+        Post post = postService.findPostById(id);
+        UserDetailsImpl requesterAccount = authService.getAuthenticatedUser();
+
+        // only admin or post owner can be authorized
+        if (!requesterAccount.isAdmin() &&
+                !post.getOwner().getAccount().getId().equals(requesterAccount.getId()))
+            throw new AccessForbidden();
+
+        // only admin can do hard delete
+        if (isHardDelete && requesterAccount.isAdmin()) postService.deletePost(post);
+
+            // post owner can do soft delete
+        else postService.removePost(post);
+
+    }
+
+    @PostMapping("/{id}/activation")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AdminAndSAdminAccess
+    public void activatePost(@PathVariable Long id) {
+        Post post = postService.findPostById(id);
+        postService.activatePost(post);
+    }
+
+    @DeleteMapping("/{id}/activation")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @AdminAndSAdminAccess
+    public void disablePost(@PathVariable Long id) {
+        Post post = postService.findPostById(id);
+        postService.disablePost(post);
     }
 
     //    @PostMapping("/deals")
@@ -195,41 +231,24 @@ public class PostController {
     //        updatePostFromRequest(postId, request);
     //    }
 
-    @PatchMapping("/{postId}/disable")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AdminAndSAdminAccess
-    public void disablePost(@PathVariable Long postId) {
 
-        Post post = postService.findPostById(postId);
-
-        postService.disablePost(post);
-
-    }
-
-    @PatchMapping("/{postId}/activate")
-    @ResponseStatus(HttpStatus.OK)
-    @AdminAndSAdminAccess
-    @JsonView(View.Detail.class)
-    public Post activatePost(@PathVariable Long postId) {
-
-        Post post = postService.findPostById(postId);
-
-        return postService.activatePost(post);
-    }
-
-    @DeleteMapping("/{postId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @AuthenticatedAccess
-    public void removePost(@PathVariable Long postId, @RequestParam Long profileId)
-            throws AccessForbidden {
-
-        Post post = postService.findPostById(postId);
-
-        Profile postOwner = profileService.findProfileById(profileId);
-
-        authService.getAuthorizedProfile(postOwner, post, true);
-
-        postService.removePost(post);
-
-    }
+    //    // get the latest modifier
+    //    AuditReader reader = AuditReaderFactory.get(entityManager);
+    //
+    //    //Here you find the revision number that you want
+    //
+    //    AuditQuery queryHistoryOfUserWithRev =
+    //            reader.createQuery().forRevisionsOfEntity(GuideBook.class, false, false)
+    //                    .addProjection(AuditEntity.revisionNumber().max())
+    //                    .add(AuditEntity.property("id").eq(Long.valueOf(182)));
+    //    List lstHistoryOfUserWithRev = queryHistoryOfUserWithRev.getResultList();
+    //
+    //        for (Object item : lstHistoryOfUserWithRev) {
+    //
+    //        //DefaultRevisionEntity revisionEntity = (DefaultRevisionEntity) ((Object[]) item)[1];
+    //        MyRevisionEntity revisionEntity = (MyRevisionEntity) ((Object[]) item)[1];
+    //        RevisionType revisionType = (RevisionType) ((Object[]) item)[2];
+    //        System.out.printf(revisionEntity.getModifierUser());
+    //        System.out.printf("revType: {}%n", revisionType);
+    //    }
 }

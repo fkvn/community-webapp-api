@@ -7,6 +7,7 @@ import mono.thainow.domain.review.ProfileReview;
 import mono.thainow.domain.review.Review;
 import mono.thainow.domain.user.User;
 import mono.thainow.view.View;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
@@ -27,6 +28,7 @@ import java.util.List;
 @DiscriminatorColumn(name = "PROFILE_TYPE", discriminatorType = DiscriminatorType.STRING)
 @JsonView(View.Basic.class)
 @Indexed
+@Audited(withModifiedFlag = true)
 public abstract class Profile implements Serializable {
     /**
      *
@@ -57,14 +59,17 @@ public abstract class Profile implements Serializable {
     @OneToMany(mappedBy = "reviewer", fetch = FetchType.LAZY)
     @IndexedEmbedded(includePaths = {"reviewByProfileId"})
     private List<Review> reviewedList;
+
     @JsonIgnore
     @OneToMany(mappedBy = "profile", fetch = FetchType.LAZY)
     @IndexedEmbedded(includePaths = {"reviewOfProfileId"})
     private List<ProfileReview> reviews;
+
     @JsonIgnore
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     @IndexedEmbedded(includePaths = {"postId"})
     private List<Post> posts;
+
     @JsonIgnore
     @ManyToMany(mappedBy = "blockers", fetch = FetchType.LAZY)
     @IndexedEmbedded(includePaths = {"blockedPostId"})

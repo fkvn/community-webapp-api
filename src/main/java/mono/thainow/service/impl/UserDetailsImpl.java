@@ -69,17 +69,19 @@ public class UserDetailsImpl implements UserDetails {
 
     public static UserDetailsImpl build(User user) {
 
-//		List<Company> companies = new ArrayList<>();
-//
-//		if (user.getRole() == UserRole.BUSINESS) {
-//			companies = user.getCompanies();
-//		}
+        //		List<Company> companies = new ArrayList<>();
+        //
+        //		if (user.getRole() == UserRole.BUSINESS) {
+        //			companies = user.getCompanies();
+        //		}
 
-// 		this list of GrantedAuthority would be used for PreAuthorize annotation
-//		in this case, we add both Privileges and Roles into stream and concat together to authority
-        List<GrantedAuthority> authorities = Stream
-                .concat(user.getPrivileges().stream(), Stream.of("ROLE_" + user.getRole()))
-                .map(role -> new SimpleGrantedAuthority(role.toString())).collect(Collectors.toList());
+        // 		this list of GrantedAuthority would be used for PreAuthorize annotation
+        //		in this case, we add both Privileges and Roles into stream and concat together to
+        //		authority
+        List<GrantedAuthority> authorities =
+                Stream.concat(user.getPrivileges().stream(), Stream.of("ROLE_" + user.getRole()))
+                        .map(role -> new SimpleGrantedAuthority(role.toString()))
+                        .collect(Collectors.toList());
 
         return new UserDetailsImpl(user, authorities);
     }
@@ -112,10 +114,8 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         UserDetailsImpl user = (UserDetailsImpl) o;
         return Objects.equals(id, user.id);
     }

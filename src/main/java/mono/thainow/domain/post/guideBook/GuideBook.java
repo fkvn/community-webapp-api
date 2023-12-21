@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import mono.thainow.view.View;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,7 +21,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
 @Entity
 @JsonView(View.Basic.class)
@@ -74,7 +72,7 @@ public class GuideBook implements Serializable {
     @CreationTimestamp
     @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
     @JsonView(View.FullDetail.class)
-    @Column(name = "DEAL_CREATED_ON")
+    @Column(name = "GUIDEBOOK_CREATED_ON")
     private LocalDateTime createdOn;
 
     //	Request Only

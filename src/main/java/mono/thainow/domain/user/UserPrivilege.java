@@ -9,7 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 @JsonView(View.Basic.class)
 public enum UserPrivilege implements GrantedAuthority {
 
-    USER_MANAGE(Code.USER_MANAGE);
+    USER_MANAGE(Code.USER_MANAGE), GUIDEBOOK_CREATE(Code.GUIDEBOOK_CREATE);
 
     private final String authority;
 
@@ -24,5 +24,7 @@ public enum UserPrivilege implements GrantedAuthority {
 
     public class Code {
         public static final String USER_MANAGE = "USER_MANAGE";
+
+        public static final String GUIDEBOOK_CREATE = "GUIDEBOOK_CREATE";
     }
 }

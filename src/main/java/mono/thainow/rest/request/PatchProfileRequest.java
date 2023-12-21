@@ -3,8 +3,8 @@ package mono.thainow.rest.request;
 import lombok.Getter;
 
 @Getter
-public class ModifyProfileRequest {
-    
+public class PatchProfileRequest {
+
     private String username;
 
     private String firstname;
@@ -21,8 +21,8 @@ public class ModifyProfileRequest {
 
     private Boolean isPhonePublic;
 
-//    private String address;
-//
-//    private String placeid;
+    //    private String address;
+    //
+    //    private String placeid;
 
 }

@@ -13,7 +13,7 @@ import mono.thainow.domain.user.UserProvider;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.exception.BadRequest;
 import mono.thainow.repository.ProfileRepository;
-import mono.thainow.rest.request.ModifyProfileRequest;
+import mono.thainow.rest.request.PatchProfileRequest;
 import mono.thainow.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,7 +83,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         //		remove related post
         List<Post> posts = postService.findPostsByProfile(profile);
-        postService.removePosts(posts);
+        //        postService.removePosts(posts);
 
         if (removeAccount) {
             // remove / delete company profiles
@@ -118,7 +118,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public UserProfile createUserProfile(User user) {
 
-        Optional<UserProfile> profile = profileRepository.findUserProfileByAccount(user);
+        Optional<Profile> profile = profileRepository.findProfileByAccount(user);
 
         if (profile.isPresent()) {
             //			if already existed -> one account only can have 1 user profile
@@ -152,7 +152,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         //		remove related post
         List<Post> posts = postService.findPostsByProfile(businessProfile);
-        postService.removePosts(posts);
+        //        postService.removePosts(posts);
 
         //		delete profile (hard delete)
         profileDao.deleteProfileById(businessProfile.getId());
@@ -249,13 +249,19 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void modifyProfile(Profile profile, ModifyProfileRequest request) {
+    public Optional<Profile> findProfileByAccountId(Long id) {
+        return profileRepository.findProfileByAccount_Id(id);
+    }
+
+
+    @Override
+    public void patchProfile(Profile profile, PatchProfileRequest request) {
         if (profile.getType() == ProfileType.USER_PROFILE) {
-            modifyUserProfile(profile, request);
+            patchUserProfile(profile, request);
         }
     }
 
-    private void modifyUserProfile(Profile profile, ModifyProfileRequest request) {
+    private void patchUserProfile(Profile profile, PatchProfileRequest request) {
         User user = profile.getAccount();
 
         Optional.ofNullable(request.getUsername()).filter(username -> !username.isBlank())

@@ -3,6 +3,7 @@ package mono.thainow.rest.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
+import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.UserProfile;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
@@ -93,9 +94,9 @@ public class UserProfileController {
     @GetMapping("/byUserId")
     @JsonView(View.Basic.class)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserProfile findUserProfileByUser(@RequestParam Long id) {
+    public Profile findUserProfileByUser(@RequestParam Long id) {
         User user = userService.findActiveUserById(id).get();
-        return profileRepository.findUserProfileByAccount(user).get();
+        return profileRepository.findProfileByAccount(user).get();
     }
 
     @PatchMapping("/{profileId}")

@@ -13,7 +13,7 @@ import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.exception.AccessForbidden;
 import mono.thainow.repository.ProfileRepository;
-import mono.thainow.rest.request.ModifyProfileRequest;
+import mono.thainow.rest.request.PatchProfileRequest;
 import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.AuthService;
 import mono.thainow.service.ProfileService;
@@ -155,11 +155,10 @@ public class ProfileController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     @AuthenticatedAccess
-    public void updateProfile(@PathVariable Long id,
-                              @Valid @RequestBody ModifyProfileRequest request)
+    public void PatchProfile(@PathVariable Long id, @Valid @RequestBody PatchProfileRequest request)
             throws AccessForbidden {
         UserProfile profile = (UserProfile) validateModifyProfileRequest(id);
-        profileService.modifyProfile(profile, request);
+        profileService.patchProfile(profile, request);
     }
 
     @PostMapping("/{requesterId}/block/posts/{postId}")
