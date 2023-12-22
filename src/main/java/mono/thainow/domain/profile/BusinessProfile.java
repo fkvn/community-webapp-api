@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import mono.thainow.domain.company.Company;
 import mono.thainow.domain.user.User;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import javax.persistence.DiscriminatorValue;
@@ -15,10 +15,10 @@ import javax.persistence.OneToOne;
 
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
 @Entity
 @DiscriminatorValue("BUSINESS_PROFILE")
+@Audited(withModifiedFlag = true)
 public class BusinessProfile extends Profile {
     /**
      *
@@ -37,7 +37,7 @@ public class BusinessProfile extends Profile {
 
     @Override
     public Object getDetails() {
-//		this.getCompany().setProfileId(this.getId());
+        //		this.getCompany().setProfileId(this.getId());
         return this.getCompany();
     }
 

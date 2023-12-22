@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.profile.Profile;
 import org.hibernate.envers.Audited;
@@ -21,10 +20,10 @@ import javax.persistence.ManyToOne;
 
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
 @Entity
 @DiscriminatorValue("POST_REVIEW")
+@Audited(withModifiedFlag = true)
 public class PostReview extends Review {
 
     /**

@@ -9,6 +9,7 @@ import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.view.View;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import javax.persistence.CascadeType;
@@ -22,12 +23,13 @@ import javax.persistence.OneToOne;
 @Entity
 @DiscriminatorValue("GUIDEBOOK_POST")
 @JsonView(View.Basic.class)
+@Audited(withModifiedFlag = true)
 public class GuideBookPost extends Post {
 
     /**
      *
      */
-    private static final long serialVersionUID = 1L;
+
     @OneToOne(cascade = CascadeType.REMOVE)
     @JsonIgnore
     @IndexedEmbedded

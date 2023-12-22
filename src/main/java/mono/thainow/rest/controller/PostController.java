@@ -3,7 +3,6 @@ package mono.thainow.rest.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import mono.thainow.annotation.AdminAndSAdminAccess;
 import mono.thainow.annotation.AuthenticatedAccess;
-import mono.thainow.annotation.CreateGuideBookAccess;
 import mono.thainow.domain.post.Post;
 import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.PostType;
@@ -78,7 +77,7 @@ public class PostController {
 
     @PatchMapping("/guidebooks/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @CreateGuideBookAccess
+    @AuthenticatedAccess
     public void PatchGuideBookPost(@PathVariable Long id, @NotNull @RequestParam Long profileId,
                                    @Valid @RequestBody PatchGuideBookPostRequest request) {
 

@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.view.View;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,13 +28,13 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@ToString
 @EqualsAndHashCode
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "REVIEW_TYPE", discriminatorType = DiscriminatorType.STRING)
 @JsonView(View.Basic.class)
 @Indexed
+@Audited(withModifiedFlag = true)
 public class Review implements Serializable {
 
     /**

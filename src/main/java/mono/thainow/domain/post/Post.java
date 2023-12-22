@@ -76,7 +76,7 @@ public abstract class Post implements Serializable {
     @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
     @Column(name = "POST_CREATED_ON")
     private LocalDateTime createdOn;
-    
+
     @UpdateTimestamp
     @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
     @Column(name = "POST_UPDATED_ON")
