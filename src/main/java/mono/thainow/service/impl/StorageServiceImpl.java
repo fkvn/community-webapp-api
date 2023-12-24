@@ -4,7 +4,6 @@ import mono.thainow.dao.StorageDao;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.repository.StorageRepository;
 import mono.thainow.rest.request.StorageRequest;
-import mono.thainow.rest.response.StorageResponse;
 import mono.thainow.service.FirebaseService;
 import mono.thainow.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ public class StorageServiceImpl implements StorageService {
     private FirebaseService firebaseService;
 
     @Override
-    public StorageResponse upload(MultipartFile multipartFile) {
+    public String upload(MultipartFile multipartFile) {
 
         String fileName = fetchFileName(multipartFile);
 
@@ -39,19 +38,21 @@ public class StorageServiceImpl implements StorageService {
         File file = convertToFile(multipartFile, fileName);
 
         // to get uploaded file link
-        String TEMP_URL = uploadFile(file, fileName, multipartFile.getContentType());
+        String url = uploadFile(file, fileName, multipartFile.getContentType());
 
         file.delete();
 
-//		return full storage object
-        StorageResponse storageResponse = new StorageResponse();
+        //		return full storage object
+        Storage storage = new Storage();
 
-        storageResponse.setName(fileName);
-        storageResponse.setType(multipartFile.getContentType());
-        storageResponse.setUrl(TEMP_URL);
-        storageResponse.setSize(multipartFile.getSize());
+        storage.setName(fileName);
+        storage.setType(multipartFile.getContentType());
+        storage.setUrl(url);
+        storage.setSize(multipartFile.getSize());
 
-        return storageResponse;
+        storage = saveStorage(storage);
+
+        return storage.getUrl();
     }
 
     @Override
@@ -105,6 +106,11 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
+    public void deleteStorage(Storage storage) {
+        storageRepository.delete(storage);
+    }
+
+    @Override
     public Optional<Storage> findStorageById(Long id) {
         return storageRepository.findById(id);
     }
@@ -139,16 +145,16 @@ public class StorageServiceImpl implements StorageService {
         if (reqs != null && reqs.size() > 0) {
 
             reqs.forEach(req -> {
-//				check if the image is already existed
+                //				check if the image is already existed
                 Storage picture = findStorageByUrl(req.getUrl());
 
-//				not existed
+                //				not existed
                 if (picture == null) {
                     picture = fetchStorageFromRequest(req);
                     picture = saveStorage(picture);
                 }
 
-//				add to new list
+                //				add to new list
                 coverPictures.add(picture);
             });
         }

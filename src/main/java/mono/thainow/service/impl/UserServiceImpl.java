@@ -1,7 +1,5 @@
 package mono.thainow.service.impl;
 
-import mono.thainow.domain.storage.Storage;
-import mono.thainow.domain.storage.StorageDefault;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserProvider;
 import mono.thainow.domain.user.UserStatus;
@@ -183,21 +181,15 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             user = new User();
 
-            //			set password
+            //	set password
             String password = request.getPassword();
             user.setPassword(
                     passwordService.encodePassword(passwordService.validatePassword(password)));
 
-            //			user profile
-            StorageDefault storageDefault = new StorageDefault();
-            Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault())
-                    .orElseGet(null);
-            user.setPicture(picture);
-
-            //			set provider
+            //	set provider
             user.setProvider(UserProvider.THAINOW);
 
-            //			set status
+            //	set status
             user.setStatus(UserStatus.ACTIVATED);
         }
 
@@ -310,11 +302,6 @@ public class UserServiceImpl implements UserService {
         Boolean isEmailVerified = Optional.ofNullable(request.getEmail_verified()).orElse(false);
         user.setEmailVerified(isEmailVerified);
 
-        StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault())
-                .orElseGet(null);
-        user.setPicture(picture);
-
         user.setProvider(UserProvider.GOOGLE);
 
         user.setStatus(UserStatus.ACTIVATED);
@@ -338,11 +325,6 @@ public class UserServiceImpl implements UserService {
 
         Boolean isEmailVerified = Optional.ofNullable(request.getEmail_verified()).orElse(false);
         user.setEmailVerified(isEmailVerified);
-
-        StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault())
-                .orElseGet(null);
-        user.setPicture(picture);
 
         user.setProvider(UserProvider.APPLE);
 
@@ -370,11 +352,6 @@ public class UserServiceImpl implements UserService {
 
         Boolean isEmailVerified = Optional.ofNullable(request.getIsEmailVerified()).orElse(false);
         user.setEmailVerified(isEmailVerified);
-
-        StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault())
-                .orElseGet(null);
-        user.setPicture(picture);
 
         user.setProvider(UserProvider.FACEBOOK);
 
@@ -413,11 +390,6 @@ public class UserServiceImpl implements UserService {
 
         String username = Optional.ofNullable(request.getName()).orElse(email).trim();
         user.setUsername(username);
-
-        StorageDefault storageDefault = new StorageDefault();
-        Storage picture = storageService.findStorageById(storageDefault.getUserProfileDefault())
-                .orElseGet(null);
-        user.setPicture(picture);
 
         user.setProvider(UserProvider.LINE);
 

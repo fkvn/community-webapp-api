@@ -13,6 +13,7 @@ import mono.thainow.rest.request.PatchGuideBookPostRequest;
 import mono.thainow.rest.request.PostRequest;
 import mono.thainow.service.GuideBookService;
 import mono.thainow.service.PostService;
+import mono.thainow.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,9 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private StorageService storageService;
 
 
     //	=============================================================

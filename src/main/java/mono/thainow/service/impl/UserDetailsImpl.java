@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserRole;
 import mono.thainow.domain.user.UserStatus;
@@ -39,7 +38,7 @@ public class UserDetailsImpl implements UserDetails {
     private String email;
 
 
-    private Storage picture;
+    private String avatarUrl;
 
 
     private UserRole role;
@@ -61,7 +60,7 @@ public class UserDetailsImpl implements UserDetails {
         this.password = user.getPassword();
         this.sub = user.getSub();
         this.email = user.getEmail();
-        this.picture = user.getPicture();
+        this.avatarUrl = user.getAvatarUrl();
         this.role = user.getRole();
         this.status = user.getStatus();
         this.authorities = authorities;

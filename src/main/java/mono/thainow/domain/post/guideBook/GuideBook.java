@@ -6,14 +6,17 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import mono.thainow.search.EnumAsString;
 import mono.thainow.view.View;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.ValueBridgeRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -50,6 +53,9 @@ public class GuideBook implements Serializable {
     @FullTextField
     private String description;
 
+    @Column(name = "GUIDEBOOK_BANNER_URL")
+    private String bannerUrl;
+
     @UpdateTimestamp
     @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
     @Column(name = "GUIDEBOOK_UPDATED_ON")
@@ -58,6 +64,7 @@ public class GuideBook implements Serializable {
 
     @Column(name = "GUIDEBOOK_CATEGORY")
     @Enumerated(EnumType.STRING)
+    @KeywordField(valueBridge = @ValueBridgeRef(type = EnumAsString.class))
     private GuideBookCategory category;
 
     //	Detail Information

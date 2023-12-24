@@ -65,12 +65,13 @@ public class Storage implements Serializable {
 
     @JsonValue
     public String toString() {
-//		String SOURCE_URL = "https://firebasestorage.googleapis.com/v0/b/mono-thainow.appspot.com/o/thainow-service-worker%%2F%s?alt=media";
+        //		String SOURCE_URL = "https://firebasestorage.googleapis.com/v0/b/mono-thainow.appspot.com/o/thainow-service-worker%%2F%s?alt=media";
         String SOURCE_CDN_URL = "/cdn/image/thainow-service-worker%%2F%s?alt=media";
 
-        boolean localEnv = true;
+        boolean isNoCached = true;
 
-        String url = localEnv ? this.url : String.format(SOURCE_CDN_URL, URLEncoder.encode(this.name, StandardCharsets.UTF_8));
+        String url = isNoCached ? this.url :
+                String.format(SOURCE_CDN_URL, URLEncoder.encode(this.name, StandardCharsets.UTF_8));
 
         return url;
     }

@@ -120,6 +120,8 @@ public class PostController {
         // only admin can do hard delete
         if (isHardDelete && requesterAccount.isAdmin()) postService.deletePost(post);
 
+        else if (isHardDelete && !requesterAccount.isAdmin()) throw new AccessForbidden();
+
             // post owner can do soft delete
         else postService.removePost(post);
 
@@ -242,7 +244,7 @@ public class PostController {
     //                    .add(AuditEntity.property("id").eq(Long.valueOf(182)));
     //    List lstHistoryOfUserWithRev = queryHistoryOfUserWithRev.getResultList();
     //
-    //        for (Object item : lstHistoryOfUserWithRev) {
+    //        for (Object itemd : lstHistoryOfUserWithRev) {
     //
     //        //DefaultRevisionEntity revisionEntity = (DefaultRevisionEntity) ((Object[]) item)[1];
     //        MyRevisionEntity revisionEntity = (MyRevisionEntity) ((Object[]) item)[1];

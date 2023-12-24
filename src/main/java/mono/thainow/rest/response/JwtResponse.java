@@ -64,7 +64,7 @@ public class JwtResponse {
 
         profileInfo.put("id", this.userProfile.getId());
         profileInfo.put("username", this.userDetails.getUsername());
-        profileInfo.put("picture", this.getUserDetails().getPicture());
+        profileInfo.put("avatarUrl", this.getUserDetails().getAvatarUrl());
         profileInfo.put("type", this.userProfile.getType());
         profileInfo.put("status", this.userDetails.getStatus());
 

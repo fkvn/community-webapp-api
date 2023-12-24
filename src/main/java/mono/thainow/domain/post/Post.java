@@ -15,6 +15,7 @@ import mono.thainow.view.View;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
+import org.hibernate.search.engine.backend.types.Sortable;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
@@ -75,11 +76,13 @@ public abstract class Post implements Serializable {
     @CreationTimestamp
     @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
     @Column(name = "POST_CREATED_ON")
+    @GenericField(sortable = Sortable.YES)
     private LocalDateTime createdOn;
 
     @UpdateTimestamp
     @JsonFormat(pattern = "MM-dd-yyyy HH:mm:ss")
     @Column(name = "POST_UPDATED_ON")
+    @GenericField(sortable = Sortable.YES)
     private LocalDateTime updatedOn;
 
     @JsonIgnore

@@ -327,14 +327,20 @@ public class AuthServiceImpl implements AuthService {
     public Profile getAuthorizedProfile(Long profileId, boolean throwError) throws AccessForbidden {
 
         UserDetailsImpl requester = getAuthenticatedUser();
-        Profile requesterProfile = profileService.findProfileById(profileId);
+        Profile requesterProfile = null;
 
-        boolean isRequesterAdmin = requester != null && requester.getRole() == UserRole.ADMIN ||
-                requester.getRole() == UserRole.SUPERADMIN;
+        try {
+            requesterProfile = profileService.findProfileById(profileId);
+        } catch (Exception e) {
+        }
+
+        boolean isRequesterAdmin = requester != null && (requester.getRole() == UserRole.ADMIN ||
+                requester.getRole() == UserRole.SUPERADMIN);
 
         if (isRequesterAdmin) return requesterProfile;
 
-        boolean isValidRequester = requesterProfile.getAccount().getId().equals(requester.getId());
+        boolean isValidRequester = requester != null && requesterProfile != null &&
+                requesterProfile.getAccount().getId().equals(requester.getId());
 
         // if not admin, they ONLY can request under their account
         if (isValidRequester) {

@@ -4,6 +4,7 @@ import mono.thainow.domain.post.guideBook.GuideBook;
 import mono.thainow.exception.BadRequest;
 import mono.thainow.repository.GuideBookRepository;
 import mono.thainow.service.GuideBookService;
+import mono.thainow.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,9 @@ public class GuideBookServiceImpl implements GuideBookService {
 
     @Autowired
     GuideBookRepository guideBookRepository;
+
+    @Autowired
+    StorageService storageService;
 
     @Override
     public GuideBook patchGuideBook(GuideBook currentGuideBook, GuideBook newGuideBook) {
@@ -30,6 +34,8 @@ public class GuideBookServiceImpl implements GuideBookService {
                 .ifPresent(currentGuideBook::setDescription);
 
         Optional.ofNullable(newGuideBook.getContent()).ifPresent(currentGuideBook::setContent);
+
+        Optional.ofNullable(newGuideBook.getBannerUrl()).ifPresent(currentGuideBook::setBannerUrl);
 
         // merge
         currentGuideBook = saveGuideBook(currentGuideBook);

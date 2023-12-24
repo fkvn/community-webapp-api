@@ -1,4 +1,13 @@
-//package mono.thainow.dao;
+package mono.thainow.dao;
+
+import mono.thainow.domain.post.PostStatus;
+import mono.thainow.domain.post.guideBook.GuideBook;
+import mono.thainow.domain.post.guideBook.GuideBookCategory;
+import mono.thainow.domain.post.guideBook.GuideBookPost;
+import org.hibernate.search.engine.search.query.SearchResult;
+
+import java.util.List;
+
 //
 //import java.util.List;
 //import java.util.Map;
@@ -19,79 +28,99 @@
 //import mono.thainow.domain.review.PostReview;
 //import mono.thainow.domain.review.ProfileReview;
 //
-//public interface SearchDao {
-//
-//	void reIndexPersistedData(String className);
-//
-//	List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit);
-//
-//	SearchResult<Company> searchCompany(String keywords, int limit, int page, double centerLat,
-//	double centerLng, String industry, String sort, String within, int radius, List<Double>
-//	topLeft, List<Double> bottomRight);
-//
-//	SearchResult<Deal> searchDeal(String keywords, int limit, int page, double centerLat, double
-//	centerLng,
-//			String category, String sort, String within, int radius, List<Double> topLeft,
-//			List<Double> bottomRight);
-//
-//	SearchResult<Job> searchJob(String keywords, String position, String experience, String
-//	skills, Boolean remote,
-//			int limit, int page, double centerLat, double centerLng, String sort, String within,
-//			int radius,
-//			List<Double> topLeft, List<Double> bottomRight);
-//
-//	SearchResult<Housing> searchHousing(String keywords, String type, String costType, Double
-//	minCost, Double maxCost,
-//			Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String
-//			category,
-//			double centerLat, double centerLng, int limit, int page, String sort, String within,
-//			int radius,
-//			List<Double> topLeft, List<Double> bottomRight);
-//
-//	SearchResult<Marketplace> searchMarketplace(String keywords, String condition, String
-//	category, Double minCost,
-//			Double maxCost, double centerLat, double centerLng, int limit, int page, String sort,
-//			String within,
-//			int radius, List<Double> topLeft, List<Double> bottomRight);
-//
-//	SearchResult<DealPost> searchDealPost(Long requesterId, Long ownerId, String keywords, int
-//	limit, int page,
-//			double centerLat, double centerLng, String category, String sort, String sortOrder,
-//			String within, int radius, List<Double> topLeft, List<Double> bottomRight, String
-//			status);
-//
-//	SearchResult<HousingPost> searchHousingPost(Long requesterId, Long ownerId, String keywords,
-//	String type,
-//			String costType, Double minCost, Double maxCost, Integer guest, Integer bed, Integer
-//			parking, Integer bath,
-//			String amenity, String category, double centerLat, double centerLng, int limit, int
-//			page, String sort,
-//			String sortOrder, String within, int radius, List<Double> topLeft, List<Double>
-//			bottomRight, String status);
-//
-//	SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String
-//	position,
-//			String experience, String skills, Boolean remote, int limit, int page, double
-//			centerLat, double centerLng,
-//			String sort, String sortOrder, String within, int radius, List<Double> topLeft,
-//			List<Double> bottomRight, String status);
-//
-//	SearchResult<MarketplacePost> searchMarketplacePost(Long requesterId, Long ownerId, String
-//	keywords,
-//			String condition, String category, Double minCost, Double maxCost, double centerLat,
-//			double centerLng, int limit,
-//			int page, String sort, String sortOrder, String within, int radius, List<Double>
-//			topLeft, List<Double> bottomRight, String status);
-//
-//	SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page,
-//	double centerLat,
-//			double centerLng, String industry, String sort, String sortOrder, String within, int
-//			radius,
-//			List<Double> topLeft, List<Double> bottomRight);
-//
-//	SearchResult<PostReview> searchPostReview(Long postId, String sort, String sortOrder, int
-//	limit, int page, AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId);
-//
-//	SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, String sortOrder,
-//	int limit, int page, AggregationKey<Map<Integer, Long>> countsByRateKey);
-//}
+public interface SearchDao {
+    //
+    void reIndexPersistedData(String className);
+
+    void reIndexPersistedData(List<String> className);
+
+    SearchResult<GuideBookPost> searchGuideBookPost(Long profileId, Long requesterId,
+                                                    String keywords, GuideBookCategory category,
+                                                    int limit, int page, String sortBy,
+                                                    String sortByOrder, PostStatus status);
+
+    SearchResult<GuideBook> searchGuideBook(Long profileId, Long requesterId, String keywords,
+                                            GuideBookCategory category, int limit, int page,
+                                            String sortBy, String sortByOrder, PostStatus status);
+    //
+    //	List<Company> searchCompanyByNameOnly(String keywords, boolean fetchAll, int fetchLimit);
+    //
+    //	SearchResult<Company> searchCompany(String keywords, int limit, int page, double centerLat,
+    //	double centerLng, String industry, String sort, String within, int radius, List<Double>
+    //	topLeft, List<Double> bottomRight);
+    //
+    //	SearchResult<Deal> searchDeal(String keywords, int limit, int page, double centerLat,
+    //	double
+    //	centerLng,
+    //			String category, String sort, String within, int radius, List<Double> topLeft,
+    //			List<Double> bottomRight);
+    //
+    //	SearchResult<Job> searchJob(String keywords, String position, String experience, String
+    //	skills, Boolean remote,
+    //			int limit, int page, double centerLat, double centerLng, String sort, String
+    //			within,
+    //			int radius,
+    //			List<Double> topLeft, List<Double> bottomRight);
+    //
+    //	SearchResult<Housing> searchHousing(String keywords, String type, String costType, Double
+    //	minCost, Double maxCost,
+    //			Integer guest, Integer bed, Integer parking, Integer bath, String amenity, String
+    //			category,
+    //			double centerLat, double centerLng, int limit, int page, String sort, String
+    //			within,
+    //			int radius,
+    //			List<Double> topLeft, List<Double> bottomRight);
+    //
+    //	SearchResult<Marketplace> searchMarketplace(String keywords, String condition, String
+    //	category, Double minCost,
+    //			Double maxCost, double centerLat, double centerLng, int limit, int page, String
+    //			sort,
+    //			String within,
+    //			int radius, List<Double> topLeft, List<Double> bottomRight);
+    //
+    //	SearchResult<DealPost> searchDealPost(Long requesterId, Long ownerId, String keywords, int
+    //	limit, int page,
+    //			double centerLat, double centerLng, String category, String sort, String sortOrder,
+    //			String within, int radius, List<Double> topLeft, List<Double> bottomRight, String
+    //			status);
+    //
+    //	SearchResult<HousingPost> searchHousingPost(Long requesterId, Long ownerId, String
+    //	keywords,
+    //	String type,
+    //			String costType, Double minCost, Double maxCost, Integer guest, Integer bed,
+    //			Integer
+    //			parking, Integer bath,
+    //			String amenity, String category, double centerLat, double centerLng, int limit, int
+    //			page, String sort,
+    //			String sortOrder, String within, int radius, List<Double> topLeft, List<Double>
+    //			bottomRight, String status);
+    //
+    //	SearchResult<JobPost> searchJobPost(Long requesterId, Long ownerId, String keywords, String
+    //	position,
+    //			String experience, String skills, Boolean remote, int limit, int page, double
+    //			centerLat, double centerLng,
+    //			String sort, String sortOrder, String within, int radius, List<Double> topLeft,
+    //			List<Double> bottomRight, String status);
+    //
+    //	SearchResult<MarketplacePost> searchMarketplacePost(Long requesterId, Long ownerId, String
+    //	keywords,
+    //			String condition, String category, Double minCost, Double maxCost, double
+    //			centerLat,
+    //			double centerLng, int limit,
+    //			int page, String sort, String sortOrder, String within, int radius, List<Double>
+    //			topLeft, List<Double> bottomRight, String status);
+    //
+    //	SearchResult<BusinessProfile> searchCompanyProfile(String keywords, int limit, int page,
+    //	double centerLat,
+    //			double centerLng, String industry, String sort, String sortOrder, String within,
+    //			int
+    //			radius,
+    //			List<Double> topLeft, List<Double> bottomRight);
+    //
+    //	SearchResult<PostReview> searchPostReview(Long postId, String sort, String sortOrder, int
+    //	limit, int page, AggregationKey<Map<Integer, Long>> aggregationKey, Long reviewerId);
+    //
+    //	SearchResult<ProfileReview> searchProfileReview(Long profileId, String sort, String
+    //	sortOrder,
+    //	int limit, int page, AggregationKey<Map<Integer, Long>> countsByRateKey);
+}

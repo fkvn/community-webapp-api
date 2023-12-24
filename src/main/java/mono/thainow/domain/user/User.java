@@ -42,8 +42,8 @@ public class User implements Serializable {
     @Column(name = "USER_USERNAME")
     private String username = "";
 
-    @OneToOne
-    private Storage picture;
+    @Column(name = "USER_AVATAR_URL")
+    private String avatarUrl;
 
     @NotNull(message = "User status can't be null!")
     @Enumerated(EnumType.STRING)

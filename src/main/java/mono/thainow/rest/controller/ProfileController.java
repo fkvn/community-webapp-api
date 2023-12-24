@@ -8,7 +8,6 @@ import mono.thainow.domain.profile.BusinessProfile;
 import mono.thainow.domain.profile.Profile;
 import mono.thainow.domain.profile.ProfileType;
 import mono.thainow.domain.profile.UserProfile;
-import mono.thainow.domain.storage.Storage;
 import mono.thainow.domain.user.User;
 import mono.thainow.domain.user.UserStatus;
 import mono.thainow.exception.AccessForbidden;
@@ -109,26 +108,19 @@ public class ProfileController {
 
     }
 
-    @PostMapping("/{id}/picture")
+    @PostMapping("/{id}/avatar")
     @ResponseStatus(HttpStatus.CREATED)
     @AuthenticatedAccess
-    public Storage uploadProfilePicture(@PathVariable Long id,
-                                        @Valid @RequestBody StorageRequest newPicture)
-            throws AccessForbidden {
+    public void uploadAvatar(@PathVariable Long id, @Valid @RequestBody StorageRequest request) {
 
 
-        UserProfile profile = (UserProfile) validateModifyProfileRequest(id);
-
-        //		get storage
-        Storage picture = storageService.fetchStorageFromRequest(newPicture);
-        picture = storageService.saveStorage(picture);
+        Profile profile = authService.getAuthorizedProfile(id, true);
 
         if (profile.getType() == ProfileType.USER_PROFILE) {
-            //			update account picture
+            //	update account picture
             User account = profile.getAccount();
-            account.setPicture(picture);
+            account.setAvatarUrl(request.getUrl());
             userService.saveUser(account);
-
         }
         //        else if (profile.getType() == ProfileType.BUSINESS_PROFILE) {
         //////			update company logo
@@ -136,8 +128,15 @@ public class ProfileController {
         ////            company.setLogo(picture);
         ////            company = companyService.saveCompany(company);
         //        }
+    }
 
-        return picture;
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @AuthenticatedAccess
+    public void PatchProfile(@PathVariable Long id, @Valid @RequestBody PatchProfileRequest request)
+            throws AccessForbidden {
+        UserProfile profile = (UserProfile) validateModifyProfileRequest(id);
+        profileService.patchProfile(profile, request);
     }
 
     // Helper Method
@@ -150,15 +149,6 @@ public class ProfileController {
         }
 
         return profile;
-    }
-
-    @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    @AuthenticatedAccess
-    public void PatchProfile(@PathVariable Long id, @Valid @RequestBody PatchProfileRequest request)
-            throws AccessForbidden {
-        UserProfile profile = (UserProfile) validateModifyProfileRequest(id);
-        profileService.patchProfile(profile, request);
     }
 
     @PostMapping("/{requesterId}/block/posts/{postId}")

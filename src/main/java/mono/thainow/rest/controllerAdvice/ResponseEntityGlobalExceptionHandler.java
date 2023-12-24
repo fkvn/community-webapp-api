@@ -19,6 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -77,7 +78,7 @@ public class ResponseEntityGlobalExceptionHandler extends ResponseEntityExceptio
     //	}
 
     @ExceptionHandler({IllegalArgumentException.class, InvalidDataAccessApiUsageException.class,
-            ConstraintViolationException.class})
+            ConstraintViolationException.class, MethodArgumentTypeMismatchException.class})
     protected ResponseEntity<Object> handleIllegalArgumentException(Exception ex,
                                                                     WebRequest request) {
 
