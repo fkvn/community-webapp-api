@@ -74,27 +74,21 @@ public class FullTextSearchController {
     @GetMapping("/guidebooks")
     @ResponseStatus(HttpStatus.ACCEPTED)
     @JsonView(View.Basic.class)
-    public SearchResponse<?> searchGuideBookPost(@RequestParam(defaultValue = "-1") Long profileId,
-                                                 @RequestParam(defaultValue = "-1")
-                                                 Long requesterId,
-                                                 @RequestParam(defaultValue = "") String keywords,
-                                                 @RequestParam(required = false)
-                                                 GuideBookCategory category,
-                                                 @RequestParam(required = false) PostStatus status,
-                                                 @RequestParam(defaultValue = "date") String sortBy,
-                                                 @RequestParam(defaultValue = "desc")
-                                                 String sortByOrder,
-                                                 @RequestParam(defaultValue = "1") int page,
-                                                 @RequestParam(defaultValue = "20") int limit) {
+    public SearchResponse<?> fetchGuideBookPost(@RequestParam(defaultValue = "-1") Long profileId,
+                                                @RequestParam(defaultValue = "-1") Long requesterId,
+                                                @RequestParam(defaultValue = "") String keywords,
+                                                @RequestParam(required = false)
+                                                GuideBookCategory category,
+                                                @RequestParam(required = false) PostStatus status,
+                                                @RequestParam(defaultValue = "date") String sortBy,
+                                                @RequestParam(defaultValue = "desc")
+                                                String sortByOrder,
+                                                @RequestParam(defaultValue = "1") int page,
+                                                @RequestParam(defaultValue = "20") int limit) {
 
         SearchResponse<?> res =
                 searchService.searchGuideBookPost(profileId, requesterId, keywords, category, limit,
                         page, sortBy, sortByOrder, status);
-
-        //        SearchResponse<?> res =
-        //                searchService.searchGuideBook(profileId, requesterId, keywords,
-        //                category, limit,
-        //                        page, sortBy, sortByOrder, status);
 
         return res;
     }

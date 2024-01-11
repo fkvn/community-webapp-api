@@ -18,7 +18,7 @@ public class EmailController {
     // Sending a simple Email
     @PostMapping
     public boolean sendMail(@Valid @RequestBody EmailRequest request) {
-        return emailService.sendSimpleMail(emailService.fetchEmailFromRequest(request));
+        return emailService.sendEmailWithHtmlTemplate(emailService.fetchEmailFromRequest(request));
     }
 
     @GetMapping("/exist")

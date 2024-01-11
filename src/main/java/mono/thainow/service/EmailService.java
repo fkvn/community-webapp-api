@@ -16,6 +16,8 @@ public interface EmailService {
     // To send a simple email
     boolean sendSimpleMail(EmailDetails details);
 
+    boolean sendEmailWithHtmlTemplate(EmailDetails details);
+
     EmailDetails fetchEmailFromRequest(@Valid EmailRequest request);
 
 

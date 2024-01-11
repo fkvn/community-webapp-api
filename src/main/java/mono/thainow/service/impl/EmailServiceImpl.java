@@ -13,9 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.validation.Valid;
 import java.util.Optional;
 
@@ -27,12 +32,18 @@ public class EmailServiceImpl implements EmailService {
     private final String CO_RECIPIENT = "kvngo@tedkvn.com";
     @Autowired
     private JavaMailSender javaMailSender;
+
+    @Autowired
+    private TemplateEngine templateEngine;
+
     @Autowired
     private UserRepository userRepository;
     @Value("${spring.mail.username}")
     private String sender;
     @Autowired
     private EmailDao emailDao;
+
+    public EmailServiceImpl() {}
 
     //	=============================================================
 
@@ -65,9 +76,14 @@ public class EmailServiceImpl implements EmailService {
             // Creating a simple mail message
             SimpleMailMessage mailMessage = new SimpleMailMessage();
 
+            String[] emailIds = new String[2];
+            emailIds[0] = details.getRecipient();
+            emailIds[1] = CO_RECIPIENT;
+
+
             // Setting up necessary details
             mailMessage.setFrom(sender);
-            mailMessage.setTo(CO_RECIPIENT);
+            mailMessage.setTo(emailIds);
             mailMessage.setSubject(details.getSubject());
             mailMessage.setText(details.getMsgBody());
 
@@ -86,16 +102,41 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    public boolean sendEmailWithHtmlTemplate(EmailDetails details) {
+        Context context = new Context();
+        context.setVariable("message", details.getMsgBody());
+        context.setVariable("recipient", details.getRecipient());
+
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+
+        String[] emailIds = new String[1];
+        emailIds[0] = CO_RECIPIENT;
+        //        emailIds[1] = details.getRecipient();
+        try {
+            helper.setFrom(sender);
+            helper.setTo(InternetAddress.parse(String.join(",", emailIds)));
+            helper.setSubject(details.getSubject());
+            String htmlContent = templateEngine.process("email-template", context);
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+            return true;
+        } catch (MessagingException e) {
+            // Handle exception
+            return false;
+        }
+
+    }
+
     @Override
     public EmailDetails fetchEmailFromRequest(@Valid EmailRequest request) {
 
         String email = Optional.ofNullable(request.getRecipient()).orElse("");
-        Assert.isTrue(isBlank(email), "Email can't be blank!");
-        Assert.isTrue(isEmailValid(email), "Invalid Email");
+        if (isBlank(email) || !isEmailValid(email)) throw new BadRequest("Invalid Email!");
 
         EmailDetails emailDetails = new EmailDetails();
 
-        String subject = Optional.ofNullable(request.getSubject()).orElse("ThaiNow Report");
+        String subject = Optional.ofNullable(request.getSubject()).orElse("ThaiNow Contact");
         String msgBody = Optional.ofNullable(request.getMsgBody()).orElse("");
 
         emailDetails.setSubject(subject);
