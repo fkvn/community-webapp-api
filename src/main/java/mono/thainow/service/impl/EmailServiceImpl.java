@@ -103,22 +103,24 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public boolean sendEmailWithHtmlTemplate(EmailDetails details) {
-        Context context = new Context();
-        context.setVariable("message", details.getMsgBody());
-        context.setVariable("recipient", details.getRecipient());
-
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
-
-        String[] emailIds = new String[1];
-        emailIds[0] = CO_RECIPIENT;
-        //        emailIds[1] = details.getRecipient();
         try {
+            Context context = new Context();
+            context.setVariable("message", details.getMsgBody());
+            context.setVariable("recipient", details.getRecipient());
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+
+            String[] emailIds = new String[1];
+            emailIds[0] = CO_RECIPIENT;
+
             helper.setFrom(sender);
             helper.setTo(InternetAddress.parse(String.join(",", emailIds)));
             helper.setSubject(details.getSubject());
             String htmlContent = templateEngine.process("email-template", context);
             helper.setText(htmlContent, true);
+
             javaMailSender.send(mimeMessage);
             return true;
         } catch (MessagingException e) {
