@@ -7,6 +7,7 @@ import mono.thainow.domain.post.guideBook.GuideBook;
 import mono.thainow.domain.post.guideBook.GuideBookCategory;
 import mono.thainow.domain.post.guideBook.GuideBookPost;
 import mono.thainow.domain.profile.Profile;
+import mono.thainow.exception.AccessForbidden;
 import mono.thainow.exception.BadRequest;
 import mono.thainow.service.AuthService;
 import org.hibernate.search.engine.search.query.SearchResult;
@@ -150,6 +151,32 @@ public class SearchDaoImpl implements SearchDao {
         // if null, the requester is neither post owner nor admins
         Profile requesterProfile = authService.getAuthorizedProfile(requesterId, false);
 
+        // check authorities
+        List<PostStatus> requestStatusList = new ArrayList<>();
+
+        if (status == null) {
+            requestStatusList.add(PostStatus.PUBLIC);
+            if (requesterProfile != null) {
+                requestStatusList.add(PostStatus.PRIVATE);
+                if (requesterProfile.getAccount().isAdmin()) {
+                    requestStatusList.add(PostStatus.DISABLED);
+                }
+            }
+        }
+        // specific status
+        else {
+            if (!status.equals(PostStatus.PUBLIC) && requesterProfile == null) {
+                throw new AccessForbidden();
+            } else if (requesterProfile != null) {
+                if (status.equals(PostStatus.DISABLED) &&
+                        !requesterProfile.getAccount().isAdmin()) {
+                    throw new AccessForbidden();
+                }
+            }
+
+            requestStatusList.add(status);
+        }
+
         SearchResult<GuideBookPost> guideBookPostSearchResult =
                 searchSession.search(GuideBookPost.class).where(f -> f.bool(b -> {
 
@@ -161,7 +188,6 @@ public class SearchDaoImpl implements SearchDao {
 
                     // exclude all blocked posts
                     if (requesterId > 0) {
-                        System.out.println(requesterId);
                         b.mustNot(f.match().field("blockers.blockerId").matching(requesterId));
                     }
 
@@ -177,28 +203,11 @@ public class SearchDaoImpl implements SearchDao {
                         b.filter(f.match().field("guideBook.category").matching(category));
                     }
 
-                    List<PostStatus> allowedStatus = new ArrayList<>();
-
-                    if (status == null) {
-                        allowedStatus.add(PostStatus.PUBLIC);
-                        if (requesterProfile != null) {
-                            allowedStatus.add(PostStatus.PRIVATE);
-                            if (requesterProfile.getAccount().isAdmin()) {
-                                allowedStatus.add(PostStatus.DISABLED);
-                            }
-                        }
-                    }
-                    // specific status
-                    else {
-                        allowedStatus.add(status);
-                    }
-
                     //	status filter
-                    b.must(f.terms().field("status").matchingAny(allowedStatus));
+                    b.must(f.terms().field("status").matchingAny(requestStatusList));
 
 
                 })).sort(f -> f.composite(b -> {
-
                     switch (sortBy) {
                         default:
                             // default by date
