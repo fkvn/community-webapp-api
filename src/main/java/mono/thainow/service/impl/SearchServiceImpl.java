@@ -11,6 +11,8 @@ import org.hibernate.search.engine.search.query.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 //
 //import java.util.List;
@@ -41,13 +43,13 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public SearchResponse<?> searchGuideBookPost(Long profileId, Long requesterId, String keywords,
-                                                 GuideBookCategory category, int limit, int page,
-                                                 String sortBy, String sortByOrder,
-                                                 PostStatus status) {
+                                                 String title, GuideBookCategory category,
+                                                 int limit, int page, String sortBy,
+                                                 String sortByOrder, List<PostStatus> status) {
 
         SearchResult<GuideBookPost> result =
-                searchDao.searchGuideBookPost(profileId, requesterId, keywords, category, limit,
-                        page, sortBy, sortByOrder, status);
+                searchDao.searchGuideBookPost(profileId, requesterId, keywords, title, category,
+                        limit, page, sortBy, sortByOrder, status);
 
         SearchResponse<GuideBookPost> searchRes = new SearchResponse<>();
         searchRes.setTotalCount(result.total().hitCount());

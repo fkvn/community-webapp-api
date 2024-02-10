@@ -77,18 +77,20 @@ public class FullTextSearchController {
     public SearchResponse<?> fetchGuideBookPost(@RequestParam(defaultValue = "-1") Long profileId,
                                                 @RequestParam(defaultValue = "-1") Long requesterId,
                                                 @RequestParam(defaultValue = "") String keywords,
+                                                @RequestParam(defaultValue = "") String title,
                                                 @RequestParam(required = false)
                                                 GuideBookCategory category,
-                                                @RequestParam(required = false) PostStatus status,
-                                                @RequestParam(defaultValue = "date") String sortBy,
+                                                @RequestParam(required = false)
+                                                List<PostStatus> status,
+                                                @RequestParam(defaultValue = "") String sortBy,
                                                 @RequestParam(defaultValue = "desc")
                                                 String sortByOrder,
                                                 @RequestParam(defaultValue = "1") int page,
                                                 @RequestParam(defaultValue = "20") int limit) {
 
         SearchResponse<?> res =
-                searchService.searchGuideBookPost(profileId, requesterId, keywords, category, limit,
-                        page, sortBy, sortByOrder, status);
+                searchService.searchGuideBookPost(profileId, requesterId, keywords, title, category,
+                        limit, page, sortBy, sortByOrder, status);
 
         return res;
     }

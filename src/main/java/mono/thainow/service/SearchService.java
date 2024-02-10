@@ -4,6 +4,8 @@ import mono.thainow.domain.post.PostStatus;
 import mono.thainow.domain.post.guideBook.GuideBookCategory;
 import mono.thainow.rest.response.SearchResponse;
 
+import java.util.List;
+
 public interface SearchService {
 
     //    SearchResponse<?> searchCompany(String industry, String keywords, double centerLat,
@@ -58,8 +60,9 @@ public interface SearchService {
     //                                                int page);
 
     SearchResponse<?> searchGuideBookPost(Long profileId, Long requesterId, String keywords,
-                                          GuideBookCategory category, int limit, int page,
-                                          String sortBy, String sortByOrder, PostStatus status);
+                                          String title, GuideBookCategory category, int limit,
+                                          int page, String sortBy, String sortByOrder,
+                                          List<PostStatus> status);
 
     SearchResponse<?> searchGuideBook(Long profileId, Long requesterId, String keywords,
                                       GuideBookCategory category, int limit, int page,

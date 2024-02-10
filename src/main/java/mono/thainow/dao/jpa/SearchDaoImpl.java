@@ -10,7 +10,9 @@ import mono.thainow.domain.profile.Profile;
 import mono.thainow.exception.AccessForbidden;
 import mono.thainow.exception.BadRequest;
 import mono.thainow.service.AuthService;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchResult;
+import org.hibernate.search.engine.search.sort.dsl.FieldSortOptionsStep;
 import org.hibernate.search.engine.search.sort.dsl.SortOrder;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
@@ -141,10 +143,11 @@ public class SearchDaoImpl implements SearchDao {
 
     @Override
     public SearchResult<GuideBookPost> searchGuideBookPost(Long profileId, Long requesterId,
-                                                           String keywords,
+                                                           String keywords, String title,
                                                            GuideBookCategory category, int limit,
                                                            int page, String sortBy,
-                                                           String sortByOrder, PostStatus status) {
+                                                           String sortByOrder,
+                                                           List<PostStatus> status) {
 
         SearchSession searchSession = Search.session(entityManager);
 
@@ -152,30 +155,36 @@ public class SearchDaoImpl implements SearchDao {
         Profile requesterProfile = authService.getAuthorizedProfile(requesterId, false);
 
         // check authorities
-        List<PostStatus> requestStatusList = new ArrayList<>();
-
-        if (status == null) {
-            requestStatusList.add(PostStatus.PUBLIC);
-            if (requesterProfile != null) {
-                requestStatusList.add(PostStatus.PRIVATE);
-                if (requesterProfile.getAccount().isAdmin()) {
-                    requestStatusList.add(PostStatus.DISABLED);
-                }
-            }
-        }
-        // specific status
-        else {
-            if (!status.equals(PostStatus.PUBLIC) && requesterProfile == null) {
-                throw new AccessForbidden();
-            } else if (requesterProfile != null) {
-                if (status.equals(PostStatus.DISABLED) &&
-                        !requesterProfile.getAccount().isAdmin()) {
+        if (status != null && status.size() > 0) {
+            status.forEach(s -> {
+                if (!s.equals(PostStatus.PUBLIC) && requesterProfile == null) {
                     throw new AccessForbidden();
+                } else if (requesterProfile != null) {
+                    if (s.equals(PostStatus.DISABLED) && !requesterProfile.getAccount().isAdmin()) {
+                        throw new AccessForbidden();
+                    }
+                }
+            });
+        }
+        // if status is null -> no specific status
+        else {
+            status = new ArrayList<PostStatus>();
+            // public post is for everyone
+            status.add(PostStatus.PUBLIC);
+
+            // not null -> either post's owner, or admin
+            if (requesterProfile != null) {
+                status.add((PostStatus.PRIVATE));
+                // if admin -> can view the disabled posts
+                if (requesterProfile.getAccount().isAdmin()) {
+                    status.add(PostStatus.REMOVED);
+                    status.add(PostStatus.DISABLED);
                 }
             }
-
-            requestStatusList.add(status);
         }
+
+        // finalStatus to use in Lambda expression
+        List<PostStatus> finalStatus = status;
 
         SearchResult<GuideBookPost> guideBookPostSearchResult =
                 searchSession.search(GuideBookPost.class).where(f -> f.bool(b -> {
@@ -193,27 +202,45 @@ public class SearchDaoImpl implements SearchDao {
 
                     //	keywords
                     if (!keywords.isEmpty()) {
-                        b.must(f.match().field("guideBook.title").boost(3.0f)
+                        b.must(f.phrase().field("guideBook.title").boost(3.0f)
                                 .field("guideBook.description").boost(2.0f)
                                 .field("guideBook.content").boost(1.0f).matching(keywords));
                     }
 
+                    //	title
+                    if (!title.isEmpty()) {
+                        b.must(f.phrase().field("guideBook.title").matching(title));
+                    }
+
                     //	category filter
                     if (category != null) {
-                        b.filter(f.match().field("guideBook.category").matching(category));
+                        b.filter(f.terms().field("guideBook.category").matchingAny(category));
                     }
 
                     //	status filter
-                    b.must(f.terms().field("status").matchingAny(requestStatusList));
-
+                    if (finalStatus != null && finalStatus.size() > 0)
+                        b.must(f.terms().field("status").matchingAny(finalStatus));
 
                 })).sort(f -> f.composite(b -> {
+                    FieldSortOptionsStep<?, ? extends SearchPredicateFactory> field = null;
                     switch (sortBy) {
-                        default:
-                            // default by date
-                            f.field("updatedOn").order(sortByOrder.equals("desc") ? SortOrder.DESC :
-                                    SortOrder.ASC);
+                        case "updatedOn": {
+                            field = f.field("updatedOn");
                             break;
+                        }
+                        case "title": {
+                            field = f.field("guideBook.gbTitleSort");
+                            break;
+                        }
+                        default:
+                            field = null;
+                            break;
+                    }
+                    if (field != null) {
+                        if (sortByOrder.equals("ascend")) field.order(SortOrder.ASC);
+                        else field.order(SortOrder.DESC);
+
+                        b.add(field);
                     }
                 })).totalHitCountThreshold(500).fetch(limit * (page - 1), limit);
 

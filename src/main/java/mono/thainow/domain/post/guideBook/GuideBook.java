@@ -44,6 +44,7 @@ public class GuideBook implements Serializable {
     private Long id;
 
     @Column(name = "GUIDEBOOK_TITLE")
+    @GenericField(name = "gbTitleSort", sortable = Sortable.YES)
     @FullTextField
     private String title;
 

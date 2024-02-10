@@ -35,9 +35,10 @@ public interface SearchDao {
     void reIndexPersistedData(List<String> className);
 
     SearchResult<GuideBookPost> searchGuideBookPost(Long profileId, Long requesterId,
-                                                    String keywords, GuideBookCategory category,
-                                                    int limit, int page, String sortBy,
-                                                    String sortByOrder, PostStatus status);
+                                                    String keywords, String title,
+                                                    GuideBookCategory category, int limit, int page,
+                                                    String sortBy, String sortByOrder,
+                                                    List<PostStatus> status);
 
     SearchResult<GuideBook> searchGuideBook(Long profileId, Long requesterId, String keywords,
                                             GuideBookCategory category, int limit, int page,
