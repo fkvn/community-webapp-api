@@ -1,5 +1,6 @@
 package mono.thainow.service.impl;
 
+import mono.thainow.configuration.ServiceEnv;
 import mono.thainow.dao.StorageDao;
 import mono.thainow.domain.storage.Storage;
 import mono.thainow.repository.StorageRepository;
@@ -7,6 +8,7 @@ import mono.thainow.rest.request.StorageRequest;
 import mono.thainow.service.FirebaseService;
 import mono.thainow.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+
 @Service
 public class StorageServiceImpl implements StorageService {
 
@@ -28,6 +33,9 @@ public class StorageServiceImpl implements StorageService {
     StorageRepository storageRepository;
     @Autowired
     private FirebaseService firebaseService;
+
+    @Value("${deploy.service.env}")
+    private String serviceEnv;
 
     @Override
     public String upload(MultipartFile multipartFile) {
@@ -42,17 +50,18 @@ public class StorageServiceImpl implements StorageService {
 
         file.delete();
 
-        //		return full storage object
-        Storage storage = new Storage();
+        if (!isBlank(url)) {
 
-        storage.setName(fileName);
-        storage.setType(multipartFile.getContentType());
-        storage.setUrl(url);
-        storage.setSize(multipartFile.getSize());
+            Storage storage = new Storage();
 
-        storage = saveStorage(storage);
+            storage.setName(fileName);
+            storage.setType(multipartFile.getContentType());
+            storage.setUrl(url);
+            storage.setSize(multipartFile.getSize());
 
-        return storage.getUrl();
+            saveStorage(storage);
+        }
+        return url;
     }
 
     @Override
@@ -73,6 +82,11 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public File convertToFile(MultipartFile multipartFile, String fileName) {
+
+        // Since Google App Engine uses /tmp/ folder path for temporary RAM storage
+        if (serviceEnv.equalsIgnoreCase(ServiceEnv.GAE_ENV.name())) {
+            fileName = "/tmp/" + fileName;
+        }
 
         File tempFile = new File(fileName);
 
