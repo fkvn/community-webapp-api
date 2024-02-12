@@ -2,14 +2,19 @@ package mono.thainow.service.impl;
 
 import com.twilio.rest.verify.v2.service.Verification;
 import com.twilio.rest.verify.v2.service.VerificationCheck;
+import mono.thainow.exception.BadRequest;
 import mono.thainow.rest.request.SendTokenRequest;
 import mono.thainow.rest.request.VerifyTokenRequest;
 import mono.thainow.security.verify.TwilioVerification;
+import mono.thainow.service.EmailService;
 import mono.thainow.service.PhoneService;
 import mono.thainow.service.TwilioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -22,20 +27,26 @@ public class TwilioServiceImpl implements TwilioService {
     @Autowired
     PhoneService phoneService;
 
+    @Autowired
+    EmailService emailService;
+
     @Override
     public void sendVerificationToken(SendTokenRequest request) {
 
         String channel = request.getChannel();
-        Assert.isTrue(isBlank(channel) && (channel.equals("email") || channel.equals("sms")),
-                "Only Email and SMS are supported at the moment!");
+        List<String> authorizedChannels = new ArrayList<>();
+        authorizedChannels.add("email");
+        authorizedChannels.add("sms");
+
+        if (isBlank(channel) || !authorizedChannels.contains(channel.toLowerCase()))
+            throw new BadRequest("Only Email and SMS are supported at the moment!");
 
         String receiver = "";
 
         switch (channel.trim()) {
             case "email": {
                 String email = request.getEmail();
-                Assert.isTrue(isBlank(email), "Email can't be empty");
-                receiver = email;
+                receiver = emailService.validateEmail(email);
             }
             break;
 
@@ -64,11 +75,15 @@ public class TwilioServiceImpl implements TwilioService {
     public void checkVerificationToken(VerifyTokenRequest request) {
 
         String channel = request.getChannel();
-        Assert.isTrue(isBlank(channel) && (channel.equals("email") || channel.equals("sms")),
-                "Only Email and SMS are supported at the moment!");
+        List<String> authorizedChannels = new ArrayList<>();
+        authorizedChannels.add("email");
+        authorizedChannels.add("sms");
+
+        if (isBlank(channel) || !authorizedChannels.contains(channel.toLowerCase()))
+            throw new BadRequest("Only Email and SMS are supported at the moment!");
 
         String token = request.getOtpToken();
-        Assert.isTrue(isBlank(token), "Token can't be empty!");
+        if (isBlank(token)) throw new BadRequest("Token can't be empty!");
 
         String receiver = "";
 
@@ -76,15 +91,13 @@ public class TwilioServiceImpl implements TwilioService {
 
             case "email": {
                 String email = request.getEmail();
-                Assert.isTrue(isBlank(email), "Email can't be empty");
-                receiver = email;
+                receiver = emailService.validateEmail(email);
             }
             break;
 
             case "sms": {
                 String phone = request.getPhone();
                 String region = request.getRegion();
-                Assert.isTrue(isBlank(phone) && isBlank(region), "Phone or Region can't be empty!");
                 receiver = phoneService.getValidatedPhoneNumberWithRegionCode(phone, region);
             }
             break;

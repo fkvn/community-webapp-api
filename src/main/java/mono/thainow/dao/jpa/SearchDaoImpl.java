@@ -229,7 +229,11 @@ public class SearchDaoImpl implements SearchDao {
                             break;
                         }
                         case "title": {
-                            field = f.field("guideBook.gbTitleSort");
+                            field = f.field("guideBook.titleSort");
+                            break;
+                        }
+                        case "category": {
+                            field = f.field("guideBook.categorySort");
                             break;
                         }
                         default:

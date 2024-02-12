@@ -44,7 +44,7 @@ public class GuideBook implements Serializable {
     private Long id;
 
     @Column(name = "GUIDEBOOK_TITLE")
-    @GenericField(name = "gbTitleSort", sortable = Sortable.YES)
+    @GenericField(name = "titleSort", sortable = Sortable.YES)
     @FullTextField
     private String title;
 
@@ -66,6 +66,7 @@ public class GuideBook implements Serializable {
     @Column(name = "GUIDEBOOK_CATEGORY")
     @Enumerated(EnumType.STRING)
     @KeywordField(valueBridge = @ValueBridgeRef(type = EnumAsString.class))
+    @GenericField(name = "categorySort", sortable = Sortable.YES)
     private GuideBookCategory category;
 
     //	Detail Information
