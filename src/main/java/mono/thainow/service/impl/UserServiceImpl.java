@@ -285,7 +285,7 @@ public class UserServiceImpl implements UserService {
 
         String email = request.getEmail();
         String password = request.getSub();
-        Assert.isTrue(isBlank(password) && isBlank(email), "Invalid credentials!");
+        if (isBlank(password) || isBlank(email)) throw new BadRequest("Invalid credentials!");
 
         user.setEmail(email);
         user.setPassword(passwordService.encodePassword(password));
@@ -315,7 +315,7 @@ public class UserServiceImpl implements UserService {
 
         String email = request.getEmail();
         String password = request.getSub();
-        Assert.isTrue(isBlank(password) && isBlank(email), "Invalid credentials!");
+        if (isBlank(password) || isBlank(email)) throw new BadRequest("Invalid credentials!");
 
         user.setEmail(email);
         user.setPassword(passwordService.encodePassword(password));
@@ -341,7 +341,7 @@ public class UserServiceImpl implements UserService {
         String email = request.getEmail();
         String password = request.getId();
 
-        Assert.isTrue(isBlank(password) && isBlank(email), "Invalid credentials!");
+        if (isBlank(password) || isBlank(email)) throw new BadRequest("Invalid credentials!");
 
         user.setEmail(email);
         user.setPassword(passwordService.encodePassword(password));
@@ -360,21 +360,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    //    @Override
-    //    public String encodePassword(String password, boolean validate) {
-    //
-    //        if (validate) {
-    //
-    //            String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
-    //            Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
-    //            Matcher matcher = pattern.matcher(password);
-    //
-    //            Assert.isTrue(matcher.matches(),
-    //                    "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
-    //        }
-    //
-    //        return encoder.encode(password);
-    //    }
 
     @Override
     public User fetchNewUserFromAccessByLineRequest(AccessByLineRequest request) {
@@ -383,7 +368,7 @@ public class UserServiceImpl implements UserService {
         String email = request.getEmail();
         String password = request.getSub();
 
-        Assert.isTrue(isBlank(password) && isBlank(email), "Invalid credentials!");
+        if (isBlank(password) || isBlank(email)) throw new BadRequest("Invalid credentials!");
 
         user.setEmail(email);
         user.setPassword(passwordService.encodePassword(password));
@@ -409,6 +394,22 @@ public class UserServiceImpl implements UserService {
         saveUser(account);
     }
 
+
+    //    @Override
+    //    public String encodePassword(String password, boolean validate) {
+    //
+    //        if (validate) {
+    //
+    //            String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{8,20}$";
+    //            Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+    //            Matcher matcher = pattern.matcher(password);
+    //
+    //            Assert.isTrue(matcher.matches(),
+    //                    "8 to 20 characters (1 upper, 1 lower, 1 number, and no white space)");
+    //        }
+    //
+    //        return encoder.encode(password);
+    //    }
 
     //	@Override
     //	public User fetchUserFromUpdateRequest(User user, UserRequest request) {
